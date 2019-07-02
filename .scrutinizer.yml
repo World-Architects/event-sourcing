@@ -1,3 +1,14 @@
+build_failure_conditions:
+  - 'issues.severity(>= MAJOR).new.exists'       # New issues of major or higher severity
+
+  - 'issues.label("coding-style").new.count > 1' # More than 1 new coding style issues.
+  - 'issues.label("coding-style").exists'        # No coding style issues allowed
+  - 'issues.label("coding-style").new.exists'    # No new coding style issues allowed
+
+  - 'project.metric("scrutinizer.quality", < 9)' # Code Quality Rating drops below 9
+
+  # Code Coverage decreased from previous inspection by more than 1%
+  - 'project.metric_change("scrutinizer.test_coverage", < -0.1)'
 build:
   nodes:
     analysis:
