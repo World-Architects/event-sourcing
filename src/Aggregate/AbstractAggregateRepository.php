@@ -142,7 +142,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	/**
 	 * Get events from position
 	 */
-	protected function getEventsFromPosition(string $aggregateId, int $position = 0)
+	protected function getEventsFromPosition(string $aggregateId, int $position)
 	{
 		$eventsSlice = $this->eventStore->readStreamEventsForward($aggregateId, $position, 50);
 		$eventCollection = new EventCollection();

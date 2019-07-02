@@ -52,11 +52,11 @@ class PdoSqlStore implements SnapshotStoreInterface
 	public function __construct(
 		PDO $pdo,
 		? SerializerInterface $serializer = null,
-		string $table = 'event_store_snapshots'
+		string $table = null
 	) {
 		$this->pdo = $pdo;
 		$this->serializer = $serializer ?? new SerializeSerializer();
-		$this->table = $table;
+		$this->table = $table === null ?? 'event_store_snapshots';
 	}
 
 	/**

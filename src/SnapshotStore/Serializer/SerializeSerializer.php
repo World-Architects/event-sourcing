@@ -3,9 +3,6 @@ declare(strict_types = 1);
 
 namespace Psa\EventSourcing\EventSourcing\SnapshotStore\Serializer;
 
-use Assert\Assertion;
-use DateTimeImmutable;
-
 /**
  * Serialize Serializer
  */
