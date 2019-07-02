@@ -1,0 +1,33 @@
+build:
+  nodes:
+    analysis:
+      project_setup:
+        override:
+          - 'true'
+      tests:
+        override:
+          - php-scrutinizer-run  --enable-security-analysis
+          -
+            command: phpcs-run
+            use_website_config: true
+    tests:
+      tests:
+        override:
+          - command: ./bin/phpunit --coverage-clover=coverage.xml
+            coverage:
+              file: coverage.xml
+              format: php-clover
+      environment:
+        php:
+          version: 7.2.13
+filter:
+  excluded_paths:
+    - 'tests/*'
+    - 'bin/*'
+checks:
+  php: true
+coding_style:
+  php:
+    spaces:
+      around_operators:
+        assignment: false
