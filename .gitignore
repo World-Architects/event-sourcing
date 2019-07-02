@@ -1,0 +1,29 @@
+## Node, Bower and Composer
+/node_modules/
+/bower_components
+/vendor
+/tests/coverage
+
+## Development meta files
+.idea/
+.buildpath
+.project
+.settings/
+.DS_Store
+.sass-cache
+atlassian-ide-plugin.xml
+pmip/
+/.phpunit.result.cache
+
+## VMs
+.vagrant
+puphpet/*
+
+## Application
+/bin/*
+/logs/*
+/tmp/*
+!/bin/.gitkeep
+!/logs/.gitkeep
+!/tmp/.gitkeep
+!/tmp/cache/.gitkeep
