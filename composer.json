@@ -29,5 +29,13 @@
     "psr-4": {
       "Psa\\EventSourcing\\Cache\\Test\\": "tests\\TestCase"
     }
+  },
+  "config": {
+    "bin-dir": "bin",
+    "sort-packages": true,
+    "prestissimo": {
+      "maxConnections": 12,
+      "minConnections": 6
+    }
   }
 }
