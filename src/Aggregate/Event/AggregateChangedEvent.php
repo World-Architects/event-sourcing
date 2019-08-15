@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Psa\EventSourcing\EventSourcing\Aggregate\Event;
+namespace Psa\EventSourcing\Aggregate\Event;
 
 use Assert\Assert;
 use DateTimeImmutable;

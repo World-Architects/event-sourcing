@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Psa\EventSourcing\EventSourcing\Projection;
+namespace Psa\EventSourcing\Projection;
 
 /**
  * Read Model

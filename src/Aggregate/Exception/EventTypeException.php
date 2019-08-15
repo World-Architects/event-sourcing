@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Psa\EventSourcing\EventSourcing\Aggregate\Exception;
+namespace Psa\EventSourcing\Aggregate\Exception;
 
 use RuntimeException;
 

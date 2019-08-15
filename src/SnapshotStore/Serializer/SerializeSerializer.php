@@ -1,7 +1,7 @@
 <?php
 declare(strict_types = 1);
 
-namespace Psa\EventSourcing\EventSourcing\SnapshotStore\Serializer;
+namespace Psa\EventSourcing\SnapshotStore\Serializer;
 
 /**
  * Serialize Serializer

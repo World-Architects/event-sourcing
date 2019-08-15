@@ -1,10 +1,10 @@
 <?php
 declare(strict_types = 1);
 
-namespace Psa\EventSourcing\EventSourcing\SnapshotStore;
+namespace Psa\EventSourcing\SnapshotStore;
 
-use Psa\EventSourcing\EventSourcing\Aggregate\AggregateRoot;
-use Psa\EventSourcing\EventSourcing\Aggregate\EventSourcedAggregateInterface;
+use Psa\EventSourcing\Aggregate\AggregateRoot;
+use Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface;
 
 /**
  * SnapshotStoreInterface
@@ -14,7 +14,7 @@ interface SnapshotStoreInterface
 	/**
 	 * Stores an aggregate snapshot
 	 *
-	 * @param \Psa\EventSourcing\EventSourcing\Aggregate\EventSourcedAggregateInterface $aggregate Aggregate
+	 * @param \Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface $aggregate Aggregate
 	 * @return void
 	 */
 	public function store(EventSourcedAggregateInterface $aggregate);

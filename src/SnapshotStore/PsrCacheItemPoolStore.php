@@ -1,10 +1,10 @@
 <?php
 declare(strict_types = 1);
 
-namespace Psa\EventSourcing\EventSourcing\SnapshotStore;
+namespace Psa\EventSourcing\SnapshotStore;
 
-use Psa\EventSourcing\EventSourcing\Aggregate\EventSourcedAggregateInterface;
-use Psa\EventSourcing\EventSourcing\SnapshotStore\Serializer\SerializerInterface;
+use Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface;
+use Psa\EventSourcing\SnapshotStore\Serializer\SerializerInterface;
 use Cache\Adapter\Common\CacheItem;
 use DateTimeImmutable;
 use Psr\Cache\CacheItemPoolInterface;
@@ -22,7 +22,7 @@ class PsrCacheItemPoolStore
 	/**
 	 * Serializer
 	 *
-	 * @var \Psa\EventSourcing\EventSourcing\SnapshotStore\Serializer\SerializerInterface
+	 * @var \Psa\EventSourcing\SnapshotStore\Serializer\SerializerInterface
 	 */
 	protected $serializer;
 
@@ -30,7 +30,7 @@ class PsrCacheItemPoolStore
 	 * Constructor
 	 *
 	 * @param \Psr\Cache\CacheItemPoolInterface $cacheItemPool PSE Cache Item Pool
-	 * @param \Psa\EventSourcing\EventSourcing\SnapshotStore\Serializer\SerializerInterface|null $serializer Serializer
+	 * @param \Psa\EventSourcing\SnapshotStore\Serializer\SerializerInterface|null $serializer Serializer
 	 */
 	public function __construct(
 		CacheItemPoolInterface $cacheItemPool,

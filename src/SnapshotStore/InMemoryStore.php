@@ -1,11 +1,11 @@
 <?php
 declare(strict_types = 1);
 
-namespace Psa\EventSourcing\EventSourcing\SnapshotStore;
+namespace Psa\EventSourcing\SnapshotStore;
 
-use Psa\EventSourcing\EventSourcing\Aggregate\AggregateRoot;
-use Psa\EventSourcing\EventSourcing\SnapshotStore\Serializer\SerializerInterface;
-use Psa\EventSourcing\EventSourcing\SnapshotStore\Serializer\SerializeSerializer;
+use Psa\EventSourcing\Aggregate\AggregateRoot;
+use Psa\EventSourcing\SnapshotStore\Serializer\SerializerInterface;
+use Psa\EventSourcing\SnapshotStore\Serializer\SerializeSerializer;
 use Assert\Assert;
 use DateTimeImmutable;
 use PDO;
@@ -30,14 +30,14 @@ class InMemoryStore implements SnapshotStoreInterface
 	/**
 	 * Serializer
 	 *
-	 * @var \Psa\EventSourcing\EventSourcing\SnapshotStore\Serializer\\SerializerInterface
+	 * @var \Psa\EventSourcing\SnapshotStore\Serializer\\SerializerInterface
 	 */
 	protected $serializer;
 
 	/**
 	 * Constructor
 	 *
-	 * @param \Psa\EventSourcing\EventSourcing\SnapshotStore\Serializer\SerializerInterface $serializer Serializer
+	 * @param \Psa\EventSourcing\SnapshotStore\Serializer\SerializerInterface $serializer Serializer
 	 */
 	public function __construct(
 		? SerializerInterface $serializer = null

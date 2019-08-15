@@ -1,10 +1,10 @@
 <?php
 declare(strict_types = 1);
 
-namespace Psa\EventSourcing\EventSourcing\Aggregate;
+namespace Psa\EventSourcing\Aggregate;
 
-use Psa\EventSourcing\EventSourcing\Aggregate\EventProducerTrait;
-use Psa\EventSourcing\EventSourcing\Aggregate\EventSourcedTrait;
+use Psa\EventSourcing\Aggregate\EventProducerTrait;
+use Psa\EventSourcing\Aggregate\EventSourcedTrait;
 
 /**
  * Aggregate Interface

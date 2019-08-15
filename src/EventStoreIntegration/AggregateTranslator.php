@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Psa\EventSourcing\EventSourcing\EventStoreIntegration;
+namespace Psa\EventSourcing\EventStoreIntegration;
 
 use Iterator;
 

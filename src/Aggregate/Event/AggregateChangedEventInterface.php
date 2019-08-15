@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Psa\EventSourcing\EventSourcing\Aggregate\Event;
+namespace Psa\EventSourcing\Aggregate\Event;
 
 use Assert\Assert;
 use DateTimeImmutable;
@@ -44,7 +44,7 @@ interface AggregateChangedEventInterface
 	/**
 	 * With meta data
 	 *
-	 * @return \Psa\EventSourcing\EventSourcing\Aggregate\Event\AggregateChangedEventInterface
+	 * @return \Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface
 	 */
 	public function withMetadata(array $metadata): AggregateChangedEventInterface;
 
@@ -55,7 +55,7 @@ interface AggregateChangedEventInterface
 	 *
 	 * @param string $key
 	 * @param mixed $value
-	 * @return \Psa\EventSourcing\EventSourcing\Aggregate\Event\AggregateChangedEventInterface
+	 * @return \Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface
 	 */
 	public function withAddMetadata(string $key, $value): AggregateChangedEventInterface;
 
@@ -70,7 +70,7 @@ interface AggregateChangedEventInterface
 	 * With version
 	 *
 	 * @param int $version Version
-	 * @return \Psa\EventSourcing\EventSourcing\Aggregate\Event\AggregateChangedEventInterface
+	 * @return \Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface
 	 */
 	public function withVersion(int $version): AggregateChangedEventInterface;
 }

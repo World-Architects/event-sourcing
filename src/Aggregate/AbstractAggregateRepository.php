@@ -1,15 +1,15 @@
 <?php
 declare(strict_types = 1);
 
-namespace Psa\EventSourcing\EventSourcing\Aggregate;
+namespace Psa\EventSourcing\Aggregate;
 
-use Psa\EventSourcing\EventSourcing\Aggregate\Event\EventCollection;
-use Psa\EventSourcing\EventSourcing\Aggregate\Event\EventCollectionInterface;
-use Psa\EventSourcing\EventSourcing\Aggregate\Exception\AggregateTypeMismatchException;
-use Psa\EventSourcing\EventSourcing\Aggregate\Exception\EventTypeException;
-use Psa\EventSourcing\EventSourcing\EventStoreIntegration\AggregateRootDecorator;
-use Psa\EventSourcing\EventSourcing\EventStoreIntegration\AggregateTranslator;
-use Psa\EventSourcing\EventSourcing\SnapshotStore\SnapshotStoreInterface;
+use Psa\EventSourcing\Aggregate\Event\EventCollection;
+use Psa\EventSourcing\Aggregate\Event\EventCollectionInterface;
+use Psa\EventSourcing\Aggregate\Exception\AggregateTypeMismatchException;
+use Psa\EventSourcing\Aggregate\Exception\EventTypeException;
+use Psa\EventSourcing\EventStoreIntegration\AggregateRootDecorator;
+use Psa\EventSourcing\EventStoreIntegration\AggregateTranslator;
+use Psa\EventSourcing\SnapshotStore\SnapshotStoreInterface;
 use Assert\Assert;
 use Prooph\EventStore\EventData;
 use Prooph\EventStore\EventId;
@@ -35,7 +35,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	/**
 	 * Snapshot Store
 	 *
-	 * @var \Psa\EventSourcing\EventSourcing\SnapshotStore\SnapshotStoreInterface|null
+	 * @var \Psa\EventSourcing\SnapshotStore\SnapshotStoreInterface|null
 	 */
 	protected $snapshotStore;
 
@@ -75,7 +75,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	 * Attempts to load an aggregate from the snapshot store
 	 *
 	 * @param string $aggregateId Aggregate Id
-	 * @return null|\Psa\EventSourcing\EventSourcing\Aggregate\EventSourcedAggregateInterface
+	 * @return null|\Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface
 	 */
 	protected function loadFromSnapshotStore(string $aggregateId)
 	{
@@ -120,7 +120,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	 * Gets an aggregate
 	 *
 	 * @param string $aggregateId Aggregate UUID
-	 * @return \Psa\EventSourcing\EventSourcing\Aggregate\EventSourcedAggregateInterface
+	 * @return \Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface
 	 */
 	public function get(string $aggregateId): EventSourcedAggregateInterface
 	{
@@ -164,7 +164,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	/**
 	 * @todo Refactor this? I have the feeling this can be done a lot better
 	 * @param \Prooph\EventStore\StreamEventsSlice $eventsSlice Event Slice
-	 * @param \Psa\EventSourcing\EventSourcing\Aggregate\Event\EventCollectionInterface Event Collection
+	 * @param \Psa\EventSourcing\Aggregate\Event\EventCollectionInterface Event Collection
 	 * @return void
 	 */
 	protected function convertEvents(
@@ -192,7 +192,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 			}
 
 			/**
-			 * @var $event \Psa\EventSourcing\EventSourcing\Aggregate\AggregateChangedEvent
+			 * @var $event \Psa\EventSourcing\Aggregate\AggregateChangedEvent
 			 */
 			$event = $eventClass::occur(
 				$metaData['_aggregate_id'],
@@ -206,7 +206,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	}
 
 	/**
-	 * @param \Psa\EventSourcing\EventSourcing\Aggregate\EventSourcedAggregateInterface $aggregate Aggregate
+	 * @param \Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface $aggregate Aggregate
 	 * @return void
 	 */
 	public function save(EventSourcedAggregateInterface $aggregate): void

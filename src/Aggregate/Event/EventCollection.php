@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace Psa\EventSourcing\EventSourcing\Aggregate\Event;
+namespace Psa\EventSourcing\Aggregate\Event;
 
-use Psa\EventSourcing\EventSourcing\Aggregate\Event\AggregateChangedEventInterface;
+use Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface;
 
 /**
  * Event Collection
@@ -83,7 +83,7 @@ class EventCollection implements EventCollectionInterface
 	/**
 	 * Adds a domain event
 	 *
-	 * @param \Psa\EventSourcing\EventSourcing\Aggregate\Event\AggregateChangedEventInterface $event Event
+	 * @param \Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface $event Event
 	 * @return void
 	 */
 	public function add(AggregateChangedEventInterface $event): void

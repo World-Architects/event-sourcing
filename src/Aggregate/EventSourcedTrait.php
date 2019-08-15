@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Psa\EventSourcing\EventSourcing\Aggregate;
+namespace Psa\EventSourcing\Aggregate;
 
-use Psa\EventSourcing\EventSourcing\Aggregate\Event\AggregateChangedEventInterface;
-use Psa\EventSourcing\EventSourcing\Aggregate\Exception\MissingEventHandlerException;
+use Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface;
+use Psa\EventSourcing\Aggregate\Exception\MissingEventHandlerException;
 use Iterator;
 use RuntimeException;
 
@@ -57,7 +57,7 @@ trait EventSourcedTrait
 	}
 
 	/**
-	 * @param \Psa\EventSourcing\EventSourcing\Aggregate\Event\AggregateChangedEventInterface $event Event
+	 * @param \Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface $event Event
 	 * @return string
 	 */
 	protected function determineEventHandlerMethodFor(AggregateChangedEventInterface $event): string
@@ -70,7 +70,7 @@ trait EventSourcedTrait
 	/**
 	 * Apply given event
 	 *
-	 * @param \Psa\EventSourcing\EventSourcing\Aggregate\Event\AggregateChangedEventInterface $event Event
+	 * @param \Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface $event Event
 	 * @return void
 	 */
 	protected function apply(AggregateChangedEventInterface $event): void

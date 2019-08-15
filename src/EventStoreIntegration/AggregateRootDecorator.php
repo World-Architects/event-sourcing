@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace Psa\EventSourcing\EventSourcing\EventStoreIntegration;
+namespace Psa\EventSourcing\EventStoreIntegration;
 
-use Psa\EventSourcing\EventSourcing\Aggregate\AggregateChangedEvent;
-use Psa\EventSourcing\EventSourcing\Aggregate\AggregateRoot;
+use Psa\EventSourcing\Aggregate\AggregateChangedEvent;
+use Psa\EventSourcing\Aggregate\AggregateRoot;
 use BadMethodCallException;
 use Iterator;
 use RuntimeException;
@@ -27,7 +27,7 @@ class AggregateRootDecorator extends AggregateRoot
     /**
      * @param AggregateRoot $anAggregateRoot
      *
-     * @return \Psa\EventSourcing\EventSourcing\AggregateChangedEvent[]
+     * @return \Psa\EventSourcing\AggregateChangedEvent[]
      */
     public function extractRecordedEvents(AggregateRoot $anAggregateRoot): array
     {

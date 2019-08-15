@@ -1,7 +1,7 @@
 <?php
 declare(strict_types = 1);
 
-namespace Psa\EventSourcing\EventSourcing\SnapshotStore;
+namespace Psa\EventSourcing\SnapshotStore;
 
 use Assert\Assertion;
 use DateTimeImmutable;

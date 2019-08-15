@@ -1,12 +1,12 @@
 <?php
 declare(strict_types = 1);
 
-namespace Psa\EventSourcing\EventSourcing\SnapshotStore;
+namespace Psa\EventSourcing\SnapshotStore;
 
-use Psa\EventSourcing\EventSourcing\Aggregate\AggregateRoot;
-use Psa\EventSourcing\EventSourcing\Aggregate\EventSourcedAggregateInterface;
-use Psa\EventSourcing\EventSourcing\SnapshotStore\Serializer\SerializerInterface;
-use Psa\EventSourcing\EventSourcing\SnapshotStore\Serializer\SerializeSerializer;
+use Psa\EventSourcing\Aggregate\AggregateRoot;
+use Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface;
+use Psa\EventSourcing\SnapshotStore\Serializer\SerializerInterface;
+use Psa\EventSourcing\SnapshotStore\Serializer\SerializeSerializer;
 use Assert\Assert;
 use DateTimeImmutable;
 use PDO;
@@ -31,7 +31,7 @@ class PdoSqlStore implements SnapshotStoreInterface
 	/**
 	 * Serializer
 	 *
-	 * @var \Psa\EventSourcing\EventSourcing\SnapshotStore\Serializer\SerializerInterface
+	 * @var \Psa\EventSourcing\SnapshotStore\Serializer\SerializerInterface
 	 */
 	protected $serializer;
 
@@ -46,7 +46,7 @@ class PdoSqlStore implements SnapshotStoreInterface
 	 * Constructor
 	 *
 	 * @param \PDO $pdo
-	 * @param \Psa\EventSourcing\EventSourcing\SnapshotStore\Serializer\SerializerInterface $serializer Serializer
+	 * @param \Psa\EventSourcing\SnapshotStore\Serializer\SerializerInterface $serializer Serializer
 	 * @param string $table Table to use
 	 */
 	public function __construct(
@@ -76,7 +76,7 @@ class PdoSqlStore implements SnapshotStoreInterface
 	/**
 	 * Stores an aggregate snapshot
 	 *
-	 * @param \Psa\EventSourcing\EventSourcing\Aggregate\EventSourcedAggregateInterface
+	 * @param \Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface
 	 * @return void
 	 */
 	public function store(EventSourcedAggregateInterface $aggregate): void
@@ -132,7 +132,7 @@ class PdoSqlStore implements SnapshotStoreInterface
 	 * Turns the data array from PDO into a snapshot DTO
 	 *
 	 * @param array $data Data
-	 * @return \Psa\EventSourcing\EventSourcing\SnapshotStore\SnapshotInterface
+	 * @return \Psa\EventSourcing\SnapshotStore\SnapshotInterface
 	 */
 	protected function toSnapshot(array $data): SnapshotInterface
 	{
