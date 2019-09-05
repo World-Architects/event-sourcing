@@ -217,8 +217,6 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 
 		$storeEvents = [];
 		foreach ($events as $event) {
-			echo $event->version() . PHP_EOL;
-
 			$storeEvents[] = new EventData(
 				EventId::generate(),
 				get_class($event),
