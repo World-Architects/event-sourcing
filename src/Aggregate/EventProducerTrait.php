@@ -47,7 +47,7 @@ trait EventProducerTrait
 	{
 		$this->version += 1;
 
-		$this->recordedEvents[] = $event->withVersion($this->version);
+		$this->recordedEvents[] = $event->withAggregateVersion($this->version);
 
 		$this->apply($event);
 	}

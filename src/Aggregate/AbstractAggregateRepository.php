@@ -47,6 +47,15 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	protected $aggregateType;
 
 	/**
+	 * Event Type Mapping
+	 *
+	 * A map of event name to event class
+	 *
+	 * @var array
+	 */
+	protected $eventTypeMapping = [];
+
+	/**
 	 * Constructor
 	 *
 	 * @param \Prooph\EventStore\EventStoreConnection $eventStore Event Store Connection
@@ -175,9 +184,15 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 			/**
 			 * @var $event \Prooph\EventStore\Internal\ResolvedEvent
 			 */
-			$eventClass = $event->event()->eventType();
+			$eventType = $event->event()->eventType();
 			$metaData = json_decode($event->event()->metadata(), true);
 			$payload = $event->event()->data();
+
+			if (isset($this->eventTypeMapping[$eventType])) {
+				$eventClass = $this->eventTypeMapping[$eventType];
+			} else {
+				$eventClass = $eventType;
+			}
 
 			if (!class_exists($eventClass)) {
 				throw EventTypeException::mappingFailed(
@@ -217,15 +232,34 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 
 		$storeEvents = [];
 		foreach ($events as $event) {
+			$eventClass = get_class($event);
+			$eventTypeContstant = $eventClass . '::EVENT_TYPE';
+			$eventVersionContstant = $eventClass . '::EVENT_VERSION';
+
+			if (defined($eventTypeContstant)) {
+				$eventType = $event::EVENT_TYPE;
+			} else {
+				throw new RuntimeException(sprintf(
+					'Event Class Constant %s is missing',
+					$eventTypeContstant
+				));
+			}
+
+			$eventVersion = 1;
+			if (defined($eventVersionContstant)) {
+				$eventVersion = $event::EVENT_VERSION;
+			}
+
 			$storeEvents[] = new EventData(
 				EventId::generate(),
-				get_class($event),
+				$eventType,
 				true,
 				json_encode($event->payload()),
 				json_encode([
+					'_event_version' => $eventVersion,
 					'_aggregate_id' => $aggregateId,
 					'_aggregate_type' => $aggregateType,
-					'_aggregate_version' => $event->version()
+					'_aggregate_version' => $event->aggregateVersion()
 				])
 			);
 		}

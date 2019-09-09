@@ -60,17 +60,17 @@ interface AggregateChangedEventInterface
 	public function withAddMetadata(string $key, $value): AggregateChangedEventInterface;
 
 	/**
-	 * Gets the version
+	 * Gets the aggregate version
 	 *
 	 * @return int
 	 */
-	public function version(): int;
+	public function aggregateVersion(): int;
 
 	/**
-	 * With version
+	 * With aggregate version
 	 *
 	 * @param int $version Version
 	 * @return \Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface
 	 */
-	public function withVersion(int $version): AggregateChangedEventInterface;
+	public function withAggregateVersion(int $version): AggregateChangedEventInterface;
 }
