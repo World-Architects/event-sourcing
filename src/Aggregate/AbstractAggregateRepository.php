@@ -120,7 +120,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	 *
 	 * @return void
 	 */
-	public function takeSnapshot(AggregateRoot $aggregate): void
+	public function createSnapshot(AggregateRoot $aggregate): void
 	{
 		$this->snapshotStore->store($aggregate);
 	}
@@ -131,7 +131,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	 * @param string $aggregateId Aggregate UUID
 	 * @return \Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface
 	 */
-	public function get(string $aggregateId): EventSourcedAggregateInterface
+	public function getAggregate(string $aggregateId): EventSourcedAggregateInterface
 	{
 		Assert::that($aggregateId)->uuid($aggregateId);
 
@@ -224,7 +224,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	 * @param \Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface $aggregate Aggregate
 	 * @return void
 	 */
-	public function save(EventSourcedAggregateInterface $aggregate): void
+	public function saveAggregate(EventSourcedAggregateInterface $aggregate): void
 	{
 		$aggregateId = $aggregate->aggregateId();
 		$aggregateType = get_class($aggregate);

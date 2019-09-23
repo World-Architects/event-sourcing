@@ -17,12 +17,12 @@ interface AggregateRepositoryInterface
 	 * @param string $aggregateId Aggregate UUID
 	 * @return \Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface
 	 */
-	public function get(string $aggregateId): EventSourcedAggregateInterface;
+	public function getAggregate(string $aggregateId): EventSourcedAggregateInterface;
 
 	/**
 	 * Persist an aggregate
 	 *
 	 * @param \Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface $aggregate Event Sourced Aggregate
 	 */
-	public function save(EventSourcedAggregateInterface $aggregate);
+	public function saveAggregate(EventSourcedAggregateInterface $aggregate);
 }
