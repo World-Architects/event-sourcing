@@ -9,6 +9,7 @@ use Psa\EventSourcing\Aggregate\Exception\AggregateTypeMismatchException;
 use Psa\EventSourcing\Aggregate\Exception\EventTypeException;
 use Psa\EventSourcing\EventStoreIntegration\AggregateRootDecorator;
 use Psa\EventSourcing\EventStoreIntegration\AggregateTranslator;
+use Psa\EventSourcing\SnapshotStore\SnapshotInterface;
 use Psa\EventSourcing\SnapshotStore\SnapshotStoreInterface;
 use Assert\Assert;
 use Prooph\EventStore\EventData;
@@ -78,15 +79,24 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	{
 		Assert::that($aggregateId)->uuid($aggregateId);
 		$this->eventStore->deleteStream($aggregateId, ExpectedVersion::ANY, $hardDelete);
+
+		if ($this->snapshotStore) {
+			$this->snapshotStore->delete($aggregateId);
+		}
 	}
 
 	/**
-	 * Attempts to load an aggregate from the snapshot store
+	 * Load an aggregate from the snapshot store
+	 *
+	 * - Checks if a snapshot store is present for this instance of the aggregate repo
+	 * - Checks if a snapshot was found for the given aggregate id
+	 * - Checks if the snapshots aggregate type matches the repositories type
+	 * - Fetches and replays the events after the aggregate version of restored from the snapshot
 	 *
 	 * @param string $aggregateId Aggregate Id
 	 * @return null|\Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface
 	 */
-	protected function loadFromSnapshotStore(string $aggregateId)
+	protected function loadFromSnapshotStore(string $aggregateId): EventSourcedAggregateInterface
 	{
 		if (!$this->snapshotStore) {
 			return null;
@@ -98,12 +108,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 			return null;
 		}
 
-		if ($snapshot->aggregateType() !== $this->aggregateType) {
-			throw AggregateTypeMismatchException::mismatch(
-				$snapshot->aggregateType(),
-				$this->aggregateType
-			);
-		}
+		$this->snapshotMatchesAggregateType($snapshot);
 
 		$lastVersion = $snapshot->lastVersion();
 		$aggregateRoot = $snapshot->aggregateRoot();
@@ -113,6 +118,22 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 		$this->aggregateDecorator->replayStreamEvents($aggregateRoot, $events);
 
 		return $aggregateRoot;
+	}
+
+	/**
+	 * Checks if the snapshot matches the repositories aggregate type
+	 *
+	 * @param \Psa\EventSourcing\SnapshotStore\SnapshotInterface
+	 * @return void
+	 */
+	protected function snapshotMatchesAggregateType(SnapshotInterface $snapshot): void
+	{
+		if ($snapshot->aggregateType() !== $this->aggregateType) {
+			throw AggregateTypeMismatchException::mismatch(
+				$snapshot->aggregateType(),
+				$this->aggregateType
+			);
+		}
 	}
 
 	/**
@@ -149,12 +170,20 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	}
 
 	/**
+	 * @return \Psa\EventSourcing\Aggregate\Event\EventCollection
+	 */
+	protected function buildEventCollection(): EventCollection
+	{
+		return new EventCollection();
+	}
+
+	/**
 	 * Get events from position
 	 */
 	protected function getEventsFromPosition(string $aggregateId, int $position)
 	{
 		$eventsSlice = $this->eventStore->readStreamEventsForward($aggregateId, $position, 50);
-		$eventCollection = new EventCollection();
+		$eventCollection = $this->buildEventCollection();
 
 		if ($eventsSlice->isEndOfStream()) {
 			$this->convertEvents($eventsSlice, $eventCollection);
@@ -265,7 +294,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 		}
 
 		$this->eventStore->appendToStream(
-			$aggregateId,
+			'Account-' . $aggregateId,
 			ExpectedVersion::ANY,
 			$storeEvents
 		);

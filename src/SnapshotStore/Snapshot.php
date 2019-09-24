@@ -51,7 +51,7 @@ final class Snapshot implements SnapshotInterface
 		int $lastVersion,
 		DateTimeImmutable $createdAt
 	) {
-		Assertion::minLength($aggregateType, 1);
+		Assertion::notEmpty($aggregateType);
 		Assertion::uuid($aggregateId, 1);
 		Assertion::min($lastVersion, 1);
 

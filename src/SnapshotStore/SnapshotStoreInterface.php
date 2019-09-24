@@ -25,4 +25,11 @@ interface SnapshotStoreInterface
 	 * @return mixed
 	 */
 	public function get(string $aggregateId): ?SnapshotInterface;
+
+	/**
+	 * Removes an aggregate from the store
+	 *
+	 * @return void
+	 */
+	// public function delete(string $aggregateId): void;
 }

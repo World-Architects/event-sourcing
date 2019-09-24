@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Psa\EventSourcing\Test\TestApp\Domain\Event;
 
+use Psa\EventSourcing\Aggregate\Event\AggregateChangedEvent;
 use Psa\EventSourcing\Test\TestApp\Domain\AccountId;
-use Psa\EventSourcing\Test\TestApp\Domain\Event\AggregateChangedEvent;
 
 /**
  * Account Created Event
@@ -40,7 +40,7 @@ class AccountCreated extends AggregateChangedEvent
 	public function accountId(): AccountId
 	{
 		if ($this->accountId === null) {
-			$this->accountId = AccountId::fromString($this->payload['accountNumber']);
+			$this->accountId = AccountId::fromString($this->payload['accountId']);
 		}
 
 		return $this->accountId;

@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Psa\EventSourcing\Test\TestApp\Domain\Event;
 
+use Psa\EventSourcing\Aggregate\Event\AggregateChangedEvent;
 use Psa\EventSourcing\Test\TestApp\Domain\AccountId;
-use Psa\EventSourcing\Test\TestApp\Domain\Event\AggregateChangedEvent;
 
 /**
  * Account Created Event

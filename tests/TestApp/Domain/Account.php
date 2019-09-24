@@ -3,9 +3,8 @@ declare(strict_types=1);
 
 namespace Psa\EventSourcing\Test\TestApp\Domain;
 
-use App\Domain\Common\Model\Currency;
-use App\Domain\Accounting\Model\Event\AccountCreated;
-use App\Domain\Accounting\Model\Event\AccountUpdated;
+use Psa\EventSourcing\Test\TestApp\Domain\Event\AccountCreated;
+use Psa\EventSourcing\Test\TestApp\Domain\Event\AccountUpdated;
 use Psa\EventSourcing\Aggregate\AggregateRoot;
 
 /**
@@ -40,14 +39,12 @@ final class Account extends AggregateRoot
 		string $description
 	) {
 		$account = new self();
+		$account->id = AccountId::generate();
 
 		$account->recordThat(AccountCreated::create(
-			AccountId::generate(),
-			$accountNumber,
-			$currency,
+			$account->id,
 			$name,
 			$description,
-			true
 		));
 
 		return $account;
@@ -84,7 +81,7 @@ final class Account extends AggregateRoot
 	 */
 	public function whenAccountCreated(AccountCreated $event): void
 	{
-		$this->id = $event->aggregateId();
+		$this->id = $event->accountId();
 		$this->name = $event->name();
 		$this->description = $event->description();
 	}

@@ -23,7 +23,7 @@ final class AccountId
 	 *
 	 * @return self
 	 */
-	public static function generate(): self
+	public static function generate(): AccountId
 	{
 		return new self(Uuid::uuid4());
 	}
@@ -31,7 +31,7 @@ final class AccountId
 	/**
 	 * @return self
 	 */
-	public static function fromString(string $userId): self
+	public static function fromString(string $userId): AccountId
 	{
 		return new self(Uuid::fromString($userId));
 	}

@@ -11,6 +11,8 @@ use Psr\Cache\CacheItemPoolInterface;
 
 /**
  * PsrCache Pool Store
+ *
+ * Uses a PSR Cache Pool to store snapshots in a cache
  */
 class PsrCacheItemPoolStore
 {

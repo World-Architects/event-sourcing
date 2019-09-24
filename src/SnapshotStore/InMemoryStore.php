@@ -8,15 +8,12 @@ use Psa\EventSourcing\SnapshotStore\Serializer\SerializerInterface;
 use Psa\EventSourcing\SnapshotStore\Serializer\SerializeSerializer;
 use Assert\Assert;
 use DateTimeImmutable;
-use PDO;
-use PDOException;
-use PDOStatement;
 use Ramsey\Uuid\Uuid;
 
 /**
- * PDO SQL based Snapshot Store
+ * In Memory Store
  *
- * Saves your aggregate state snapshot in a SQL database.
+ * Saves your aggregate state snapshot in memory.
  */
 class InMemoryStore implements SnapshotStoreInterface
 {

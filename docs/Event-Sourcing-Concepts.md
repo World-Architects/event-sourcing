@@ -5,7 +5,7 @@
  * The aggregates events that were **NOT** applied are read by the event system implementation
    * and stored in the event store
    * and flagged as read / applied
-   * Projections are triggered
+   * Projections (if there are any) are triggered
      * Projections generate the read model / fill the (SQL) database
 
 ## Reading / restoring aggregates
