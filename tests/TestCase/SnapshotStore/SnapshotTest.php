@@ -11,8 +11,12 @@ use Psa\EventSourcing\SnapshotStore\Snapshot;
  */
 class SnapshotTest extends TestCase
 {
-
-	public function testAsserts()
+	/**
+	 * testAsserts
+	 *
+	 * @return void
+	 */
+	public function testAsserts(): void
 	{
 		$created = new \DateTimeImmutable('now');
 		$object = new \stdClass();

@@ -1,32 +1,13 @@
 <?php
-declare(strict_types = 1);
+namespace Psa\EventSourcing\EventStoreIntegration\ProophV8;
 
-namespace Psa\EventSourcing\Aggregate;
-
-use Psa\EventSourcing\Aggregate\Event\EventCollection;
 use Psa\EventSourcing\Aggregate\Event\EventCollectionInterface;
-use Psa\EventSourcing\Aggregate\Exception\AggregateTypeMismatchException;
+use Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface;
 use Psa\EventSourcing\Aggregate\Exception\EventTypeException;
 use Psa\EventSourcing\EventStoreIntegration\AggregateRootDecorator;
-use Psa\EventSourcing\EventStoreIntegration\AggregateTranslator;
-use Psa\EventSourcing\SnapshotStore\SnapshotInterface;
 use Psa\EventSourcing\SnapshotStore\SnapshotStoreInterface;
-use Assert\Assert;
-use Prooph\EventStore\EventData;
-use Prooph\EventStore\EventId;
-use Prooph\EventStore\EventStoreConnection;
-use Prooph\EventStore\ExpectedVersion;
-use Prooph\EventStore\SliceReadStatus;
-use Prooph\EventStore\StreamEventsSlice;
-use RuntimeException;
 
-/**
- * Aggregate Repository
- *
- * When extending this class make sure you are setting the aggregate type
- * property with your aggregate type the repository should use.
- */
-abstract class AbstractAggregateRepository implements AggregateRepositoryInterface
+class EventStore
 {
 	/**
 	 * @var \Prooph\EventStore\EventStoreConnection
@@ -62,129 +43,15 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	 * @param \Prooph\EventStore\EventStoreConnection $eventStore Event Store Connection
 	 */
 	public function __construct(
-		EventStoreConnection $eventStore,
-		SnapshotStoreInterface $snapshotStore
+		EventStoreConnection $eventStore
 	) {
 		$this->eventStore = $eventStore;
-		$this->snapshotStore = $snapshotStore;
-		$this->aggregateDecorator = AggregateRootDecorator::newInstance();
-	}
-
-	/**
-	 * Deletes an aggregate
-	 *
-	 * @param string $aggregateId Aggregate UUID
-	 */
-	public function delete(string $aggregateId, $hardDelete = false)
-	{
-		Assert::that($aggregateId)->uuid($aggregateId);
-		$this->eventStore->deleteStream($aggregateId, ExpectedVersion::ANY, $hardDelete);
-
-		if ($this->snapshotStore) {
-			$this->snapshotStore->delete($aggregateId);
-		}
-	}
-
-	/**
-	 * Load an aggregate from the snapshot store
-	 *
-	 * - Checks if a snapshot store is present for this instance of the aggregate repo
-	 * - Checks if a snapshot was found for the given aggregate id
-	 * - Checks if the snapshots aggregate type matches the repositories type
-	 * - Fetches and replays the events after the aggregate version of restored from the snapshot
-	 *
-	 * @param string $aggregateId Aggregate Id
-	 * @return null|\Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface
-	 */
-	protected function loadFromSnapshotStore(string $aggregateId): EventSourcedAggregateInterface
-	{
-		if (!$this->snapshotStore) {
-			return null;
-		}
-
-		$snapshot = $this->snapshotStore->get($aggregateId);
-
-		if ($snapshot === null) {
-			return null;
-		}
-
-		$this->snapshotMatchesAggregateType($snapshot);
-
-		$lastVersion = $snapshot->lastVersion();
-		$aggregateRoot = $snapshot->aggregateRoot();
-
-		$events = $this->getEventsFromPosition($snapshot->aggregateId(), $snapshot->lastVersion() + 1);
-
-		$this->aggregateDecorator->replayStreamEvents($aggregateRoot, $events);
-
-		return $aggregateRoot;
-	}
-
-	/**
-	 * Checks if the snapshot matches the repositories aggregate type
-	 *
-	 * @param \Psa\EventSourcing\SnapshotStore\SnapshotInterface
-	 * @return void
-	 */
-	protected function snapshotMatchesAggregateType(SnapshotInterface $snapshot): void
-	{
-		if ($snapshot->aggregateType() !== $this->aggregateType) {
-			throw AggregateTypeMismatchException::mismatch(
-				$snapshot->aggregateType(),
-				$this->aggregateType
-			);
-		}
-	}
-
-	/**
-	 * Creates a snapshot of the aggregate
-	 *
-	 * @return void
-	 */
-	public function createSnapshot(AggregateRoot $aggregate): void
-	{
-		$this->snapshotStore->store($aggregate);
-	}
-
-	/**
-	 * Gets an aggregate
-	 *
-	 * @param string $aggregateId Aggregate UUID
-	 * @return \Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface
-	 */
-	public function getAggregate(string $aggregateId): EventSourcedAggregateInterface
-	{
-		Assert::that($aggregateId)->uuid($aggregateId);
-
-		if ($this->snapshotStore) {
-			$result = $this->loadFromSnapshotStore($aggregateId);
-			if ($result !== null) {
-				return $result;
-			}
-		}
-
-		$eventCollection = $this->getEventsFromPosition($aggregateId, 0);
-		$aggregateType = $this->aggregateType;
-
-		return $aggregateType::reconstituteFromHistory($eventCollection);
-	}
-
-	/**
-	 * @return \Psa\EventSourcing\Aggregate\Event\EventCollection
-	 */
-	protected function buildEventCollection(): EventCollection
-	{
-		return new EventCollection();
 	}
 
 	/**
 	 * Get events from position
-	 *
-	 * @param string $aggregateId Aggregate UUID
-	 * @param int $position Position
-	 * @return \Psa\EventSourcing\Aggregate\Event\EventCollection
 	 */
-	protected function getEventsFromPosition(string $aggregateId, int $position): EventCollection
+	protected function getEventsFromPosition(string $aggregateId, int $position)
 	{
 		$eventsSlice = $this->eventStore->readStreamEventsForward($aggregateId, $position, 50);
 		$eventCollection = $this->buildEventCollection();

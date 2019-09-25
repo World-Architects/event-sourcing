@@ -33,6 +33,27 @@ class EventCollection implements EventCollectionInterface
 	/**
 	 * @inheritDoc
 	 */
+	public function count(): int
+	{
+		return count($this->events);
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function last(): ?AggregateChangedEventInterface
+	{
+		$postion = count($this->events) - 1;
+		if ($postion < 0) {
+			return null;
+		}
+
+		return $this->events[$postion];
+	}
+
+	/**
+	 * @inheritDoc
+	 */
 	public function rewind(): void
 	{
 		$this->position = 0;
