@@ -14,11 +14,20 @@ use RuntimeException;
  */
 class AggregateRootDecorator extends AggregateRoot
 {
+    /**
+     * @return self
+     */
     public static function newInstance(): self
     {
         return new static();
     }
 
+    /**
+     * Extracts the aggregate version
+     *
+     * @param \Psa\EventSourcing\Aggregate\AggregateRoot $anAggregateRoot Aggregate Root
+     * @return int
+     */
     public function extractAggregateVersion(AggregateRoot $anAggregateRoot): int
     {
         return $anAggregateRoot->version;
@@ -34,6 +43,12 @@ class AggregateRootDecorator extends AggregateRoot
         return $anAggregateRoot->popRecordedEvents();
     }
 
+    /**
+     * Extracts an aggregate ID
+     *
+     * @param \Psa\EventSourcing\Aggregate\AggregateRoot $anAggregateRoot Aggregate Root
+     * @return string UUID
+     */
     public function extractAggregateId(AggregateRoot $anAggregateRoot): string
     {
         return $anAggregateRoot->aggregateId();
@@ -42,17 +57,24 @@ class AggregateRootDecorator extends AggregateRoot
     /**
      * @throws RuntimeException
      */
-    public function fromHistory($arClass, Iterator $aggregateChangedEvents): AggregateRoot
+    public function fromHistory($aggregateRootClass, Iterator $aggregateChangedEvents): AggregateRoot
     {
-        if (!class_exists($arClass)) {
+        if (!class_exists($aggregateRootClass)) {
             throw new RuntimeException(
-                sprintf('Aggregate root class %s cannot be found', $arClass)
+                sprintf('Aggregate root class %s cannot be found', $aggregateRootClass)
             );
         }
 
-        return $arClass::reconstituteFromHistory($aggregateChangedEvents);
+        return $aggregateRootClass::reconstituteFromHistory($aggregateChangedEvents);
     }
 
+    /**
+     * Replay stream events
+     *
+     * @param \Psa\EventSourcing\Aggregate\AggregateRoot $anAggregateRoot Aggregate Root
+     * @param \Iterator $events Events
+     * @return void
+     */
     public function replayStreamEvents(AggregateRoot $aggregateRoot, Iterator $events): void
     {
         $aggregateRoot->replay($events);
@@ -60,6 +82,7 @@ class AggregateRootDecorator extends AggregateRoot
 
     /**
      * @throws BadMethodCallException
+     * @return string
      */
     public function aggregateId(): string
     {

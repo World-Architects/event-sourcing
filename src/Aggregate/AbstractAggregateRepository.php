@@ -3,6 +3,8 @@ declare(strict_types = 1);
 
 namespace Psa\EventSourcing\Aggregate;
 
+use Assert\Assert;
+use Prooph\EventStore\Async\EventStoreConnection;
 use Psa\EventSourcing\Aggregate\Event\EventCollection;
 use Psa\EventSourcing\Aggregate\Event\EventCollectionInterface;
 use Psa\EventSourcing\Aggregate\Exception\AggregateTypeMismatchException;
@@ -11,13 +13,12 @@ use Psa\EventSourcing\EventStoreIntegration\AggregateRootDecorator;
 use Psa\EventSourcing\EventStoreIntegration\AggregateTranslator;
 use Psa\EventSourcing\SnapshotStore\SnapshotInterface;
 use Psa\EventSourcing\SnapshotStore\SnapshotStoreInterface;
-use Assert\Assert;
 use Prooph\EventStore\EventData;
 use Prooph\EventStore\EventId;
-use Prooph\EventStore\EventStoreConnection;
 use Prooph\EventStore\ExpectedVersion;
 use Prooph\EventStore\SliceReadStatus;
 use Prooph\EventStore\StreamEventsSlice;
+use Psa\Foundation\CorrelationId;
 use RuntimeException;
 
 /**
@@ -36,7 +37,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	/**
 	 * Snapshot Store
 	 *
-	 * @var \Psa\EventSourcing\SnapshotStore\SnapshotStoreInterface|null
+	 * @var null|\Psa\EventSourcing\SnapshotStore\SnapshotStoreInterface|null
 	 */
 	protected $snapshotStore;
 
@@ -63,7 +64,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	 */
 	public function __construct(
 		EventStoreConnection $eventStore,
-		SnapshotStoreInterface $snapshotStore
+		?SnapshotStoreInterface $snapshotStore = null
 	) {
 		$this->eventStore = $eventStore;
 		$this->snapshotStore = $snapshotStore;
@@ -288,15 +289,24 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 					'_event_version' => $eventVersion,
 					'_aggregate_id' => $aggregateId,
 					'_aggregate_type' => $aggregateType,
-					'_aggregate_version' => $event->aggregateVersion()
+					'_aggregate_version' => $event->aggregateVersion(),
+					'_userId' => '1234',
+					//'$correlationId' => CorrelationId::toString()
 				])
 			);
 		}
 
-		$this->eventStore->appendToStream(
+		$promise = $this->eventStore->appendToStreamAsync(
 			'Account-' . $aggregateId,
 			ExpectedVersion::ANY,
 			$storeEvents
 		);
+
+		$promise->onResolve(function($result) {
+			if ($result instanceof \Throwable) {
+				var_dump($result);
+				die();
+			}
+		});
 	}
 }
