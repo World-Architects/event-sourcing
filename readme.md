@@ -6,6 +6,12 @@
 
 This library provides tools for an event sourcing implementation.
 
+## Installation
+
+```sh
+composer require psa/event-sourcing
+```
+
 ## Documentation
 
 Please see the [docs folder](../docs/index.md)

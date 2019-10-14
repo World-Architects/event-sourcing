@@ -2,7 +2,7 @@
 
  * [Event Sourcing Concepts](Event-Sourcing-Concepts.md)
  * [Aggregate Integration](Aggregate-Integration.md)
- * [Event Store Integration](Event-Store-Integration.md)
+ * [Aggregate Repository](Aggregate-Repository.md)
  * [Snapshot Stores](Snapshot-Stores.md)
  * [Resources](Resources.md)
 

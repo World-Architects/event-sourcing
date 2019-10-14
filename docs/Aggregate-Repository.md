@@ -14,8 +14,9 @@ class FooAggregateRepository extends AbstractAggregateRepository
 		$this->saveAggregate($aggregate);
 	}
 }
-``` 
+```
+
+It doesn't really matter for the library itself where you create the files and what naming schema you use this is within the concern of your application.
 
 Use your favorite way of dependency injection to get an instance of the repository where you need it or construct it manually and then simply call
 `save($aggregate)` on it. If something went wrong exceptions are thrown.
- 
