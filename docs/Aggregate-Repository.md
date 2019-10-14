@@ -16,5 +16,6 @@ class FooAggregateRepository extends AbstractAggregateRepository
 }
 ``` 
 
-Use your favorite way of dependency injection to get an instance of the repository where you need it or construct it manually and then simply
+Use your favorite way of dependency injection to get an instance of the repository where you need it or construct it manually and then simply call
+`save($aggregate)` on it. If something went wrong exceptions are thrown.
  
