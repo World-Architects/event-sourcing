@@ -46,7 +46,7 @@
 			".\\bin\\phpcbf .\\src .\\tests"
 		],
 		"analyze": [
-			".\\bin\\phpstan analyse -l 1 -c phpstan.neon .\\src\\"
+			".\\bin\\phpstan analyse -l 5 -c phpstan.neon .\\src\\"
 		]
 	},
 	"minimum-stability": "dev",
