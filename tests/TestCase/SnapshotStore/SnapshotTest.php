@@ -27,7 +27,7 @@ class SnapshotTest extends TestCase
 			);
 
 			$this->fail('No exception thrown, aggregate type can`t be empty');
-		}catch (\Assert\InvalidArgumentException $e) {
+		} catch (\Assert\InvalidArgumentException $e) {
 		}
 
 		try {
@@ -40,7 +40,7 @@ class SnapshotTest extends TestCase
 			);
 
 			$this->fail('No exception thrown, aggregate id must be an UUID');
-		}catch (\Assert\InvalidArgumentException $e) {
+		} catch (\Assert\InvalidArgumentException $e) {
 		}
 
 		try {
@@ -53,7 +53,7 @@ class SnapshotTest extends TestCase
 			);
 
 			$this->fail('No exception thrown, last version can`t be lower than 1');
-		}catch (\Assert\InvalidArgumentException $e) {
+		} catch (\Assert\InvalidArgumentException $e) {
 		}
 	}
 

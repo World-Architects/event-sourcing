@@ -3,7 +3,8 @@ declare(strict_types=1);
 
 namespace Psa\EventSourcing\Aggregate;
 
-use Psa\EventSourcing\Aggregate\AggregateTypeException;
+use Psa\EventSourcing\Aggregate\Exception\AggregateTypeException;
+use InvalidArgumentException;
 
 class AggregateType
 {
@@ -40,7 +41,7 @@ class AggregateType
 
 		$self = new static();
 		$aggregateClass = get_class($eventSourcedAggregateRoot);
-		$typeConstant = $aggregateClass . '::' . $self->$aggregateTypeConstant;
+		$typeConstant = $aggregateClass . '::' . $self->aggregateTypeConstant;
 
 		if (defined($typeConstant)) {
 			$self->aggregateType = constant($typeConstant);
@@ -57,12 +58,12 @@ class AggregateType
 	 * Use this factory when aggregate type equals to aggregate root class
 	 * The factory makes sure that the aggregate root class exists.
 	 *
-	 * @throws Exception\InvalidArgumentException
+	 * @throws \InvalidArgumentException
 	 */
 	public static function fromAggregateRootClass(string $aggregateRootClass): AggregateType
 	{
 		if (!class_exists($aggregateRootClass)) {
-			throw new \InvalidArgumentException(sprintf('Aggregate root class %s can not be found', $aggregateRootClass));
+			throw new InvalidArgumentException(sprintf('Aggregate root class %s can not be found', $aggregateRootClass));
 		}
 
 		$self = new static();
@@ -74,12 +75,13 @@ class AggregateType
 	/**
 	 * Use this factory when the aggregate type is not equal to the aggregate root class
 	 *
-	 * @throws Exception\InvalidArgumentException
+	 * @param string $aggregateTypeString Aggregate Type String
+	 * @throws \InvalidArgumentException
 	 */
 	public static function fromString(string $aggregateTypeString): AggregateType
 	{
 		if (empty($aggregateTypeString)) {
-			throw new \InvalidArgumentException('AggregateType must be a non empty string');
+			throw new InvalidArgumentException('AggregateType must be a non empty string');
 		}
 
 		$self = new static();
@@ -88,6 +90,10 @@ class AggregateType
 		return $self;
 	}
 
+	/**
+	 * @param array $mapping Mapping
+	 * @return static
+	 */
 	public static function fromMapping(array $mapping): AggregateType
 	{
 		$self = new static();
@@ -96,20 +102,34 @@ class AggregateType
 		return $self;
 	}
 
+	/**
+	 * Constructor
+	 *
+	 * @return void
+	 */
 	private function __construct()
 	{
 	}
 
+	/**
+	 * @return null|string
+	 */
 	public function mappedClass(): ?string
 	{
-		return empty($this->mapping) ? null : \current($this->mapping);
+		return empty($this->mapping) ? null : current($this->mapping);
 	}
 
+	/**
+	 * @return string
+	 */
 	public function toString(): string
 	{
-		return empty($this->mapping) ? $this->aggregateType : \key($this->mapping);
+		return empty($this->mapping) ? $this->aggregateType : key($this->mapping);
 	}
 
+	/**
+	 * @return string
+	 */
 	public function __toString(): string
 	{
 		return $this->toString();

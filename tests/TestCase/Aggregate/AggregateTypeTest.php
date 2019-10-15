@@ -20,7 +20,8 @@ class AggregateTypeTest extends TestCase
 	public function testAggregateObjectWithProvider(): void
 	{
 		$class = new class() implements AggregateTypeProviderInterface {
-			public function aggregateType(): AggregateType {
+			public function aggregateType(): AggregateType
+			{
 				return AggregateType::fromString('Interfaced-Aggregate');
 			}
 		};
@@ -43,5 +44,4 @@ class AggregateTypeTest extends TestCase
 		$result = AggregateType::fromAggregateRoot($class);
 		$this->assertEquals('Type-Constant', $result->toString());
 	}
-
 }

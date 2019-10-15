@@ -51,12 +51,12 @@ class PdoSqlStore implements SnapshotStoreInterface
 	 */
 	public function __construct(
 		PDO $pdo,
-		? SerializerInterface $serializer = null,
-		string $table = null
+		?SerializerInterface $serializer = null,
+		?string $table = null
 	) {
 		$this->pdo = $pdo;
 		$this->serializer = $serializer ?? new SerializeSerializer();
-		$this->table = $table === null ?? 'event_store_snapshots';
+		$this->table = $table === null ? 'event_store_snapshots' : $table;
 	}
 
 	/**
@@ -76,7 +76,7 @@ class PdoSqlStore implements SnapshotStoreInterface
 	/**
 	 * Stores an aggregate snapshot
 	 *
-	 * @param \Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface
+	 * @param \Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface $aggregate Aggregate
 	 * @return void
 	 */
 	public function store(EventSourcedAggregateInterface $aggregate): void
@@ -101,7 +101,8 @@ class PdoSqlStore implements SnapshotStoreInterface
 	/**
 	 * Gets an aggregate snapshot if one exist
 	 *
-	 * @return mixed
+	 * @param string $aggregateId Aggregate Id
+	 * @return null|\Psa\EventSourcing\SnapshotStore\SnapshotInterface
 	 */
 	public function get(string $aggregateId): ?SnapshotInterface
 	{

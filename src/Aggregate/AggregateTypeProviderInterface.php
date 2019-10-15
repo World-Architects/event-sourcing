@@ -5,5 +5,5 @@ namespace Psa\EventSourcing\Aggregate;
 
 interface AggregateTypeProviderInterface
 {
-    public function aggregateType(): AggregateType;
+	public function aggregateType(): AggregateType;
 }

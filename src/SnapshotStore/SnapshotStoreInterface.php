@@ -22,7 +22,7 @@ interface SnapshotStoreInterface
 	/**
 	 * Gets an aggregate snapshot if one exist
 	 *
-	 * @return mixed
+	 * @return null|\Psa\EventSourcing\SnapshotStore\SnapshotInterface
 	 */
 	public function get(string $aggregateId): ?SnapshotInterface;
 

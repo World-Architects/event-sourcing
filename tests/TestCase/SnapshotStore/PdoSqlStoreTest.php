@@ -44,6 +44,5 @@ class PdoSqlStoreTest extends TestCase
 	 */
 	public function testSnapshotStore(): void
 	{
-		
 	}
 }

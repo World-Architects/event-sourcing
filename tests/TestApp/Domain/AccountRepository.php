@@ -14,6 +14,11 @@ use Psa\EventSourcing\Aggregate\AggregateRoot;
 class AccountRepository extends AbstractAggregateRepository
 {
 	/**
+	 * @var string
+	 */
+	protected $aggregateType = 'Account';
+
+	/**
 	 * @param \Psa\EventSourcing\Test\TestApp\Domain\Account
 	 */
 	public function save(Account $account)
