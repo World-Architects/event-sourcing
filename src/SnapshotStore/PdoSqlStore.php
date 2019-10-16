@@ -145,4 +145,23 @@ class PdoSqlStore implements SnapshotStoreInterface
 			DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $data['created_at'])
 		);
 	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function delete(string $aggregateId): void
+	{
+		Assert::that($aggregateId)->uuid();
+
+		$sql = "DELETE * FROM event_store_snapshots "
+			 . "WHERE aggregate_id = :aggregateId";
+
+		$statement = $this->pdo->prepare($sql);
+		$statement->execute([
+			'aggregateId' => $aggregateId,
+		]);
+
+		$this->pdoErrorCheck($statement);
+		$result = $statement->fetch(PDO::FETCH_ASSOC);
+	}
 }

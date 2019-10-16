@@ -6,6 +6,9 @@ namespace Psa\EventSourcing\Aggregate;
 use Psa\EventSourcing\Aggregate\Exception\AggregateTypeException;
 use InvalidArgumentException;
 
+/**
+ * Aggregate Type
+ */
 class AggregateType
 {
 	/**
@@ -24,6 +27,15 @@ class AggregateType
 	protected $aggregateTypeConstant = 'AGGREGATE_TYPE';
 
 	/**
+	 * Constructor
+	 *
+	 * @return void
+	 */
+	private function __construct()
+	{
+	}
+
+	/**
 	 * Use this factory when aggregate type should be detected based on given aggregate root
 	 *
 	 * @param object $eventSourcedAggregateRoot
@@ -35,6 +47,7 @@ class AggregateType
 			throw AggregateTypeException::notAnObject($eventSourcedAggregateRoot);
 		}
 
+		// Check if the aggregate implements the type provider
 		if ($eventSourcedAggregateRoot instanceof AggregateTypeProviderInterface) {
 			return $eventSourcedAggregateRoot->aggregateType();
 		}
@@ -43,13 +56,16 @@ class AggregateType
 		$aggregateClass = get_class($eventSourcedAggregateRoot);
 		$typeConstant = $aggregateClass . '::' . $self->aggregateTypeConstant;
 
+		// Check if the aggregate has the type defined as constant
 		if (defined($typeConstant)) {
 			$self->aggregateType = constant($typeConstant);
+			$self->mapping = [$self->aggregateType => $aggregateClass];
 
 			return $self;
 		}
 
-		$self->aggregateType = get_class($eventSourcedAggregateRoot);
+		// Fall back to the FQCN as type
+		$self->aggregateType = $aggregateClass;
 
 		return $self;
 	}
@@ -103,15 +119,6 @@ class AggregateType
 	}
 
 	/**
-	 * Constructor
-	 *
-	 * @return void
-	 */
-	private function __construct()
-	{
-	}
-
-	/**
 	 * @return null|string
 	 */
 	public function mappedClass(): ?string
@@ -144,7 +151,7 @@ class AggregateType
 	{
 		$otherAggregateType = self::fromAggregateRoot($aggregateRoot);
 
-		if (! $this->equals($otherAggregateType)) {
+		if (!$this->equals($otherAggregateType)) {
 			throw AggregateTypeException::typeMismatch(
 				$this->toString(),
 				$otherAggregateType->toString()
@@ -159,10 +166,11 @@ class AggregateType
 	 */
 	public function equals(AggregateType $other): bool
 	{
-		if (! $aggregateTypeString = $this->mappedClass()) {
+		if (!$aggregateTypeString = $this->mappedClass()) {
 			$aggregateTypeString = $this->toString();
 		}
 
-		return $aggregateTypeString === $other->toString() || $aggregateTypeString === $other->mappedClass();
+		return $aggregateTypeString === $other->toString()
+			|| $aggregateTypeString === $other->mappedClass();
 	}
 }

@@ -34,15 +34,33 @@ class PdoSqlStoreTest extends TestCase
 			->disableOriginalConstructor()
 			->getMock();
 
-		$this->store  = new PdoSqlStore($this->pdo, new JsonSerializer());
+		$this->store = new PdoSqlStore($this->pdo, new JsonSerializer());
 	}
 
 	/**
-	 * testSnapshotStore
+	 * testStore
 	 *
 	 * @return void
 	 */
-	public function testSnapshotStore(): void
+	public function testStore(): void
+	{
+	}
+
+	/**
+	 * testGet
+	 *
+	 * @return void
+	 */
+	public function testGet(): void
+	{
+	}
+
+	/**
+	 * testDelete
+	 *
+	 * @return void
+	 */
+	public function testDelete(): void
 	{
 	}
 }

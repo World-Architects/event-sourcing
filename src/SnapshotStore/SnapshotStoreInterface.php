@@ -31,5 +31,5 @@ interface SnapshotStoreInterface
 	 *
 	 * @return void
 	 */
-	// public function delete(string $aggregateId): void;
+	public function delete(string $aggregateId): void;
 }

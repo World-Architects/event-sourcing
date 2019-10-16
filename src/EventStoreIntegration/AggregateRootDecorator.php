@@ -36,6 +36,7 @@ class AggregateRootDecorator extends AggregateRoot
 	/**
 	 * @param AggregateRoot $anAggregateRoot
 	 *
+	 * @param \Psa\EventSourcing\Aggregate\AggregateRoot $anAggregateRoot
 	 * @return \Psa\EventSourcing\AggregateChangedEvent[]
 	 */
 	public function extractRecordedEvents(AggregateRoot $anAggregateRoot): array
@@ -71,7 +72,7 @@ class AggregateRootDecorator extends AggregateRoot
 	/**
 	 * Replay stream events
 	 *
-	 * @param \Psa\EventSourcing\Aggregate\AggregateRoot $anAggregateRoot Aggregate Root
+	 * @param \Psa\EventSourcing\Aggregate\AggregateRoot $aggregateRoot Aggregate Root
 	 * @param \Iterator $events Events
 	 * @return void
 	 */

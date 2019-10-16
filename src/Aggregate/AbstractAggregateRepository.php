@@ -7,6 +7,7 @@ use Assert\Assert;
 use Prooph\EventStore\EventStoreConnection;
 use Psa\EventSourcing\Aggregate\Event\EventCollection;
 use Psa\EventSourcing\Aggregate\Event\EventCollectionInterface;
+use Psa\EventSourcing\Aggregate\Event\EventType;
 use Psa\EventSourcing\Aggregate\Exception\AggregateTypeMismatchException;
 use Psa\EventSourcing\Aggregate\Exception\EventTypeException;
 use Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface;
@@ -46,7 +47,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	/**
 	 * Aggregate Type
 	 *
-	 * @var string
+	 * @var \Psa\EventSourcing\Aggregate\AggregateType
 	 */
 	protected $aggregateType;
 
@@ -77,12 +78,14 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	public function __construct(
 		EventStoreConnection $eventStore,
 		AggregateTranslatorInterface $aggregateTranslator,
+		AggregateType $aggregateType,
 		?SnapshotStoreInterface $snapshotStore = null
 	) {
 		$this->eventStore = $eventStore;
 		$this->aggregateTranslator = $aggregateTranslator;
 		$this->snapshotStore = $snapshotStore;
 		$this->aggregateDecorator = AggregateRootDecorator::newInstance();
+		$this->aggregateType = $aggregateType;
 	}
 
 	/**
@@ -180,10 +183,10 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 			}
 		}
 
-		$eventCollection = $this->getEventsFromPosition($aggregateId, 0);
-		$aggregateType = $this->aggregateType;
-
-		return $aggregateType::reconstituteFromHistory($eventCollection);
+		return $this->aggregateTranslator->reconstituteAggregateFromHistory(
+			$this->aggregateType,
+			$this->getEventsFromPosition($aggregateId, 0)
+		);
 	}
 
 	/**
@@ -205,7 +208,9 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	{
 		Assert::that($aggregateId)->uuid($aggregateId);
 
-		$eventsSlice = $this->eventStore->readStreamEventsForward($aggregateId, $position, 50);
+		$streamName = $this->determineStreamName($aggregateId);
+
+		$eventsSlice = $this->eventStore->readStreamEventsForward($streamName, $position, 1024);
 		$eventCollection = $this->buildEventCollection();
 
 		if ($eventsSlice->isEndOfStream()) {
@@ -216,7 +221,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 
 		while (!$eventsSlice->isEndOfStream()) {
 			$this->convertEvents($eventsSlice, $eventCollection);
-			$eventsSlice = $this->eventStore->readStreamEventsForward($aggregateId, $eventsSlice->lastEventNumber() + 1, 5);
+			$eventsSlice = $this->eventStore->readStreamEventsForward($aggregateId, $eventsSlice->lastEventNumber() + 1, 1024);
 		}
 
 		return $eventCollection;
@@ -224,6 +229,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 
 	/**
 	 * @todo Refactor this? I have the feeling this can be done a lot better
+	 *
 	 * @param \Prooph\EventStore\StreamEventsSlice $eventsSlice Event Slice
 	 * @param \Psa\EventSourcing\Aggregate\Event\EventCollectionInterface Event Collection
 	 * @return void
@@ -234,7 +240,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	) {
 		foreach ($eventsSlice->events() as $event) {
 			/**
-			 * @var $event \Prooph\EventStore\Internal\ResolvedEvent
+			 * @var \Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface $event
 			 */
 			$eventType = $event->event()->eventType();
 			$metaData = json_decode($event->event()->metadata(), true);
@@ -259,14 +265,14 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 			}
 
 			/**
-			 * @var $event \Psa\EventSourcing\Aggregate\AggregateChangedEvent
+			 * @var \Psa\EventSourcing\Aggregate\AggregateChangedEvent $event
 			 */
 			$event = $eventClass::occur(
 				$metaData['_aggregate_id'],
 				$payload
 			);
 			$event = $event->withMetadata($metaData);
-			$event = $event->withVersion($metaData['_aggregate_version']);
+			//$event = $event->withVersion($metaData['_aggregate_version']);
 
 			$eventCollection->add($event);
 		}
@@ -289,31 +295,15 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 		$storeEvents = [];
 		foreach ($events as $event) {
 			/**
-			 * @var $event \Psa\EventSourcing\EventSourcing\Aggregate\Event\AggregateChangedEventInterface
+			 * @var \Psa\EventSourcing\EventSourcing\Aggregate\Event\AggregateChangedEventInterface $event
 			 */
-			$eventClass = get_class($event);
-			$eventTypeContstant = $eventClass . '::EVENT_TYPE';
-			$eventVersionContstant = $eventClass . '::EVENT_VERSION';
-
-			if (defined($eventTypeContstant)) {
-				$eventType = $event::EVENT_TYPE;
-			} else {
-				throw new RuntimeException(sprintf(
-					'Event Class Constant %s is missing',
-					$eventTypeContstant
-				));
-			}
-
-			$eventVersion = 1;
-			if (defined($eventVersionContstant)) {
-				$eventVersion = $event::EVENT_VERSION;
-			}
+			$eventType = EventType::fromEvent($event);
 
 			$event = $this->enrichEventMetadata($event, $aggregateId, $aggregateType);
 
 			$storeEvents[] = new EventData(
 				EventId::generate(),
-				$eventType,
+				$eventType->toString(),
 				true,
 				json_encode($event->payload()),
 				json_encode($event->metadata())

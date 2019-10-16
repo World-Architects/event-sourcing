@@ -36,6 +36,24 @@ class PersonAggregate implements EventSourcedAggregateInterface
 }
 ```
 
+## Aggregate Type
+
+The aggregate type is an identifier used by the store to distinguis different aggregates. Keep in mind that when using the ubiquious language of DDD it is easy to end up with duplicates. Think of the two different contexts of *user* account` and a *book keeping* account. Your system is very likely going to have two Account aggregates in different domains.
+
+Depending on what kind of strategy to determine the aggregate type you've choosen there are several ways of providing it:
+
+### via Interface
+
+If the aggregate implements `Psa\EventSourcing\Aggregate\AggregateProviderInterface` the repository will call that method on the aggregate and use the returned type.
+
+### via Constant
+
+If the aggregate provides a constant, by default `AGGREGATE_TYPE`, the repository will use this as type.
+
+### FQCN fallback
+
+If you don't do anything the repository receiving the aggregate will use the FQCN as aggregate type.
+
 ## Domain Events
 
 Event sourced aggregate events **must** implement `Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface`.

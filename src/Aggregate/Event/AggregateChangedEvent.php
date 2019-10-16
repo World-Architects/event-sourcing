@@ -111,7 +111,16 @@ class AggregateChangedEvent implements AggregateChangedEventInterface
 	}
 
 	/**
-	 * With meta data
+	 * With    public function version(): int
+		 {
+			 return $this->metadata['_aggregate_version'];
+		 }
+		 public function withVersion(int $version): AggregateChanged
+		 {
+			 $self = clone $this;
+			 $self->setVersion($version);
+			 return $self;
+		 } meta data
 	 *
 	 * @return self
 	 */

@@ -17,8 +17,10 @@ use Prooph\EventStore\Transport\Http\EndpointExtensions;
 use Prooph\EventStoreHttpClient\ConnectionSettings;
 use Prooph\EventStoreHttpClient\EventStoreConnectionFactory;
 
+use Psa\EventSourcing\Aggregate\AggregateType;
 use Psa\EventSourcing\EventStoreIntegration\AggregateTranslator;
 use Psa\EventSourcing\Test\TestApp\Domain\Account;
+use Psa\EventSourcing\Test\TestApp\Domain\AccountId;
 use Psa\EventSourcing\Test\TestApp\Domain\AccountRepository;
 
 /**
@@ -52,10 +54,15 @@ class AbstractAggregateRepositoryTest extends TestCase
 
 		$repository = new AccountRepository(
 			$eventStore,
-			$aggregateTranslator
+			$aggregateTranslator,
+			AggregateType::fromMapping(['Account' => Account::class])
 		);
 
 		$repository->save($account);
+
+		$accountId = AccountId::fromString($account->aggregateId());
+		$account2 = $repository->get($accountId);
+		var_dump($account2);
 	}
 
 	/**

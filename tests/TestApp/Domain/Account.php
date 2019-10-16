@@ -12,6 +12,8 @@ use Psa\EventSourcing\Aggregate\AggregateRoot;
  */
 final class Account extends AggregateRoot
 {
+	const AGGREGATE_TYPE = 'Account';
+
 	/**
 	 * @var \App\Domain\Accounting\Model\AccountId
 	 */

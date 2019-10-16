@@ -44,4 +44,22 @@ class AggregateTypeTest extends TestCase
 		$result = AggregateType::fromAggregateRoot($class);
 		$this->assertEquals('Type-Constant', $result->toString());
 	}
+
+	/**
+	 * testEquals
+	 *
+	 * @return void
+	 */
+	public function testEquals(): void
+	{
+		$type = AggregateType::fromMapping(['Type' => '\TypeClass']);
+		$type2 = AggregateType::fromMapping(['Type' => '\OhterTypeClass']);
+		$this->assertTrue($type->equals($type));
+		$this->assertFalse($type->equals($type2));
+
+		$type = AggregateType::fromString('TypeClass');
+		$type2 = AggregateType::fromString('OtherTypeClass');
+		$this->assertTrue($type->equals($type));
+		$this->assertFalse($type->equals($type2));
+	}
 }

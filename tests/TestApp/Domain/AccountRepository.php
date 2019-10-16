@@ -14,9 +14,12 @@ use Psa\EventSourcing\Aggregate\AggregateRoot;
 class AccountRepository extends AbstractAggregateRepository
 {
 	/**
-	 * @var string
+	 * @var array
 	 */
-	protected $aggregateType = 'Account';
+	protected $eventTypeMapping = [
+		'Accounting.Account.created' => AccountCreated::class,
+		'Accounting.Account.updated' => AccountUpdated::class,
+	];
 
 	/**
 	 * @param \Psa\EventSourcing\Test\TestApp\Domain\Account

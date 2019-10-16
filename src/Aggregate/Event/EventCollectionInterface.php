@@ -10,4 +10,8 @@ use Iterator;
  */
 interface EventCollectionInterface extends Iterator
 {
+	/**
+	 * @param \Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface $event Event
+	 */
+	public function add(AggregateChangedEventInterface $event): void;
 }

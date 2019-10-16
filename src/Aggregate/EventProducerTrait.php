@@ -20,14 +20,14 @@ trait EventProducerTrait
 	/**
 	 * List of events that are not committed to the EventStore
 	 *
-	 * @var AggregateChangedEvent[]
+	 * @var \Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface[]
 	 */
 	protected $recordedEvents = [];
 
 	/**
 	 * Get pending events and reset stack
 	 *
-	 * @return AggregateChangedEvent[]
+	 * @return \Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface[]
 	 */
 	public function popRecordedEvents(): array
 	{

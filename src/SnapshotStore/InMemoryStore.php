@@ -77,4 +77,12 @@ class InMemoryStore implements SnapshotStoreInterface
 			$data['created_at']
 		);
 	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function delete(string $aggregateId): void
+	{
+		unset($this->store[$aggregateId]);
+	}
 }
