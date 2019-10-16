@@ -6,11 +6,10 @@ namespace Psa\EventSourcing\Aggregate\Event;
 use Assert\Assert;
 use DateTimeImmutable;
 use DateTimeZone;
-use ReflectionClass;
 use Ramsey\Uuid\Uuid;
 
 /**
- * AggregateChangedEvent
+ * Aggregate Changed Event
  */
 class AggregateChangedEvent implements AggregateChangedEventInterface
 {
@@ -35,15 +34,12 @@ class AggregateChangedEvent implements AggregateChangedEventInterface
 	protected $metadata = [];
 
 	/**
-	 * @var \ReflectionClass
-	 */
-	protected $_reflection;
-
-	/**
 	 * @return static
 	 */
 	public static function occur(string $aggregateId, array $payload = []): AggregateChangedEventInterface
 	{
+		Assert::that($aggregateId)->uuid();
+
 		return new static($aggregateId, $payload);
 	}
 
@@ -56,6 +52,8 @@ class AggregateChangedEvent implements AggregateChangedEventInterface
 	 */
 	protected function __construct(string $aggregateId, array $payload, array $metadata = [])
 	{
+		Assert::that($aggregateId)->uuid();
+
 		//metadata needs to be set before setAggregateId and setVersion is called
 		$this->metadata = $metadata;
 		$this->setAggregateId($aggregateId);
@@ -113,7 +111,16 @@ class AggregateChangedEvent implements AggregateChangedEventInterface
 	}
 
 	/**
-	 * With meta data
+	 * With    public function version(): int
+		 {
+			 return $this->metadata['_aggregate_version'];
+		 }
+		 public function withVersion(int $version): AggregateChanged
+		 {
+			 $self = clone $this;
+			 $self->setVersion($version);
+			 return $self;
+		 } meta data
 	 *
 	 * @return self
 	 */

@@ -39,19 +39,10 @@ trait EventSourcedTrait
 	protected function replay(Iterator $historyEvents): void
 	{
 		foreach ($historyEvents as $pastEvent) {
-			/** @var AggregateChangedEvent $pastEvent */
-			if ($pastEvent->version() !== $this->version + 1) {
-				/*
-				throw new RuntimeException(sprintf(
-					'Event Type `%s` version %d is not the next in line with the current aggregate version %d.',
-					get_class($pastEvent),
-					$pastEvent->version(),
-					$this->version
-				));
-				*/
-			}
-
-			$this->version = $pastEvent->version();
+			/**
+			 * @var \Psa\EventSourcing\Aggregate\Event\AggregateChangedEvent $pastEvent
+			 */
+			$this->version = $pastEvent->aggregateVersion();
 			$this->apply($pastEvent);
 		}
 	}

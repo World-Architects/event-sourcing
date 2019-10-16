@@ -16,14 +16,12 @@ class EventTransformer
 	 */
 	public function fromEventStore($event)
 	{
-
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public function toEventStore($event)
 	{
-
 	}
 }

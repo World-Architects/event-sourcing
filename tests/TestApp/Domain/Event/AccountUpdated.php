@@ -60,4 +60,3 @@ class AccountUpdated extends AggregateChangedEvent
 		return $this->description;
 	}
 }
-

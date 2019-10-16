@@ -4,6 +4,7 @@ declare(strict_types = 1);
 namespace Psa\EventSourcing\SnapshotStore;
 
 use Psa\EventSourcing\Aggregate\AggregateRoot;
+use Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface;
 use Psa\EventSourcing\SnapshotStore\Serializer\SerializerInterface;
 use Psa\EventSourcing\SnapshotStore\Serializer\SerializeSerializer;
 use Assert\Assert;
@@ -27,7 +28,7 @@ class InMemoryStore implements SnapshotStoreInterface
 	/**
 	 * Serializer
 	 *
-	 * @var \Psa\EventSourcing\SnapshotStore\Serializer\\SerializerInterface
+	 * @var \Psa\EventSourcing\SnapshotStore\Serializer\SerializerInterface
 	 */
 	protected $serializer;
 
@@ -39,15 +40,13 @@ class InMemoryStore implements SnapshotStoreInterface
 	public function __construct(
 		? SerializerInterface $serializer = null
 	) {
-		$this->serializer = $serializer ?? new SerializeSerializer();
+		$this->serializer = $serializer ? $serializer : new SerializeSerializer();
 	}
 
 	/**
-	 * Stores an aggregate snapshot
-	 *
-	 * @return void
+	 * @inheritDoc
 	 */
-	public function store(AggregateRoot $aggregate)
+	public function store(EventSourcedAggregateInterface $aggregate): void
 	{
 		$this->store[$aggregate->aggregateId()] = [
 			'id' => Uuid::uuid4()->toString(),
@@ -60,9 +59,7 @@ class InMemoryStore implements SnapshotStoreInterface
 	}
 
 	/**
-	 * Gets an aggregate snapshot if one exist
-	 *
-	 * @return mixed
+	 * @inheritDoc
 	 */
 	public function get(string $aggregateId): ?SnapshotInterface
 	{
@@ -79,5 +76,13 @@ class InMemoryStore implements SnapshotStoreInterface
 			(int)$data['aggregate_version'],
 			$data['created_at']
 		);
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function delete(string $aggregateId): void
+	{
+		unset($this->store[$aggregateId]);
 	}
 }

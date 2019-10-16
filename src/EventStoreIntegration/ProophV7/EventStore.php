@@ -51,7 +51,6 @@ class EventStore
 	 */
 	protected function getEventsFromPosition(string $aggregateId, int $position)
 	{
-
 	}
 
 	/**
@@ -60,6 +59,5 @@ class EventStore
 	 */
 	public function saveAggregate(EventSourcedAggregateInterface $aggregate): void
 	{
-
 	}
 }

@@ -3,21 +3,25 @@ declare(strict_types = 1);
 
 namespace Psa\EventSourcing\Aggregate;
 
+use Assert\Assert;
+use Prooph\EventStore\EventStoreConnection;
 use Psa\EventSourcing\Aggregate\Event\EventCollection;
 use Psa\EventSourcing\Aggregate\Event\EventCollectionInterface;
+use Psa\EventSourcing\Aggregate\Event\EventType;
 use Psa\EventSourcing\Aggregate\Exception\AggregateTypeMismatchException;
 use Psa\EventSourcing\Aggregate\Exception\EventTypeException;
+use Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface;
 use Psa\EventSourcing\EventStoreIntegration\AggregateRootDecorator;
 use Psa\EventSourcing\EventStoreIntegration\AggregateTranslator;
+use Psa\EventSourcing\EventStoreIntegration\AggregateTranslatorInterface;
 use Psa\EventSourcing\SnapshotStore\SnapshotInterface;
 use Psa\EventSourcing\SnapshotStore\SnapshotStoreInterface;
-use Assert\Assert;
 use Prooph\EventStore\EventData;
 use Prooph\EventStore\EventId;
-use Prooph\EventStore\EventStoreConnection;
 use Prooph\EventStore\ExpectedVersion;
 use Prooph\EventStore\SliceReadStatus;
 use Prooph\EventStore\StreamEventsSlice;
+use Psa\Foundation\CorrelationId;
 use RuntimeException;
 
 /**
@@ -36,14 +40,14 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	/**
 	 * Snapshot Store
 	 *
-	 * @var \Psa\EventSourcing\SnapshotStore\SnapshotStoreInterface|null
+	 * @var null|\Psa\EventSourcing\SnapshotStore\SnapshotStoreInterface|null
 	 */
 	protected $snapshotStore;
 
 	/**
 	 * Aggregate Type
 	 *
-	 * @var string
+	 * @var \Psa\EventSourcing\Aggregate\AggregateType
 	 */
 	protected $aggregateType;
 
@@ -57,17 +61,31 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	protected $eventTypeMapping = [];
 
 	/**
+	 * @var \Psa\EventSourcing\EventStoreIntegration\AggregateTranslatorInterface
+	 */
+	protected $aggregateTranslator;
+
+	/**
+	 * @var null|string
+	 */
+	protected $streamName;
+
+	/**
 	 * Constructor
 	 *
 	 * @param \Prooph\EventStore\EventStoreConnection $eventStore Event Store Connection
 	 */
 	public function __construct(
 		EventStoreConnection $eventStore,
-		SnapshotStoreInterface $snapshotStore
+		AggregateTranslatorInterface $aggregateTranslator,
+		AggregateType $aggregateType,
+		?SnapshotStoreInterface $snapshotStore = null
 	) {
 		$this->eventStore = $eventStore;
+		$this->aggregateTranslator = $aggregateTranslator;
 		$this->snapshotStore = $snapshotStore;
 		$this->aggregateDecorator = AggregateRootDecorator::newInstance();
+		$this->aggregateType = $aggregateType;
 	}
 
 	/**
@@ -98,6 +116,8 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	 */
 	protected function loadFromSnapshotStore(string $aggregateId): EventSourcedAggregateInterface
 	{
+		Assert::that($aggregateId)->uuid($aggregateId);
+
 		if (!$this->snapshotStore) {
 			return null;
 		}
@@ -141,7 +161,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	 *
 	 * @return void
 	 */
-	public function createSnapshot(AggregateRoot $aggregate): void
+	public function createSnapshot(EventSourcedAggregateInterface $aggregate): void
 	{
 		$this->snapshotStore->store($aggregate);
 	}
@@ -163,16 +183,16 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 			}
 		}
 
-		$eventCollection = $this->getEventsFromPosition($aggregateId, 0);
-		$aggregateType = $this->aggregateType;
-
-		return $aggregateType::reconstituteFromHistory($eventCollection);
+		return $this->aggregateTranslator->reconstituteAggregateFromHistory(
+			$this->aggregateType,
+			$this->getEventsFromPosition($aggregateId, 0)
+		);
 	}
 
 	/**
-	 * @return \Psa\EventSourcing\Aggregate\Event\EventCollection
+	 * @return \Psa\EventSourcing\Aggregate\Event\EventCollectionInterface
 	 */
-	protected function buildEventCollection(): EventCollection
+	protected function buildEventCollection(): EventCollectionInterface
 	{
 		return new EventCollection();
 	}
@@ -180,13 +200,17 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	/**
 	 * Get events from position
 	 *
-	 * @param string $aggregateId Aggregate UUID
+	 * @param string $aggregateId Aggregate Id
 	 * @param int $position Position
-	 * @return \Psa\EventSourcing\Aggregate\Event\EventCollection
+	 * @return \Psa\EventSourcing\Aggregate\Event\EventCollectionInterface
 	 */
-	protected function getEventsFromPosition(string $aggregateId, int $position): EventCollection
+	protected function getEventsFromPosition(string $aggregateId, int $position)
 	{
-		$eventsSlice = $this->eventStore->readStreamEventsForward($aggregateId, $position, 50);
+		Assert::that($aggregateId)->uuid($aggregateId);
+
+		$streamName = $this->determineStreamName($aggregateId);
+
+		$eventsSlice = $this->eventStore->readStreamEventsForward($streamName, $position, 1024);
 		$eventCollection = $this->buildEventCollection();
 
 		if ($eventsSlice->isEndOfStream()) {
@@ -197,7 +221,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 
 		while (!$eventsSlice->isEndOfStream()) {
 			$this->convertEvents($eventsSlice, $eventCollection);
-			$eventsSlice = $this->eventStore->readStreamEventsForward($aggregateId, $eventsSlice->lastEventNumber() + 1, 5);
+			$eventsSlice = $this->eventStore->readStreamEventsForward($aggregateId, $eventsSlice->lastEventNumber() + 1, 1024);
 		}
 
 		return $eventCollection;
@@ -205,6 +229,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 
 	/**
 	 * @todo Refactor this? I have the feeling this can be done a lot better
+	 *
 	 * @param \Prooph\EventStore\StreamEventsSlice $eventsSlice Event Slice
 	 * @param \Psa\EventSourcing\Aggregate\Event\EventCollectionInterface Event Collection
 	 * @return void
@@ -215,7 +240,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	) {
 		foreach ($eventsSlice->events() as $event) {
 			/**
-			 * @var $event \Prooph\EventStore\Internal\ResolvedEvent
+			 * @var \Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface $event
 			 */
 			$eventType = $event->event()->eventType();
 			$metaData = json_decode($event->event()->metadata(), true);
@@ -240,14 +265,14 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 			}
 
 			/**
-			 * @var $event \Psa\EventSourcing\Aggregate\AggregateChangedEvent
+			 * @var \Psa\EventSourcing\Aggregate\AggregateChangedEvent $event
 			 */
 			$event = $eventClass::occur(
 				$metaData['_aggregate_id'],
 				$payload
 			);
 			$event = $event->withMetadata($metaData);
-			$event = $event->withVersion($metaData['_aggregate_version']);
+			//$event = $event->withVersion($metaData['_aggregate_version']);
 
 			$eventCollection->add($event);
 		}
@@ -259,48 +284,74 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	 */
 	public function saveAggregate(EventSourcedAggregateInterface $aggregate): void
 	{
-		$aggregateId = $aggregate->aggregateId();
+		$aggregateId = $this->aggregateTranslator->extractAggregateId($aggregate);
+		$events = $this->aggregateTranslator->extractPendingStreamEvents($aggregate);
+		$streamName = $this->determineStreamName($aggregateId);
+		$this->assertAggregateType($aggregate);
+
 		$aggregateType = get_class($aggregate);
-		$events = $aggregate->popRecordedEvents();
+		$aggregateType = substr($aggregateType, strrpos($aggregateType, '\\') + 1);
 
 		$storeEvents = [];
 		foreach ($events as $event) {
-			$eventClass = get_class($event);
-			$eventTypeContstant = $eventClass . '::EVENT_TYPE';
-			$eventVersionContstant = $eventClass . '::EVENT_VERSION';
+			/**
+			 * @var \Psa\EventSourcing\EventSourcing\Aggregate\Event\AggregateChangedEventInterface $event
+			 */
+			$eventType = EventType::fromEvent($event);
 
-			if (defined($eventTypeContstant)) {
-				$eventType = $event::EVENT_TYPE;
-			} else {
-				throw new RuntimeException(sprintf(
-					'Event Class Constant %s is missing',
-					$eventTypeContstant
-				));
-			}
-
-			$eventVersion = 1;
-			if (defined($eventVersionContstant)) {
-				$eventVersion = $event::EVENT_VERSION;
-			}
+			$event = $this->enrichEventMetadata($event, $aggregateId, $aggregateType);
 
 			$storeEvents[] = new EventData(
 				EventId::generate(),
-				$eventType,
+				$eventType->toString(),
 				true,
 				json_encode($event->payload()),
-				json_encode([
-					'_event_version' => $eventVersion,
-					'_aggregate_id' => $aggregateId,
-					'_aggregate_type' => $aggregateType,
-					'_aggregate_version' => $event->aggregateVersion()
-				])
+				json_encode($event->metadata())
 			);
 		}
 
 		$this->eventStore->appendToStream(
-			'Account-' . $aggregateId,
+			$streamName,
 			ExpectedVersion::ANY,
 			$storeEvents
 		);
+	}
+
+	/**
+	 * @param object $eventSourcedAggregateRoot
+	 */
+	protected function assertAggregateType($eventSourcedAggregateRoot)
+	{
+		$this->aggregateType->assert($eventSourcedAggregateRoot);
+	}
+
+	/**
+	 *
+	 */
+	public function enrichEventMetadata(
+		AggregateChangedEventInterface $event,
+		string $aggregateId,
+		string $aggregateType
+	): AggregateChangedEventInterface {
+		return $event
+			->withAddMetadata('_aggregate_id', $aggregateId)
+			->withAddMetadata('_aggregate_type', $aggregateType)
+			->withAddMetadata('_aggregate_version', $event->aggregateVersion());
+	}
+
+	/**
+	 * Default stream name generation.
+	 *
+	 * Override this method in an extending repository to provide a custom name
+	 */
+	protected function determineStreamName(string $aggregateId): string
+	{
+		if ($this->streamName === null) {
+			$prefix = $this->aggregateType->toString();
+		} else {
+			$prefix = $this->streamName;
+		}
+
+		return $prefix . '-' . $aggregateId;
 	}
 }

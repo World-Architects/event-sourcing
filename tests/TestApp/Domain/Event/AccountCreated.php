@@ -48,11 +48,19 @@ class AccountCreated extends AggregateChangedEvent
 
 	public function name(): string
 	{
+		if ($this->name === null) {
+			$this->name = $this->payload['name'];
+		}
+
 		return $this->name;
 	}
 
 	public function description(): string
 	{
+		if ($this->description === null) {
+			$this->description = $this->payload['description'];
+		}
+
 		return $this->description;
 	}
 }

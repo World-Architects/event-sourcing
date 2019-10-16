@@ -3,10 +3,25 @@ declare(strict_types=1);
 
 namespace Psa\EventSourcing\Test\TestCase\Aggregate;
 
+use function Clue\StreamFilter\fun;
 use PHPUnit\Framework\TestCase;
-use Prooph\EventStore\Async\EventStoreConnection;
+use Prooph\EventStore\EndPoint;
+use Prooph\EventStore\UserCredentials;
+//use Prooph\EventStoreClient\ConnectionSettings;
+//use Prooph\EventStoreClient\EventStoreConnectionFactory;
+
+use GuzzleHttp\Client as GuzzleClient;
+use Http\Adapter\Guzzle6\Client;
+
+use Prooph\EventStore\Transport\Http\EndpointExtensions;
+use Prooph\EventStoreHttpClient\ConnectionSettings;
+use Prooph\EventStoreHttpClient\EventStoreConnectionFactory;
+
+use Psa\EventSourcing\Aggregate\AggregateType;
+use Psa\EventSourcing\EventStoreIntegration\AggregateTranslator;
 use Psa\EventSourcing\Test\TestApp\Domain\Account;
-use Psa\EventSourcing\Test\TestApp\Domain\Repository\AccountRepository;
+use Psa\EventSourcing\Test\TestApp\Domain\AccountId;
+use Psa\EventSourcing\Test\TestApp\Domain\AccountRepository;
 
 /**
  * Abstract Aggregate Repository Test
@@ -14,33 +29,74 @@ use Psa\EventSourcing\Test\TestApp\Domain\Repository\AccountRepository;
 class AbstractAggregateRepositoryTest extends TestCase
 {
 	/**
-	 * @inheritDoc
+	 *@return void
 	 */
-	public function setUp(): void
+	public function testAccountRepository(): void
 	{
-		parent::setUp();
+		$httpClient = new Client(new GuzzleClient());
+		$userCredentials = new UserCredentials('admin', 'changeit');
 
-		$this->eventStore = $this->getMockBuilder(EventStoreConnection::class)
-			->disableOriginalConstructor()
-			->getMock();
+		$eventStore = EventStoreConnectionFactory::create(
+			new ConnectionSettings(
+				new EndPoint('127.0.0.1', 2113),
+				EndpointExtensions::HTTP_SCHEMA,
+				$userCredentials
+			),
+			$httpClient
+		);
 
-		$this->repository = new AccountRepository($this->eventStore);
-	}
+		$aggregateTranslator = new AggregateTranslator();
 
-	/**
-	 * testSaveAggregate
-	 *
-	 * @return void
-	 */
-	public function testSaveAggregate(): void
-	{
 		$account = Account::create(
-			'Name',
+			'Test',
 			'Description'
 		);
 
-		$this->repository->saveAggregate($account);
+		$repository = new AccountRepository(
+			$eventStore,
+			$aggregateTranslator,
+			AggregateType::fromMapping(['Account' => Account::class])
+		);
 
-		$result = $this->repository->getAggregate($account->aggregateId());
+		$repository->save($account);
+
+		$accountId = AccountId::fromString($account->aggregateId());
+		$account2 = $repository->get($accountId);
+		var_dump($account2);
+	}
+
+	/**
+	 * @return void
+	 */
+	public function testAsyncAccountRepository(): void
+	{
+		/*
+		$userCredentials = new UserCredentials(
+			'admin',
+			'changeit'
+		);
+
+		$settings = ConnectionSettings::default()
+			->withDefaultCredentials($userCredentials);
+
+		$eventStore = EventStoreConnectionFactory::createFromEndPoint(
+			new EndPoint('localhost', 1113),
+			$settings
+		);
+
+		$promise = $eventStore->connectAsync();
+		$promise->onResolve(function($error, $value) {
+			$account = Account::create(
+				'Test',
+				'Description'
+			);
+
+			$repository = new AccountRepository(
+				$eventStore
+			);
+
+			$repository->save($account);
+		});
+		*/
 	}
 }

@@ -1,8 +1,8 @@
 # Snapshot Stores
 
-Snapshot stores take a snapshot of a *current state* of an aggregate. The aggregate gets serialized, it's actual version read and stored along the serialized object in the store.
+Snapshot stores take a snapshot of the **current state** of an aggregate. The aggregate gets serialized, it's actual version read and stored along the serialized object in the store.
 
-When do you want to take a snapshot? By a rule of thumb you should take snapshots when you have aggregates with a really huge event history. Just for the sake of taking a number, if you have 10k events you might want to take start to take a snapshot every thousand events at least.
+When do you want to take a snapshot? By a rule of thumb you should take snapshots when you have aggregates with a really huge event history. Just for the sake of taking a number, if you have 10k events you might want to start to take a snapshot every thousand events. The numbers are randomly picked, it really depends on the specific case.
 
 ## Stores
 
