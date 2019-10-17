@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace Psa\EventSourcing\Aggregate\Event;
 
+use InvalidArgumentException;
 use Psa\EventSourcing\Aggregate\AggregateTypeProviderInterface;
 use Psa\EventSourcing\Aggregate\Exception\AggregateTypeException;
-use InvalidArgumentException;
-use Psa\EventSourcing\Aggregate\Exception\EventTypeException;
+use Psa\EventSourcing\Aggregate\Event\Exception\EventTypeException;
 
 /**
  * Event Type
@@ -40,8 +40,8 @@ class EventType
 	/**
 	 * Use this factory when aggregate type should be detected based on given aggregate root
 	 *
-	 * @param object $event
-	 * @throws Exception\AggregateTypeException
+	 * @param object $event Event object
+	 * @throws \Psa\EventSourcing\Aggregate\Event\Exception\EventTypeException
 	 */
 	public static function fromEvent($event): EventType
 	{
@@ -132,7 +132,7 @@ class EventType
 	 */
 	public function toString(): string
 	{
-		return empty($this->mapping) ? $this->eventType : key($this->mapping);
+		return empty($this->mapping) ? (string)$this->eventType : (string)key($this->mapping);
 	}
 
 	/**
@@ -144,13 +144,12 @@ class EventType
 	}
 
 	/**
-	 * @param object $eventRoot
-	 *
-	 * @throws Exception\AggregateTypeException
+	 * @param object $event Event object
+	 * @throws \Psa\EventSourcing\Aggregate\Event\Exception\EventTypeException
 	 */
 	public function assert($event): void
 	{
-		$otherEvent = self::fromAggregateRoot($event);
+		$otherEvent = self::fromEvent($event);
 
 		if (!$this->equals($otherEvent)) {
 			throw EventTypeException::typeMismatch(

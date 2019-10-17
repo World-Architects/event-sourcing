@@ -8,7 +8,7 @@ use Exception;
 /**
  * EventTypeException
  */
-class EventTypeException extends AggregateException
+class EventTypeException extends EventException
 {
 	/**
 	 * @param mixed $type Type
@@ -31,6 +31,19 @@ class EventTypeException extends AggregateException
 	{
 		return new self(sprintf(
 			'Event types must be equal. %s != %s',
+			$aggregateType,
+			$otherAggregateType
+		));
+	}
+
+	public static function mappingFailed(
+		string  $class,
+		string $eventNumber,
+		string $eventId
+	) {
+		return new self(sprintf(
+			'Mapping of %s failed. Version %s ID %s',
+			$class,
 			$aggregateType,
 			$otherAggregateType
 		));

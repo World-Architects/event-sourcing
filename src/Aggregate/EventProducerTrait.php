@@ -15,7 +15,7 @@ trait EventProducerTrait
 	 *
 	 * @var int
 	 */
-	protected $version = 0;
+	protected $aggregateVersion = 0;
 
 	/**
 	 * List of events that are not committed to the EventStore
@@ -42,12 +42,13 @@ trait EventProducerTrait
 	 * Record an aggregate changed event
 	 *
 	 * @param \Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface $event Event
+	 * @return void
 	 */
 	protected function recordThat(AggregateChangedEventInterface $event): void
 	{
-		$this->version += 1;
+		$this->aggregateVersion += 1;
 
-		$this->recordedEvents[] = $event->withAggregateVersion($this->version);
+		$this->recordedEvents[] = $event->withAggregateVersion($this->aggregateVersion);
 
 		$this->apply($event);
 	}
@@ -59,6 +60,9 @@ trait EventProducerTrait
 
 	/**
 	 * Apply given event
+	 *
+	 * @param \Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface $event Event
+	 * @return void
 	 */
 	abstract protected function apply(AggregateChangedEventInterface $event): void;
 }

@@ -30,14 +30,14 @@ class AggregateRootDecorator extends AggregateRoot
 	 */
 	public function extractAggregateVersion(AggregateRoot $anAggregateRoot): int
 	{
-		return $anAggregateRoot->version;
+		return $anAggregateRoot->aggregateVersion;
 	}
 
 	/**
 	 * @param AggregateRoot $anAggregateRoot
 	 *
-	 * @param \Psa\EventSourcing\Aggregate\AggregateRoot $anAggregateRoot
-	 * @return \Psa\EventSourcing\AggregateChangedEvent[]
+	 * @param \Psa\EventSourcing\Aggregate\AggregateRoot $anAggregateRoot An Aggregate Root
+	 * @return array
 	 */
 	public function extractRecordedEvents(AggregateRoot $anAggregateRoot): array
 	{
@@ -56,9 +56,12 @@ class AggregateRootDecorator extends AggregateRoot
 	}
 
 	/**
+	 * @param string $aggregateRootClass Aggregate Root
+	 * @param \Iterator $aggregateChangedEvents Changed events
+	 * @return \Psa\EventSourcing\Aggregate\AggregateRoot
 	 * @throws RuntimeException
 	 */
-	public function fromHistory($aggregateRootClass, Iterator $aggregateChangedEvents): AggregateRoot
+	public function fromHistory(string $aggregateRootClass, Iterator $aggregateChangedEvents): AggregateRoot
 	{
 		if (!class_exists($aggregateRootClass)) {
 			throw new RuntimeException(

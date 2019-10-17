@@ -18,7 +18,7 @@ trait EventSourcedTrait
 	 *
 	 * @var int
 	 */
-	protected $version = 0;
+	protected $aggregateVersion = 0;
 
 	/**
 	 * @throws RuntimeException
@@ -42,7 +42,7 @@ trait EventSourcedTrait
 			/**
 			 * @var \Psa\EventSourcing\Aggregate\Event\AggregateChangedEvent $pastEvent
 			 */
-			$this->version = $pastEvent->aggregateVersion();
+			$this->aggregateVersion = $pastEvent->aggregateVersion();
 			$this->apply($pastEvent);
 		}
 	}
@@ -82,7 +82,7 @@ trait EventSourcedTrait
 	 */
 	public function aggregateVersion(): int
 	{
-		return $this->version;
+		return $this->aggregateVersion;
 	}
 
 	/**

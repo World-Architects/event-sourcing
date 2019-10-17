@@ -9,6 +9,7 @@
 		}
 	],
 	"require": {
+		"ext-json": "*",
 		"php": "^7.2",
 		"beberlei/assert": "^3.2",
 		"prooph/event-store": "dev-master as v8.0.0-RC-1",

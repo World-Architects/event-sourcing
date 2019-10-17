@@ -131,7 +131,7 @@ class AggregateType
 	 */
 	public function toString(): string
 	{
-		return empty($this->mapping) ? $this->aggregateType : key($this->mapping);
+		return empty($this->mapping) ? (string)$this->aggregateType : (string)key($this->mapping);
 	}
 
 	/**

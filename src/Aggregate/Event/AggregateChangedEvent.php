@@ -34,7 +34,7 @@ class AggregateChangedEvent implements AggregateChangedEventInterface
 	protected $metadata = [];
 
 	/**
-	 * @return static
+	 * @inheritDoc
 	 */
 	public static function occur(string $aggregateId, array $payload = []): AggregateChangedEventInterface
 	{
@@ -74,7 +74,10 @@ class AggregateChangedEvent implements AggregateChangedEventInterface
 		}
 
 		if ($this->createdAt === null) {
-			$this->createdAt = new DateTimeImmutable('now', new DateTimeZone('UTC'));
+			$this->createdAt = new DateTimeImmutable(
+				'now',
+				new DateTimeZone('UTC')
+			);
 		}
 	}
 
@@ -141,7 +144,7 @@ class AggregateChangedEvent implements AggregateChangedEventInterface
 	 * @param mixed $value
 	 * @return self
 	 */
-	public function withAddMetadata(string $key, $value): AggregateChangedEventInterface
+	public function withAddedMetadata(string $key, $value): AggregateChangedEventInterface
 	{
 		$event = clone $this;
 		$event->metadata[$key] = $value;
@@ -205,5 +208,31 @@ class AggregateChangedEvent implements AggregateChangedEventInterface
 	protected function setPayload(array $payload): void
 	{
 		$this->payload = $payload;
+	}
+
+	/**
+	 *
+	 */
+	protected function getFromPayload(string $property)
+	{
+		if (!isset($this->{$property})
+			|| $this->{$property} === null
+			&& isset($this->payload[$property])
+		) {
+			$this->{$property} = $this->payload[$property];
+
+			return $this->payload[$property];
+		}
+
+		return $this->{$property};
+	}
+
+	public function __call($name, $arguments)
+	{
+		if (!isset($this->{$name})) {
+			return;
+		}
+
+		return $this->getFromPayload($name);
 	}
 }

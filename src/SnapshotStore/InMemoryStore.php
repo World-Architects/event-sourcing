@@ -38,7 +38,7 @@ class InMemoryStore implements SnapshotStoreInterface
 	 * @param \Psa\EventSourcing\SnapshotStore\Serializer\SerializerInterface $serializer Serializer
 	 */
 	public function __construct(
-		? SerializerInterface $serializer = null
+		?SerializerInterface $serializer = null
 	) {
 		$this->serializer = $serializer ? $serializer : new SerializeSerializer();
 	}

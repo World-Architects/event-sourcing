@@ -6,6 +6,8 @@ namespace Psa\EventSourcing\Test\TestCase\SnapshotStore;
 use PHPUnit\Framework\TestCase;
 use Psa\EventSourcing\SnapshotStore\InMemoryStore;
 use Psa\EventSourcing\SnapshotStore\Serializer\JsonSerializer;
+use Psa\EventSourcing\SnapshotStore\Serializer\SerializeSerializer;
+use Psa\EventSourcing\Test\TestApp\Domain\Account;
 
 /**
  * In Memory Store Test
@@ -24,7 +26,7 @@ class InMemoryStoreTest extends TestCase
 	{
 		parent::setUp();
 
-		$this->store = new InMemoryStore(new JsonSerializer());
+		$this->store = new InMemoryStore(new SerializeSerializer());
 	}
 
 	/**
@@ -34,23 +36,11 @@ class InMemoryStoreTest extends TestCase
 	 */
 	public function testStore(): void
 	{
-	}
+		$account = Account::create('test', 'test');
+		$id = $account->aggregateId();
 
-	/**
-	 * testGet
-	 *
-	 * @return void
-	 */
-	public function testGet(): void
-	{
-	}
-
-	/**
-	 * testDelete
-	 *
-	 * @return void
-	 */
-	public function testDelete(): void
-	{
+		$this->store->store($account);
+		$this->store->get($id);
+		$this->store->delete($id);
 	}
 }

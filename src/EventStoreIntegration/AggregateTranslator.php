@@ -16,7 +16,7 @@ use Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface;
 final class AggregateTranslator implements AggregateTranslatorInterface
 {
 	/**
-	 * @var AggregateRootDecorator
+	 * @var object
 	 */
 	protected $aggregateRootDecorator;
 

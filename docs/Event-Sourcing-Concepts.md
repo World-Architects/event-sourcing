@@ -4,14 +4,21 @@ The fundamental idea of Event Sourcing is that of ensuring every change to the s
 
 If you need a basic introduction to event sourcing check [Martin Fowlers Event Sourcing description](https://martinfowler.com/eaaDev/EventSourcing.html).
 
-## Saving Aggregates Sequence
+## Creating and Saving Aggregate Events Sequence
 
-This describes what happens when an aggregate is saved:
+Triggering events
 
- * The aggregates events that were **NOT** yet applied are read by the event system implementation
+ * Some method is called on an aggregate causing an event
+   * The event is dispatched
+   * The event is applied, the status of the aggregate changes
+   * The event is put in a stack of non-persistent events
+
+When persisting the aggreate:
+
+ * The aggregates events that were stacked are read by the event system implementation
    * and stored in the event store
    * and flagged as read / applied
-   * Projections (if there are any) are triggered
+   * Projections (if there are any) process the events
      * Projections generate the read model / fill the database
 
 ## Reading / restoring aggregates Sequence

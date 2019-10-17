@@ -9,8 +9,8 @@ use Psa\EventSourcing\Aggregate\Event\EventCollection;
 use Psa\EventSourcing\Aggregate\Event\EventCollectionInterface;
 use Psa\EventSourcing\Aggregate\Event\EventType;
 use Psa\EventSourcing\Aggregate\Exception\AggregateTypeMismatchException;
-use Psa\EventSourcing\Aggregate\Exception\EventTypeException;
 use Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface;
+use Psa\EventSourcing\Aggregate\Event\Exception\EventTypeException;
 use Psa\EventSourcing\EventStoreIntegration\AggregateRootDecorator;
 use Psa\EventSourcing\EventStoreIntegration\AggregateTranslator;
 use Psa\EventSourcing\EventStoreIntegration\AggregateTranslatorInterface;
@@ -71,6 +71,11 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	protected $streamName;
 
 	/**
+	 * @var \Psa\EventSourcing\EventStoreIntegration\AggregateRootDecorator
+	 */
+	protected $aggregateDecorator;
+
+	/**
 	 * Constructor
 	 *
 	 * @param \Prooph\EventStore\EventStoreConnection $eventStore Event Store Connection
@@ -96,11 +101,12 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	public function delete(string $aggregateId, $hardDelete = false)
 	{
 		Assert::that($aggregateId)->uuid($aggregateId);
-		$this->eventStore->deleteStream($aggregateId, ExpectedVersion::ANY, $hardDelete);
 
 		if ($this->snapshotStore) {
 			$this->snapshotStore->delete($aggregateId);
 		}
+
+		$this->eventStore->deleteStream($aggregateId, ExpectedVersion::ANY, $hardDelete);
 	}
 
 	/**
@@ -143,7 +149,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	/**
 	 * Checks if the snapshot matches the repositories aggregate type
 	 *
-	 * @param \Psa\EventSourcing\SnapshotStore\SnapshotInterface
+	 * @param \Psa\EventSourcing\SnapshotStore\SnapshotInterface $snapshot Snapshot
 	 * @return void
 	 */
 	protected function snapshotMatchesAggregateType(SnapshotInterface $snapshot): void
@@ -151,7 +157,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 		if ($snapshot->aggregateType() !== $this->aggregateType) {
 			throw AggregateTypeMismatchException::mismatch(
 				$snapshot->aggregateType(),
-				$this->aggregateType
+				$this->aggregateType->toString()
 			);
 		}
 	}
@@ -231,7 +237,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	 * @todo Refactor this? I have the feeling this can be done a lot better
 	 *
 	 * @param \Prooph\EventStore\StreamEventsSlice $eventsSlice Event Slice
-	 * @param \Psa\EventSourcing\Aggregate\Event\EventCollectionInterface Event Collection
+	 * @param \Psa\EventSourcing\Aggregate\Event\EventCollectionInterface $eventCollection Event Collection
 	 * @return void
 	 */
 	protected function convertEvents(
@@ -289,9 +295,6 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 		$streamName = $this->determineStreamName($aggregateId);
 		$this->assertAggregateType($aggregate);
 
-		$aggregateType = get_class($aggregate);
-		$aggregateType = substr($aggregateType, strrpos($aggregateType, '\\') + 1);
-
 		$storeEvents = [];
 		foreach ($events as $event) {
 			/**
@@ -299,7 +302,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 			 */
 			$eventType = EventType::fromEvent($event);
 
-			$event = $this->enrichEventMetadata($event, $aggregateId, $aggregateType);
+			$event = $this->enrichEventMetadata($event, $aggregateId, $this->aggregateType->toString());
 
 			$storeEvents[] = new EventData(
 				EventId::generate(),
@@ -334,9 +337,9 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 		string $aggregateType
 	): AggregateChangedEventInterface {
 		return $event
-			->withAddMetadata('_aggregate_id', $aggregateId)
-			->withAddMetadata('_aggregate_type', $aggregateType)
-			->withAddMetadata('_aggregate_version', $event->aggregateVersion());
+			->withAddedMetadata('_aggregate_id', $aggregateId)
+			->withAddedMetadata('_aggregate_type', $aggregateType)
+			->withAddedMetadata('_aggregate_version', $event->aggregateVersion());
 	}
 
 	/**

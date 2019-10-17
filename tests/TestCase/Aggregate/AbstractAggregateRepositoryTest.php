@@ -62,7 +62,12 @@ class AbstractAggregateRepositoryTest extends TestCase
 
 		$accountId = AccountId::fromString($account->aggregateId());
 		$account2 = $repository->get($accountId);
-		var_dump($account2);
+
+		$account2->update('Changed name', 'Changed description');
+		$repository->save($account2);
+
+		$account3 = $repository->get($accountId);
+		var_dump($account3);
 	}
 
 	/**

@@ -11,6 +11,8 @@ use Psa\EventSourcing\Test\TestApp\Domain\AccountId;
  */
 class AccountUpdated extends AggregateChangedEvent
 {
+	const EVENT_TYPE = 'Accounting.Account.updated';
+
 	protected $accountId;
 	protected $name;
 	protected $description;
@@ -36,27 +38,12 @@ class AccountUpdated extends AggregateChangedEvent
 		return $event;
 	}
 
-	/**
-	 * @return string
-	 */
-	public function accountId(): string
+	public function accountId(): AccountId
 	{
+		if ($this->accountId === null) {
+			$this->accountId = AccountId::fromString($this->payload['accountId']);
+		}
+
 		return $this->accountId;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function name(): string
-	{
-		return $this->name;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function description(): string
-	{
-		return $this->description;
 	}
 }

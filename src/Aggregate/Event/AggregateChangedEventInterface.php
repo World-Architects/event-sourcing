@@ -9,14 +9,17 @@ use DateTimeZone;
 use Ramsey\Uuid\Uuid;
 
 /**
- * AggregateChangedEventInterface
+ * Aggregate Changed Event Interface
  */
 interface AggregateChangedEventInterface
 {
 	/**
 	 * @return static
 	 */
-	public static function occur(string $aggregateId, array $payload = []): AggregateChangedEventInterface;
+	public static function occur(
+		string $aggregateId,
+		array $payload = []
+	): AggregateChangedEventInterface;
 
 	/**
 	 * Gets the meta data
@@ -57,7 +60,7 @@ interface AggregateChangedEventInterface
 	 * @param mixed $value
 	 * @return \Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface
 	 */
-	public function withAddMetadata(string $key, $value): AggregateChangedEventInterface;
+	public function withAddedMetadata(string $key, $value): AggregateChangedEventInterface;
 
 	/**
 	 * Gets the aggregate version

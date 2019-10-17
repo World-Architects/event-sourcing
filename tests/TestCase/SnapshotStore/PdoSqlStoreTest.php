@@ -7,6 +7,8 @@ use PHPUnit\Framework\TestCase;
 use PDO;
 use Psa\EventSourcing\SnapshotStore\PdoSqlStore;
 use Psa\EventSourcing\SnapshotStore\Serializer\JsonSerializer;
+use Psa\EventSourcing\SnapshotStore\Serializer\SerializeSerializer;
+use Psa\EventSourcing\Test\TestApp\Domain\Account;
 
 /**
  * Pdo Sql Store Test
@@ -32,9 +34,10 @@ class PdoSqlStoreTest extends TestCase
 
 		$this->pdo = $this->getMockBuilder(PDO::class)
 			->disableOriginalConstructor()
+			->addMethods(['execute', 'prepare'])
 			->getMock();
 
-		$this->store = new PdoSqlStore($this->pdo, new JsonSerializer());
+		$this->store = new PdoSqlStore($this->pdo, new SerializeSerializer());
 	}
 
 	/**
@@ -44,23 +47,11 @@ class PdoSqlStoreTest extends TestCase
 	 */
 	public function testStore(): void
 	{
-	}
+		$account = Account::create('test', 'test');
+		$accountId = $account->aggregateId();
 
-	/**
-	 * testGet
-	 *
-	 * @return void
-	 */
-	public function testGet(): void
-	{
-	}
-
-	/**
-	 * testDelete
-	 *
-	 * @return void
-	 */
-	public function testDelete(): void
-	{
+		$this->store->store($account);
+		$result = $this->store->get($accountId);
+		$this->store->delete($accountId);
 	}
 }

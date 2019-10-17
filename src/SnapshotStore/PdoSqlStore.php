@@ -69,6 +69,7 @@ class PdoSqlStore implements SnapshotStoreInterface
 	{
 		if ($statement->errorCode() !== '00000') {
 			$errorInfo = $statement->errorInfo();
+
 			throw new PDOException($errorInfo[2], $errorInfo[1]);
 		}
 	}
@@ -82,7 +83,6 @@ class PdoSqlStore implements SnapshotStoreInterface
 	public function store(EventSourcedAggregateInterface $aggregate): void
 	{
 		$data = [
-			'id' => Uuid::uuid4()->toString(),
 			'aggregate_type' => get_class($aggregate),
 			'aggregate_id' => $aggregate->aggregateId(),
 			'aggregate_version' => $aggregate->aggregateVersion(),
@@ -90,8 +90,8 @@ class PdoSqlStore implements SnapshotStoreInterface
 			'created_at' => (new DateTimeImmutable())->format('Y-m-d H:i:s')
 		];
 
-		$sql = "INSERT INTO $this->table (`id`, `aggregate_type`, `aggregate_id`, `aggregate_version`, `aggregate_root`, `created_at`) "
-			 . "VALUES (:id, :aggregate_type, :aggregate_id, :aggregate_version, :aggregate_root, :created_at)";
+		$sql = "INSERT INTO $this->table (`aggregate_type`, `aggregate_id`, `aggregate_version`, `aggregate_root`, `created_at`) "
+			 . "VALUES (:aggregate_type, :aggregate_id, :aggregate_version, :aggregate_root, :created_at)";
 
 		$statement = $this->pdo->prepare($sql);
 		$statement->execute($data);
@@ -108,15 +108,13 @@ class PdoSqlStore implements SnapshotStoreInterface
 	{
 		Assert::that($aggregateId)->uuid();
 
-		$sql = "SELECT * FROM event_store_snapshots "
-			 . "WHERE aggregate_id = :aggregateId "
-			 //. "AND aggregate_type = :aggregateType"
+		$sql = "SELECT * FROM {$this->table} "
+			 . "WHERE aggregate_id = :aggregate_id "
 			 . "ORDER BY aggregate_version";
 
 		$statement = $this->pdo->prepare($sql);
 		$statement->execute([
-			'aggregateId' => $aggregateId,
-			//'aggregateType' => null
+			'aggregate_id' => $aggregateId,
 		]);
 
 		$this->pdoErrorCheck($statement);
@@ -153,7 +151,7 @@ class PdoSqlStore implements SnapshotStoreInterface
 	{
 		Assert::that($aggregateId)->uuid();
 
-		$sql = "DELETE * FROM event_store_snapshots "
+		$sql = "DELETE FROM {$this->table} "
 			 . "WHERE aggregate_id = :aggregateId";
 
 		$statement = $this->pdo->prepare($sql);
