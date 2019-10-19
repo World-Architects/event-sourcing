@@ -14,6 +14,7 @@ use Psa\EventSourcing\Aggregate\Event\Exception\EventTypeException;
 use Psa\EventSourcing\EventStoreIntegration\AggregateRootDecorator;
 use Psa\EventSourcing\EventStoreIntegration\AggregateTranslator;
 use Psa\EventSourcing\EventStoreIntegration\AggregateTranslatorInterface;
+use Psa\EventSourcing\EventStoreIntegration\EventTranslator;
 use Psa\EventSourcing\SnapshotStore\SnapshotInterface;
 use Psa\EventSourcing\SnapshotStore\SnapshotStoreInterface;
 use Prooph\EventStore\EventData;
@@ -74,6 +75,11 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	 * @var \Psa\EventSourcing\EventStoreIntegration\AggregateRootDecorator
 	 */
 	protected $aggregateDecorator;
+
+	/**
+	 * @var int
+	 */
+	protected $eventsPerSlice = 64;
 
 	/**
 	 * Constructor
@@ -214,74 +220,37 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	{
 		Assert::that($aggregateId)->uuid($aggregateId);
 
+		$events = new \ArrayIterator([]);
+		$eventTranslator = EventTranslator::fromTypeMap($this->eventTypeMapping);
 		$streamName = $this->determineStreamName($aggregateId);
 
-		$eventsSlice = $this->eventStore->readStreamEventsForward($streamName, $position, 1024);
-		$eventCollection = $this->buildEventCollection();
+		$eventsSlice = $this->eventStore->readStreamEventsForward(
+			$streamName,
+			$position,
+			$this->eventsPerSlice
+		);
 
 		if ($eventsSlice->isEndOfStream()) {
-			$this->convertEvents($eventsSlice, $eventCollection);
+			foreach ($eventsSlice->events() as $resolvedEvent) {
+				$events[] = $eventTranslator->resolveEvent($resolvedEvent->event());
+			}
 
-			return $eventCollection;
+			return $events;
 		}
 
 		while (!$eventsSlice->isEndOfStream()) {
-			$this->convertEvents($eventsSlice, $eventCollection);
-			$eventsSlice = $this->eventStore->readStreamEventsForward($aggregateId, $eventsSlice->lastEventNumber() + 1, 1024);
-		}
-
-		return $eventCollection;
-	}
-
-	/**
-	 * @todo Refactor this? I have the feeling this can be done a lot better
-	 *
-	 * @param \Prooph\EventStore\StreamEventsSlice $eventsSlice Event Slice
-	 * @param \Psa\EventSourcing\Aggregate\Event\EventCollectionInterface $eventCollection Event Collection
-	 * @return void
-	 */
-	protected function convertEvents(
-		StreamEventsSlice $eventsSlice,
-		EventCollectionInterface $eventCollection
-	) {
-		foreach ($eventsSlice->events() as $event) {
-			/**
-			 * @var \Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface $event
-			 */
-			$eventType = $event->event()->eventType();
-			$metaData = json_decode($event->event()->metadata(), true);
-			$payload = $event->event()->data();
-
-			if (isset($this->eventTypeMapping[$eventType])) {
-				$eventClass = $this->eventTypeMapping[$eventType];
-			} else {
-				$eventClass = $eventType;
-			}
-
-			if (!class_exists($eventClass)) {
-				throw EventTypeException::mappingFailed(
-					$eventClass,
-					$event->event()->eventNumber(),
-					$event->event()->eventId()->toString()
-				);
-			}
-
-			if ($event->event()->isJson()) {
-				$payload = json_decode($payload, true);
-			}
-
-			/**
-			 * @var \Psa\EventSourcing\Aggregate\AggregateChangedEvent $event
-			 */
-			$event = $eventClass::occur(
-				$metaData['_aggregate_id'],
-				$payload
+			$eventsSlice = $this->eventStore->readStreamEventsForward(
+				$streamName,
+				$eventsSlice->lastEventNumber() + 1,
+				$this->eventsPerSlice
 			);
-			$event = $event->withMetadata($metaData);
-			//$event = $event->withVersion($metaData['_aggregate_version']);
 
-			$eventCollection->add($event);
+			foreach ($eventsSlice->events() as $resolvedEvent) {
+				$events[] = $eventTranslator->resolveEvent($resolvedEvent->event());
+			}
 		}
+
+		return $events;
 	}
 
 	/**

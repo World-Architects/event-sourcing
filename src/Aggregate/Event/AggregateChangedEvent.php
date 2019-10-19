@@ -36,11 +36,11 @@ class AggregateChangedEvent implements AggregateChangedEventInterface
 	/**
 	 * @inheritDoc
 	 */
-	public static function occur(string $aggregateId, array $payload = []): AggregateChangedEventInterface
+	public static function occur(string $aggregateId, array $payload = [], array $metadata = []): AggregateChangedEventInterface
 	{
 		Assert::that($aggregateId)->uuid();
 
-		return new static($aggregateId, $payload);
+		return new static($aggregateId, $payload, $metadata);
 	}
 
 	/**

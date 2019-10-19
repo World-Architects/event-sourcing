@@ -108,6 +108,14 @@ final class Account extends AggregateRoot implements JsonSerializable
 	 */
 	public function jsonSerialize()
 	{
+		return $this->toArray();
+	}
+
+	/**
+	 * @return array
+	 */
+	public function toArray()
+	{
 		return [
 			'id' => (string)$this->id,
 			'name' => $this->name,
