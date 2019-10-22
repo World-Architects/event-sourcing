@@ -30,10 +30,6 @@ class AccountCreated extends AggregateChangedEvent
 			'description' => $description,
 		]);
 
-		$event->accountId = $accountId;
-		$event->name = $name;
-		$event->description = $description;
-
 		return $event;
 	}
 

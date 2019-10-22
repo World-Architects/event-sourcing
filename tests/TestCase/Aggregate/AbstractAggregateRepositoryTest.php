@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Psa\EventSourcing\Test\TestCase\Aggregate;
 
+use Psa\EventSourcing\EventStoreIntegration\EventTranslator;
 use function Clue\StreamFilter\fun;
 use PHPUnit\Framework\TestCase;
 use Prooph\EventStore\EndPoint;
@@ -46,6 +47,7 @@ class AbstractAggregateRepositoryTest extends TestCase
 		);
 
 		$aggregateTranslator = new AggregateTranslator();
+		$eventTranslator = new EventTranslator();
 
 		$account = Account::create(
 			'Test',
@@ -55,53 +57,33 @@ class AbstractAggregateRepositoryTest extends TestCase
 		$repository = new AccountRepository(
 			$eventStore,
 			$aggregateTranslator,
+			$eventTranslator,
 			AggregateType::fromMapping(['Account' => Account::class])
 		);
+
+		//dd($repository->getAggregate('ba2c2d45-2a5c-4949-97f7-fd05a14ec980'));
+		//return;
 
 		$repository->save($account);
 
 		$accountId = AccountId::fromString($account->aggregateId());
-		$account2 = $repository->get($accountId);
 
-		$account2->update('Changed name', 'Changed description');
-		$repository->save($account2);
+		$account = $repository->get($accountId);
 
-		$account3 = $repository->get($accountId);
-		var_dump($account3);
-	}
+		$account->update('Changed name', 'Changed description');
+		$repository->save($account);
 
-	/**
-	 * @return void
-	 */
-	public function testAsyncAccountRepository(): void
-	{
-		/*
-		$userCredentials = new UserCredentials(
-			'admin',
-			'changeit'
-		);
+		$account = $repository->get($accountId);
+		var_dump($account->jsonSerialize());
 
-		$settings = ConnectionSettings::default()
-			->withDefaultCredentials($userCredentials);
-
-		$eventStore = EventStoreConnectionFactory::createFromEndPoint(
-			new EndPoint('localhost', 1113),
-			$settings
-		);
-
-		$promise = $eventStore->connectAsync();
-		$promise->onResolve(function($error, $value) {
-			$account = Account::create(
-				'Test',
-				'Description'
-			);
-
-			$repository = new AccountRepository(
-				$eventStore
-			);
-
+		for ($x = 1; $x <= 127; $x++) {
+			$account->update('Changed name - ' . $x, 'Changed description - ' . $x);
 			$repository->save($account);
-		});
-		*/
+		}
+
+		sleep(3);
+
+		$account = $repository->get($accountId);
+		var_dump($account->jsonSerialize());
 	}
 }

@@ -63,7 +63,7 @@ final class Account extends AggregateRoot implements JsonSerializable
 	public function update(string $name, string $description)
 	{
 		$this->recordThat(AccountUpdated::create(
-			$this->id,
+			AccountId::fromString((string)$this->id),
 			$name,
 			$description
 		));

@@ -3,6 +3,7 @@ declare(strict_types = 1);
 
 namespace Psa\EventSourcing\Aggregate;
 
+use ArrayIterator;
 use Assert\Assert;
 use Prooph\EventStore\EventStoreConnection;
 use Psa\EventSourcing\Aggregate\Event\EventCollection;
@@ -15,6 +16,7 @@ use Psa\EventSourcing\EventStoreIntegration\AggregateRootDecorator;
 use Psa\EventSourcing\EventStoreIntegration\AggregateTranslator;
 use Psa\EventSourcing\EventStoreIntegration\AggregateTranslatorInterface;
 use Psa\EventSourcing\EventStoreIntegration\EventTranslator;
+use Psa\EventSourcing\EventStoreIntegration\EventTranslatorInterface;
 use Psa\EventSourcing\SnapshotStore\SnapshotInterface;
 use Psa\EventSourcing\SnapshotStore\SnapshotStoreInterface;
 use Prooph\EventStore\EventData;
@@ -67,6 +69,11 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	protected $aggregateTranslator;
 
 	/**
+	 * @var \Psa\EventSourcing\EventStoreIntegration\EventTranslatorInterface
+	 */
+	protected $eventTranslator;
+
+	/**
 	 * @var null|string
 	 */
 	protected $streamName;
@@ -89,11 +96,13 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	public function __construct(
 		EventStoreConnection $eventStore,
 		AggregateTranslatorInterface $aggregateTranslator,
+		EventTranslatorInterface $eventTranslator,
 		AggregateType $aggregateType,
 		?SnapshotStoreInterface $snapshotStore = null
 	) {
 		$this->eventStore = $eventStore;
 		$this->aggregateTranslator = $aggregateTranslator;
+		$this->eventTranslator = $eventTranslator;
 		$this->snapshotStore = $snapshotStore;
 		$this->aggregateDecorator = AggregateRootDecorator::newInstance();
 		$this->aggregateType = $aggregateType;
@@ -202,14 +211,6 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	}
 
 	/**
-	 * @return \Psa\EventSourcing\Aggregate\Event\EventCollectionInterface
-	 */
-	protected function buildEventCollection(): EventCollectionInterface
-	{
-		return new EventCollection();
-	}
-
-	/**
 	 * Get events from position
 	 *
 	 * @param string $aggregateId Aggregate Id
@@ -220,7 +221,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	{
 		Assert::that($aggregateId)->uuid($aggregateId);
 
-		$events = new \ArrayIterator([]);
+		$events = new ArrayIterator([]);
 		$eventTranslator = EventTranslator::fromTypeMap($this->eventTypeMapping);
 		$streamName = $this->determineStreamName($aggregateId);
 
@@ -232,7 +233,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 
 		if ($eventsSlice->isEndOfStream()) {
 			foreach ($eventsSlice->events() as $resolvedEvent) {
-				$events[] = $eventTranslator->resolveEvent($resolvedEvent->event());
+				$events[] = $eventTranslator->fromStore($resolvedEvent->event());
 			}
 
 			return $events;
@@ -246,7 +247,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 			);
 
 			foreach ($eventsSlice->events() as $resolvedEvent) {
-				$events[] = $eventTranslator->resolveEvent($resolvedEvent->event());
+				$events[] = $eventTranslator->fromStore($resolvedEvent->event());
 			}
 		}
 
@@ -261,31 +262,14 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	{
 		$aggregateId = $this->aggregateTranslator->extractAggregateId($aggregate);
 		$events = $this->aggregateTranslator->extractPendingStreamEvents($aggregate);
+		$events = $this->eventTranslator->toStore($aggregateId, $this->aggregateType, $events);
 		$streamName = $this->determineStreamName($aggregateId);
 		$this->assertAggregateType($aggregate);
-
-		$storeEvents = [];
-		foreach ($events as $event) {
-			/**
-			 * @var \Psa\EventSourcing\EventSourcing\Aggregate\Event\AggregateChangedEventInterface $event
-			 */
-			$eventType = EventType::fromEvent($event);
-
-			$event = $this->enrichEventMetadata($event, $aggregateId, $this->aggregateType->toString());
-
-			$storeEvents[] = new EventData(
-				EventId::generate(),
-				$eventType->toString(),
-				true,
-				json_encode($event->payload()),
-				json_encode($event->metadata())
-			);
-		}
 
 		$this->eventStore->appendToStream(
 			$streamName,
 			ExpectedVersion::ANY,
-			$storeEvents
+			$events
 		);
 	}
 
@@ -295,20 +279,6 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	protected function assertAggregateType($eventSourcedAggregateRoot)
 	{
 		$this->aggregateType->assert($eventSourcedAggregateRoot);
-	}
-
-	/**
-	 *
-	 */
-	public function enrichEventMetadata(
-		AggregateChangedEventInterface $event,
-		string $aggregateId,
-		string $aggregateType
-	): AggregateChangedEventInterface {
-		return $event
-			->withAddedMetadata('_aggregate_id', $aggregateId)
-			->withAddedMetadata('_aggregate_type', $aggregateType)
-			->withAddedMetadata('_aggregate_version', $event->aggregateVersion());
 	}
 
 	/**

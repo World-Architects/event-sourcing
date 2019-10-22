@@ -4,13 +4,17 @@ declare(strict_types=1);
 namespace Psa\EventSourcing\EventStoreIntegration;
 
 use Prooph\EventStore\EventData;
+use Prooph\EventStore\EventId;
 use Prooph\EventStore\RecordedEvent;
+use Psa\EventSourcing\Aggregate\AggregateType;
+use Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface;
+use Psa\EventSourcing\Aggregate\Event\EventType;
 use RuntimeException;
 
 /**
- * AggregateRootDecorator
+ * EventTranslatorInterface
  */
-class EventTranslator
+class EventTranslator implements EventTranslatorInterface
 {
 	/**
 	 * @var string
@@ -20,7 +24,7 @@ class EventTranslator
 	/**
 	 * @var array
 	 */
-	protected $eventTypeClassMap = [];
+	protected $eventTypeMap = [];
 
 	/**
 	 * @var callable|null
@@ -31,19 +35,67 @@ class EventTranslator
 	 * @param array $map Map
 	 * @return self
 	 */
-	public static function fromTypeMap(array $map): self
+	public static function fromTypeMap(array $typeMap): self
 	{
 		$self = new self();
-		$self->eventTypeClassMap = $map;
+		$self->eventTypeMap = $typeMap;
 
 		return $self;
+	}
+
+	/**
+	 * @param \Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface $event Event
+	 * @param string $aggregateId Aggregate Id
+	 * @param string $aggregateType String
+	 * @return \Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface
+	 */
+	public function enrichEventMetadata(
+		AggregateChangedEventInterface $event,
+		string $aggregateId,
+		string $aggregateType
+	): AggregateChangedEventInterface {
+		return $event
+			->withAddedMetadata('_aggregate_id', $aggregateId)
+			->withAddedMetadata('_aggregate_type', $aggregateType)
+			->withAddedMetadata('_aggregate_version', $event->aggregateVersion());
+	}
+
+	/**
+	 * @param array $events Events
+	 * @return array
+	 */
+	public function toStore(string $aggregateId, AggregateType $aggregateType, array $events): array
+	{
+		$storeEvents = [];
+		foreach ($events as $event) {
+			/**
+			 * @var \Psa\EventSourcing\EventSourcing\Aggregate\Event\AggregateChangedEventInterface $event
+			 */
+			if (!$event instanceof AggregateChangedEventInterface) {
+				throw new RuntimeException();
+			}
+
+			$eventType = EventType::fromEvent($event);
+
+			$event = $this->enrichEventMetadata($event, $aggregateId, $aggregateType->toString());
+
+			$storeEvents[] = new EventData(
+				EventId::generate(),
+				$eventType->toString(),
+				true,
+				json_encode($event->payload()),
+				json_encode($event->metadata())
+			);
+		}
+
+		return $storeEvents;
 	}
 
 	/**
 	 * @param \Prooph\EventStore\RecordedEvent $recordedEvent Recorded Event
 	 * @return object
 	 */
-	public function resolveEvent(RecordedEvent $recordedEvent)
+	public function fromStore(RecordedEvent $recordedEvent)
 	{
 		$eventType = $recordedEvent->eventType();
 		$eventClass = '';
@@ -57,8 +109,8 @@ class EventTranslator
 			$eventClass = $handler($eventType, $recordedEvent);
 		}
 
-		if (isset($this->eventTypeClassMap[$eventType])) {
-			$eventClass = $this->eventTypeClassMap[$eventType];
+		if (isset($this->eventTypeMap[$eventType])) {
+			$eventClass = $this->eventTypeMap[$eventType];
 		}
 
 		if (!class_exists($eventClass)) {
