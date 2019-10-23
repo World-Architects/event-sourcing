@@ -20,3 +20,15 @@ It doesn't really matter for the library itself where you create the files and w
 
 Use your favorite way of dependency injection to get an instance of the repository where you need it or construct it manually and then simply call
 `save($aggregate)` on it. If something went wrong exceptions are thrown.
+
+## Aggregate Translator
+
+An aggregate translator extracts the events from a domain aggregate to persist them and vice versa. 
+
+## Event Translator
+
+An event translator turns the returned format of the events from the store back into the original event objects expected by the aggregate.
+
+When persisting the state of an aggregate, the events from the aggregate are turned into the format expected by the event store.
+
+The library comes with the `AggregateChangedEventTranslator`, that is used by default. It expects that your domain events implement the `AggregateChangedEventInterface` interface. If your events don't implement it, it will throw execptions when the event is processed. 

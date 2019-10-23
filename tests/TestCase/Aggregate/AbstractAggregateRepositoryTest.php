@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Psa\EventSourcing\Test\TestCase\Aggregate;
 
-use Psa\EventSourcing\EventStoreIntegration\EventTranslator;
+use Psa\EventSourcing\EventStoreIntegration\AggregateChangedEventTranslator;
 use function Clue\StreamFilter\fun;
 use PHPUnit\Framework\TestCase;
 use Prooph\EventStore\EndPoint;
@@ -47,7 +47,7 @@ class AbstractAggregateRepositoryTest extends TestCase
 		);
 
 		$aggregateTranslator = new AggregateTranslator();
-		$eventTranslator = new EventTranslator();
+		$eventTranslator = new AggregateChangedEventTranslator();
 
 		$account = Account::create(
 			'Test',

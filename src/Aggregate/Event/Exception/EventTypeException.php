@@ -36,16 +36,22 @@ class EventTypeException extends EventException
 		));
 	}
 
+	/**
+	 * @param string $class Class
+	 * @param string $eventNumber Event Number
+	 * @param string $eventId Event Id
+	 * @return self
+	 */
 	public static function mappingFailed(
-		string  $class,
+		string $class,
 		string $eventNumber,
 		string $eventId
 	) {
 		return new self(sprintf(
 			'Mapping of %s failed. Version %s ID %s',
 			$class,
-			$aggregateType,
-			$otherAggregateType
+			$eventNumber,
+			$eventId
 		));
 	}
 }

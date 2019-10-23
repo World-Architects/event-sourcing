@@ -166,6 +166,7 @@ class AggregateChangedEvent implements AggregateChangedEventInterface
 	 * With version
 	 *
 	 * @param int $version Version
+	 * @return \Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface
 	 */
 	public function withAggregateVersion(int $version): AggregateChangedEventInterface
 	{
@@ -211,7 +212,10 @@ class AggregateChangedEvent implements AggregateChangedEventInterface
 	}
 
 	/**
+	 * Gets a value from the payload
 	 *
+	 * @param string $property Property
+	 * @return mixed
 	 */
 	protected function getFromPayload(string $property)
 	{
@@ -227,12 +231,14 @@ class AggregateChangedEvent implements AggregateChangedEventInterface
 		return $this->{$property};
 	}
 
+	/**
+	 * Magic Call
+	 *
+	 * @param string $name Name
+	 * @param array $arguments Arguments
+	 */
 	public function __call($name, $arguments)
 	{
-		if (!isset($this->{$name})) {
-			return;
-		}
-
 		return $this->getFromPayload($name);
 	}
 }

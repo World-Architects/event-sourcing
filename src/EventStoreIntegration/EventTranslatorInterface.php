@@ -12,7 +12,10 @@ use Psa\EventSourcing\Aggregate\AggregateType;
 interface EventTranslatorInterface
 {
 	/**
-	 *
+	 * @param string $aggregateId Aggregat Id
+	 * @param \Psa\EventSourcing\Aggregate\AggregateType $aggregateType
+	 * @param array $events Events
+	 * @return array
 	 */
 	public function toStore(string $aggregateId, AggregateType $aggregateType, array $events): array;
 
@@ -21,4 +24,10 @@ interface EventTranslatorInterface
 	 * @return object
 	 */
 	public function fromStore(RecordedEvent $recordedEvent);
+
+	/**
+	 * @param array $typeMap Type Mapping
+	 * @return self
+	 */
+	public function withTypeMap(array $typeMap): EventTranslatorInterface;
 }

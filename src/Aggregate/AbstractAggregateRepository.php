@@ -15,7 +15,7 @@ use Psa\EventSourcing\Aggregate\Event\Exception\EventTypeException;
 use Psa\EventSourcing\EventStoreIntegration\AggregateRootDecorator;
 use Psa\EventSourcing\EventStoreIntegration\AggregateTranslator;
 use Psa\EventSourcing\EventStoreIntegration\AggregateTranslatorInterface;
-use Psa\EventSourcing\EventStoreIntegration\EventTranslator;
+use Psa\EventSourcing\EventStoreIntegration\AggregateChangedEventTranslator;
 use Psa\EventSourcing\EventStoreIntegration\EventTranslatorInterface;
 use Psa\EventSourcing\SnapshotStore\SnapshotInterface;
 use Psa\EventSourcing\SnapshotStore\SnapshotStoreInterface;
@@ -154,7 +154,10 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 		$lastVersion = $snapshot->lastVersion();
 		$aggregateRoot = $snapshot->aggregateRoot();
 
-		$events = $this->getEventsFromPosition($snapshot->aggregateId(), $snapshot->lastVersion() + 1);
+		$events = $this->getEventsFromPosition(
+			$snapshot->aggregateId(),
+			$snapshot->lastVersion() + 1
+		);
 
 		$this->aggregateDecorator->replayStreamEvents($aggregateRoot, $events);
 
@@ -215,14 +218,14 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	 *
 	 * @param string $aggregateId Aggregate Id
 	 * @param int $position Position
-	 * @return \Psa\EventSourcing\Aggregate\Event\EventCollectionInterface
+	 * @return \Iterator
 	 */
-	protected function getEventsFromPosition(string $aggregateId, int $position)
+	protected function getEventsFromPosition(string $aggregateId, int $position): \Iterator
 	{
 		Assert::that($aggregateId)->uuid($aggregateId);
 
 		$events = new ArrayIterator([]);
-		$eventTranslator = EventTranslator::fromTypeMap($this->eventTypeMapping);
+		$eventTranslator = $this->eventTranslator->withTypeMap($this->eventTypeMapping);
 		$streamName = $this->determineStreamName($aggregateId);
 
 		$eventsSlice = $this->eventStore->readStreamEventsForward(

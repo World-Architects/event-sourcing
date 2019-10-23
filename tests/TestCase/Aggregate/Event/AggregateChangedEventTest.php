@@ -38,5 +38,8 @@ class AggregateChangedEventTest extends TestCase
 			'_aggregate_id' => 'b46f6c31-0114-47cf-992f-7235516bee97',
 			'_aggregate_version' => 1
 		], $event->metadata());
+
+		$result = $event->test();
+		$this->assertEquals('payload', $result);
 	}
 }

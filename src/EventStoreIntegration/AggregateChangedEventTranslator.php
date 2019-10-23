@@ -12,9 +12,14 @@ use Psa\EventSourcing\Aggregate\Event\EventType;
 use RuntimeException;
 
 /**
- * EventTranslatorInterface
+ * Aggregate Changed Event Translator
+ *
+ * This translator will only work with events implementing the AggregateChangedEventInterface!
+ *
+ * If you want to work with an aggregate that provides the events in a different
+ * object structure you'll have to implement your own event translator.
  */
-class EventTranslator implements EventTranslatorInterface
+class AggregateChangedEventTranslator implements EventTranslatorInterface
 {
 	/**
 	 * @var string
@@ -32,12 +37,24 @@ class EventTranslator implements EventTranslatorInterface
 	protected $customHandler;
 
 	/**
-	 * @param array $map Map
+	 * @param array $typeMap Map
 	 * @return self
 	 */
 	public static function fromTypeMap(array $typeMap): self
 	{
 		$self = new self();
+		$self->eventTypeMap = $typeMap;
+
+		return $self;
+	}
+
+	/**
+	 * @param array $typeMap Type Mapping
+	 * @return self
+	 */
+	public function withTypeMap(array $typeMap): EventTranslatorInterface
+	{
+		$self = clone $this;
 		$self->eventTypeMap = $typeMap;
 
 		return $self;
@@ -72,11 +89,14 @@ class EventTranslator implements EventTranslatorInterface
 			 * @var \Psa\EventSourcing\EventSourcing\Aggregate\Event\AggregateChangedEventInterface $event
 			 */
 			if (!$event instanceof AggregateChangedEventInterface) {
-				throw new RuntimeException();
+				throw new RuntimeException(sprintf(
+					'Event %s does not implemt %s',
+					$eventType->toString(),
+					AggregateChangedEventInterface::class
+				));
 			}
 
 			$eventType = EventType::fromEvent($event);
-
 			$event = $this->enrichEventMetadata($event, $aggregateId, $aggregateType->toString());
 
 			$storeEvents[] = new EventData(
