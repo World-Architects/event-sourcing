@@ -33,13 +33,25 @@ class AggregateChangedEventTest extends TestCase
 		$this->assertInstanceOf(AggregateChangedEvent::class, $event);
 		$this->assertEquals($id, $event->aggregateId());
 		$this->assertEquals($payload, $event->payload());
+		$this->assertEquals(1, $event->aggregateVersion());
 
 		$this->assertEquals([
 			'_aggregate_id' => 'b46f6c31-0114-47cf-992f-7235516bee97',
 			'_aggregate_version' => 1
 		], $event->metadata());
 
-		$result = $event->test();
-		$this->assertEquals('payload', $result);
+		$this->assertEquals('payload', $event->test());
+
+		$event2 = $event->withAddedMetadata('added', 'this');
+		$this->assertNotEquals($event, $event2);
+
+		$this->assertEquals([
+			'_aggregate_id' => 'b46f6c31-0114-47cf-992f-7235516bee97',
+			'_aggregate_version' => 1,
+			'added' => 'this'
+		], $event2->metadata());
+
+		$event2 = $event2->withMetadata(['over' => 'ridden']);
+		$this->assertEquals(['over' => 'ridden'], $event2->metadata());
 	}
 }

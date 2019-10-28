@@ -6,8 +6,6 @@ namespace Psa\EventSourcing\Aggregate;
 use ArrayIterator;
 use Assert\Assert;
 use Prooph\EventStore\EventStoreConnection;
-use Psa\EventSourcing\Aggregate\Event\EventCollection;
-use Psa\EventSourcing\Aggregate\Event\EventCollectionInterface;
 use Psa\EventSourcing\Aggregate\Event\EventType;
 use Psa\EventSourcing\Aggregate\Exception\AggregateTypeMismatchException;
 use Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface;
