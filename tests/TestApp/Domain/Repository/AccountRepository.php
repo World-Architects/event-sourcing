@@ -11,6 +11,13 @@ use Psa\EventSourcing\Test\TestApp\Domain\Account;
  */
 class AccountRepository extends AbstractAggregateRepository
 {
+	const AGGREGATE_TYPE = Account::AGGREGATE_TYPE;
+
+	/**
+	 * @var string|\Psa\EventSourcing\Aggregate\AggregateType
+	 */
+	protected $aggregateType = Account::AGGREGATE_TYPE;
+
 	/**
 	 * Saves the account
 	 *

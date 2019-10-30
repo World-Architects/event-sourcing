@@ -26,10 +26,18 @@ use Psa\Foundation\CorrelationId;
 use RuntimeException;
 
 /**
- * Aggregate Repository
+ * Abstract Aggregate Repository
  *
  * When extending this class make sure you are setting the aggregate type
  * property with your aggregate type the repository should use.
+ *
+ * Alternatively, depending on your flavor and style, you can also declare the
+ * AGGREGATE_TYPE constant. A recommended way of doing so is to re-use the
+ * constant from your aggregate:
+ *
+ * const AGGREGATE_TYPE = SomeAggregate::AGGREGATE_TYPE;
+ *
+ * The third possibility is to implement the AggregateTypeProviderInterface.
  */
 abstract class AbstractAggregateRepository implements AggregateRepositoryInterface
 {
@@ -95,7 +103,6 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 		EventStoreConnection $eventStore,
 		AggregateTranslatorInterface $aggregateTranslator,
 		EventTranslatorInterface $eventTranslator,
-		AggregateType $aggregateType,
 		?SnapshotStoreInterface $snapshotStore = null
 	) {
 		$this->eventStore = $eventStore;
@@ -103,7 +110,35 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 		$this->eventTranslator = $eventTranslator;
 		$this->snapshotStore = $snapshotStore;
 		$this->aggregateDecorator = AggregateRootDecorator::newInstance();
-		$this->aggregateType = $aggregateType;
+		$this->determineAggregateType();
+	}
+
+	/**
+	 * Determines and checks the aggregate type for this repository
+	 *
+	 * @return void
+	 */
+	protected function determineAggregateType(): void
+	{
+		if (is_string($this->aggregateType)) {
+			$this->aggregateType = AggregateType::fromString($this->aggregateType);
+		}
+
+		if (defined(self::class . 'AGGREGATE_TYPE')) {
+			$this->aggregateType = AggregateType::fromString(self::AGGREGATE_TYPE);
+		}
+
+		if ($this instanceof AggregateTypeProviderInterface) {
+			$this->aggregateType = $this->aggregateType();
+		}
+
+		if (!$this->aggregateType instanceof AggregateType) {
+			throw new RuntimeException(sprintf(
+				'%s::$aggregateType is not string or %s',
+				self::class,
+				AggregateType::class
+			));
+		}
 	}
 
 	/**
@@ -290,7 +325,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	protected function determineStreamName(string $aggregateId): string
 	{
 		if ($this->streamName === null) {
-			$prefix = $this->aggregateType->toString();
+			$prefix = (string)$this->aggregateType;
 		} else {
 			$prefix = $this->streamName;
 		}
