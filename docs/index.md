@@ -5,6 +5,7 @@
  * [Aggregate Repository](Aggregate-Repository.md)
  * [Snapshot Stores](Snapshot-Stores.md)
  * [Resources](Resources.md)
+ * [Optional: CQRS Guide](CQRS.md)
 
 ## Copyright
 
