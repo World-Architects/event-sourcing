@@ -66,6 +66,7 @@ class AggregateType
 
 		// Fall back to the FQCN as type
 		$self->aggregateType = $aggregateClass;
+		$self->mapping = [$aggregateClass => $aggregateClass];
 
 		return $self;
 	}

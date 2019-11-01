@@ -8,7 +8,7 @@ use Psa\EventSourcing\Aggregate\AggregateType;
 use Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface;
 
 /**
- * AggregateTranslatorInterface
+ * Aggregate Translator Interface
  */
 interface AggregateTranslatorInterface
 {

@@ -120,23 +120,33 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	 */
 	protected function determineAggregateType(): void
 	{
-		if (is_string($this->aggregateType)) {
-			$this->aggregateType = AggregateType::fromString($this->aggregateType);
+		if (defined(self::class . 'AGGREGATE_TYPE')) {
+			$this->aggregateType = self::AGGREGATE_TYPE;
 		}
 
-		if (defined(self::class . 'AGGREGATE_TYPE')) {
-			$this->aggregateType = AggregateType::fromString(self::AGGREGATE_TYPE);
+		if (is_string($this->aggregateType)) {
+			$this->aggregateType = AggregateType::fromString($this->aggregateType);
+			return;
 		}
 
 		if ($this instanceof AggregateTypeProviderInterface) {
 			$this->aggregateType = $this->aggregateType();
+			return;
+		}
+
+		if (is_array($this->aggregateType)) {
+			$this->aggregateType = AggregateType::fromMapping($this->aggregateType);
+			return;
 		}
 
 		if (!$this->aggregateType instanceof AggregateType) {
 			throw new RuntimeException(sprintf(
-				'%s::$aggregateType is not string or %s',
+				'%s::$aggregateType is a not string or %s. %s given.',
 				self::class,
-				AggregateType::class
+				AggregateType::class,
+				is_object($this->aggregateType)
+					? get_class($this->aggregateType)
+					: gettype($this->aggregateType)
 			));
 		}
 	}
@@ -326,6 +336,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	{
 		if ($this->streamName === null) {
 			$prefix = (string)$this->aggregateType;
+			$prefix = str_replace('\\', '', $prefix);
 		} else {
 			$prefix = $this->streamName;
 		}

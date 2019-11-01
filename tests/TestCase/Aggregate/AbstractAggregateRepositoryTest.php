@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Psa\EventSourcing\Test\TestCase\Aggregate;
 
 use Psa\EventSourcing\EventStoreIntegration\AggregateChangedEventTranslator;
+use Psa\EventSourcing\Test\TestApp\Infrastructure\Repository\AccountRepository;
 use function Clue\StreamFilter\fun;
 use PHPUnit\Framework\TestCase;
 use Prooph\EventStore\EndPoint;
@@ -22,7 +23,6 @@ use Psa\EventSourcing\Aggregate\AggregateType;
 use Psa\EventSourcing\EventStoreIntegration\AggregateTranslator;
 use Psa\EventSourcing\Test\TestApp\Domain\Account;
 use Psa\EventSourcing\Test\TestApp\Domain\AccountId;
-use Psa\EventSourcing\Test\TestApp\Domain\AccountRepository;
 
 /**
  * Abstract Aggregate Repository Test
@@ -34,6 +34,8 @@ class AbstractAggregateRepositoryTest extends TestCase
 	 */
 	public function testAccountRepository(): void
 	{
+		//$this->markTestSkipped();
+
 		$httpClient = new Client(new GuzzleClient());
 		$userCredentials = new UserCredentials('admin', 'changeit');
 
@@ -46,19 +48,19 @@ class AbstractAggregateRepositoryTest extends TestCase
 			$httpClient
 		);
 
-		$aggregateTranslator = new AggregateTranslator();
-		$eventTranslator = new AggregateChangedEventTranslator();
-
 		$account = Account::create(
 			'Test',
 			'Description'
 		);
 
+		$aggregateTranslator = new AggregateTranslator();
+		$eventTranslator = new AggregateChangedEventTranslator();
+
 		$repository = new AccountRepository(
 			$eventStore,
 			$aggregateTranslator,
 			$eventTranslator,
-			AggregateType::fromMapping(['Account' => Account::class])
+			null
 		);
 
 		//dd($repository->getAggregate('ba2c2d45-2a5c-4949-97f7-fd05a14ec980'));
