@@ -3,10 +3,12 @@ declare(strict_types=1);
 
 namespace Psa\EventSourcing\Test\TestCase\SnapshotStore;
 
+use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 use Psa\EventSourcing\SnapshotStore\InMemoryStore;
 use Psa\EventSourcing\SnapshotStore\Serializer\JsonSerializer;
 use Psa\EventSourcing\SnapshotStore\Serializer\SerializeSerializer;
+use Psa\EventSourcing\SnapshotStore\SnapshotInterface;
 use Psa\EventSourcing\Test\TestApp\Domain\Account;
 
 /**
@@ -39,8 +41,20 @@ class InMemoryStoreTest extends TestCase
 		$account = Account::create('test', 'test');
 		$id = $account->aggregateId();
 
+		// writing
 		$this->store->store($account);
-		$this->store->get($id);
+
+		// reading
+		$result = $this->store->get($id);
+		$this->assertInstanceOf(SnapshotInterface::class, $result);
+		$this->assertEquals($id, $result->aggregateId());
+		$this->assertEquals('Psa\EventSourcing\Test\TestApp\Domain\Account', $result->aggregateType());
+		$this->assertInstanceOf(DateTimeImmutable::class, $result->createdAt());
+
+		// deleting
 		$this->store->delete($id);
+
+		$result = $this->store->get($id);
+		$this->assertNull($result);
 	}
 }

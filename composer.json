@@ -41,6 +41,9 @@
 		"test": [
 			".\\bin\\phpunit"
 		],
+		"coverage": [
+			".\\bin\\phpunit --coverage-html ./tmp/coverage"
+		],
 		"cscheck": [
 			".\\bin\\phpcs .\\src .\\tests --standard=./phpcs.xml"
 		],
