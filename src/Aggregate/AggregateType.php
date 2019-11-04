@@ -9,7 +9,7 @@ use InvalidArgumentException;
 /**
  * Aggregate Type
  */
-class AggregateType
+class AggregateType implements AggregateTypeInterface
 {
 	/**
 	 * @var string|null

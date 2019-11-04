@@ -80,14 +80,14 @@ class PdoSqlStore implements SnapshotStoreInterface
 	 * @param \Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface $aggregate Aggregate
 	 * @return void
 	 */
-	public function store(EventSourcedAggregateInterface $aggregate): void
+	public function store(SnapshotInterface $snapshot): void
 	{
 		$data = [
-			'aggregate_type' => get_class($aggregate),
-			'aggregate_id' => $aggregate->aggregateId(),
-			'aggregate_version' => $aggregate->aggregateVersion(),
-			'aggregate_root' => $this->serializer->serialize($aggregate),
-			'created_at' => (new DateTimeImmutable())->format('Y-m-d H:i:s')
+			'aggregate_type' => $snapshot->aggregateType(),
+			'aggregate_id' => $snapshot->aggregateId(),
+			'aggregate_version' => $snapshot->lastVersion(),
+			'aggregate_root' => $this->serializer->serialize($snapshot->aggregateRoot()),
+			'created_at' => $snapshot->createdAt()
 		];
 
 		$sql = "INSERT INTO $this->table (`aggregate_type`, `aggregate_id`, `aggregate_version`, `aggregate_root`, `created_at`) "

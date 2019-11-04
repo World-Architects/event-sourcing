@@ -10,7 +10,7 @@ use DateTimeImmutable;
 /**
  * Snapshot
  */
-final class Snapshot implements SnapshotInterface
+class Snapshot implements SnapshotInterface
 {
 	/**
 	 * @var string

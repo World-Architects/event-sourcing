@@ -46,15 +46,14 @@ class InMemoryStore implements SnapshotStoreInterface
 	/**
 	 * @inheritDoc
 	 */
-	public function store(EventSourcedAggregateInterface $aggregate): void
+	public function store(SnapshotInterface $snapshot): void
 	{
-		$this->store[$aggregate->aggregateId()] = [
-			'id' => Uuid::uuid4()->toString(),
-			'aggregate_type' => get_class($aggregate),
-			'aggregate_id' => $aggregate->aggregateId(),
-			'aggregate_version' => $aggregate->aggregateVersion(),
-			'aggregate_root' => $this->serializer->serialize($aggregate),
-			'created_at' => new DateTimeImmutable()
+		$this->store[$snapshot->aggregateId()] = [
+			'aggregate_type' => $snapshot->aggregateType(),
+			'aggregate_id' => $snapshot->aggregateId(),
+			'aggregate_version' => $snapshot->lastVersion(),
+			'aggregate_root' => $this->serializer->serialize($snapshot->aggregateRoot()),
+			'created_at' => $snapshot->createdAt()
 		];
 	}
 

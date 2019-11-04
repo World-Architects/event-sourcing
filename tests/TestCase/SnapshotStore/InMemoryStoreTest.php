@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Psa\EventSourcing\SnapshotStore\InMemoryStore;
 use Psa\EventSourcing\SnapshotStore\Serializer\JsonSerializer;
 use Psa\EventSourcing\SnapshotStore\Serializer\SerializeSerializer;
+use Psa\EventSourcing\SnapshotStore\Snapshot;
 use Psa\EventSourcing\SnapshotStore\SnapshotInterface;
 use Psa\EventSourcing\Test\TestApp\Domain\Account;
 
@@ -41,8 +42,16 @@ class InMemoryStoreTest extends TestCase
 		$account = Account::create('test', 'test');
 		$id = $account->aggregateId();
 
+		$snapshot = new Snapshot(
+			get_class($account),
+			$account->aggregateId(),
+			$account,
+			$account->aggregateVersion(),
+			new DateTimeImmutable()
+		);
+
 		// writing
-		$this->store->store($account);
+		$this->store->store($snapshot);
 
 		// reading
 		$result = $this->store->get($id);

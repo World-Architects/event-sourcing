@@ -17,7 +17,7 @@ interface SnapshotStoreInterface
 	 * @param \Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface $aggregate Aggregate
 	 * @return void
 	 */
-	public function store(EventSourcedAggregateInterface $aggregate);
+	public function store(SnapshotInterface $aggregate);
 
 	/**
 	 * Gets an aggregate snapshot if one exist
