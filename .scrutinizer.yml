@@ -10,6 +10,17 @@ build_failure_conditions:
   # Code Coverage decreased from previous inspection by more than 1%
   - 'project.metric_change("scrutinizer.test_coverage", < -0.1)'
 build:
+  environment:
+    variables:
+      PDO_TEST_USER: 'root'
+      PDO_TEST_PASS: ''
+      PDO_TEST_HOST: '127.0.0.1'
+      PDO_TEST_DB: 'test'
+    php:
+      version: '7.2'
+  project_setup:
+    before:
+      - mysql -e "CREATE DATABASE test CHARSET=utf8 DEFAULT COLLATE utf8_general_ci"
   nodes:
     analysis:
       project_setup:

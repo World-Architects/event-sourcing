@@ -25,5 +25,13 @@ class AggregateRootTest extends TestCase
 			'Updated Name!',
 			'Updated description'
 		);
+
+		$this->assertNotEmpty($account->aggregateId());
+		$this->assertIsString($account->aggregateId());
+		$this->assertEquals(2, $account->aggregateVersion());
+
+		$result = $account->popRecordedEvents();
+		$this->assertIsArray($result);
+		$this->assertCount(2, $result);
 	}
 }

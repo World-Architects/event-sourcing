@@ -13,16 +13,16 @@ use Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface;
 interface AggregateTranslatorInterface
 {
 	/**
-	 * @param object $eventSourcedAggregateRoot
+	 * @param object $aggregateRoot
 	 * @return int
 	 */
-	public function extractAggregateVersion($eventSourcedAggregateRoot): int;
+	public function extractAggregateVersion($aggregateRoot): int;
 
 	/**
-	 * @param object $eventSourcedAggregateRoot
+	 * @param object $aggregateRoot
 	 * @return string
 	 */
-	public function extractAggregateId($eventSourcedAggregateRoot): string;
+	public function extractAggregateId($aggregateRoot): string;
 
 	/**
 	 * @return object reconstructed EventSourcedAggregateRoot
@@ -33,15 +33,15 @@ interface AggregateTranslatorInterface
 	);
 
 	/**
-	 * @param object $eventSourcedAggregateRoot
+	 * @param object $aggregateRoot
 	 * @return \Prooph\EventStore\EventData[]
 	 */
-	public function extractPendingStreamEvents($eventSourcedAggregateRoot): array;
+	public function extractPendingStreamEvents($aggregateRoot): array;
 
 	/**
-	 * @param object $eventSourcedAggregateRoot Aggregate Root
+	 * @param object $aggregateRoot Aggregate Root
 	 * @param Iterator $events
 	 * @return void
 	 */
-	public function replayStreamEvents($eventSourcedAggregateRoot, Iterator $events): void;
+	public function replayStreamEvents($aggregateRoot, Iterator $events): void;
 }

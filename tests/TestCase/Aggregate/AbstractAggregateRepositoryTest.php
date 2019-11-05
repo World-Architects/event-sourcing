@@ -32,7 +32,7 @@ class AbstractAggregateRepositoryTest extends TestCase
 	/**
 	 *@return void
 	 */
-	public function testAccountRepository(): void
+	public function testAbstractRepository(): void
 	{
 		//$this->markTestSkipped();
 
@@ -52,6 +52,7 @@ class AbstractAggregateRepositoryTest extends TestCase
 			'Test',
 			'Description'
 		);
+		$accountId = AccountId::fromString($account->aggregateId());
 
 		$aggregateTranslator = new AggregateTranslator();
 		$eventTranslator = new AggregateChangedEventTranslator();
@@ -63,29 +64,25 @@ class AbstractAggregateRepositoryTest extends TestCase
 			null
 		);
 
-		//dd($repository->getAggregate('ba2c2d45-2a5c-4949-97f7-fd05a14ec980'));
-		//return;
-
 		$repository->save($account);
-
-		$accountId = AccountId::fromString($account->aggregateId());
-
 		$account = $repository->get($accountId);
+
+		$this->assertEquals($account->aggregateId(), (string)$accountId);
 
 		$account->update('Changed name', 'Changed description');
 		$repository->save($account);
 
 		$account = $repository->get($accountId);
-		var_dump($account->jsonSerialize());
+		//var_dump($account->jsonSerialize());
 
 		for ($x = 1; $x <= 127; $x++) {
 			$account->update('Changed name - ' . $x, 'Changed description - ' . $x);
 			$repository->save($account);
 		}
 
-		sleep(3);
+		//sleep(3);
 
 		$account = $repository->get($accountId);
-		var_dump($account->jsonSerialize());
+		//var_dump($account->jsonSerialize());
 	}
 }

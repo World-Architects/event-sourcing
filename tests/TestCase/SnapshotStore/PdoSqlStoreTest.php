@@ -9,6 +9,7 @@ use Psa\EventSourcing\SnapshotStore\PdoSqlStore;
 use Psa\EventSourcing\SnapshotStore\Serializer\JsonSerializer;
 use Psa\EventSourcing\SnapshotStore\Serializer\SerializeSerializer;
 use Psa\EventSourcing\SnapshotStore\Snapshot;
+use Psa\EventSourcing\SnapshotStore\SnapshotInterface;
 use Psa\EventSourcing\Test\TestApp\Domain\Account;
 use Psa\EventSourcing\Test\TestCase\TestCase;
 
@@ -66,7 +67,10 @@ class PdoSqlStoreTest extends TestCase
 		);
 
 		$this->store->store($snapshot);
+
 		$result = $this->store->get($accountId);
+		$this->assertInstanceOf(SnapshotInterface::class, $result);
+
 		$this->store->delete($accountId);
 	}
 }
