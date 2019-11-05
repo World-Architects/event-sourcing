@@ -17,10 +17,12 @@ build:
       PDO_TEST_HOST: '127.0.0.1'
       PDO_TEST_DB: 'test'
     php:
-      version: '7.2'
+      version: '7.3'
   project_setup:
     before:
       - mysql -e "CREATE DATABASE test CHARSET=utf8 DEFAULT COLLATE utf8_general_ci"
+      - curl -s https://packagecloud.io/install/repositories/EventStore/EventStore-OSS/script.deb.sh | sudo bash
+      - sudo apt-get install eventstore-oss=5.0.3-1
   nodes:
     analysis:
       project_setup:
@@ -41,7 +43,7 @@ build:
               format: php-clover
       environment:
         php:
-          version: 7.2.13
+          version: 7.3
 filter:
   excluded_paths:
     - 'tests/*'
