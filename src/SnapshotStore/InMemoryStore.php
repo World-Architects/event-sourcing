@@ -53,7 +53,7 @@ class InMemoryStore implements SnapshotStoreInterface
 			'aggregate_id' => $snapshot->aggregateId(),
 			'aggregate_version' => $snapshot->lastVersion(),
 			'aggregate_root' => $this->serializer->serialize($snapshot->aggregateRoot()),
-			'created_at' => $snapshot->createdAt()
+			'created_at' => $snapshot->createdAt()->format('Y-m-d H:i:s')
 		];
 	}
 
@@ -73,7 +73,7 @@ class InMemoryStore implements SnapshotStoreInterface
 			$data['aggregate_id'],
 			$this->serializer->unserialize($data['aggregate_root']),
 			(int)$data['aggregate_version'],
-			$data['created_at']
+			DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $data['created_at'])
 		);
 	}
 

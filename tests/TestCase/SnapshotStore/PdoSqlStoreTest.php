@@ -3,18 +3,27 @@ declare(strict_types=1);
 
 namespace Psa\EventSourcing\Test\TestCase\SnapshotStore;
 
-use PHPUnit\Framework\TestCase;
+use DateTimeImmutable;
 use PDO;
 use Psa\EventSourcing\SnapshotStore\PdoSqlStore;
 use Psa\EventSourcing\SnapshotStore\Serializer\JsonSerializer;
 use Psa\EventSourcing\SnapshotStore\Serializer\SerializeSerializer;
+use Psa\EventSourcing\SnapshotStore\Snapshot;
 use Psa\EventSourcing\Test\TestApp\Domain\Account;
+use Psa\EventSourcing\Test\TestCase\TestCase;
 
 /**
- * Pdo Sql Store Test
+ * PDO Sql Store Test
  */
 class PdoSqlStoreTest extends TestCase
 {
+	/**
+	 * @var array
+	 */
+	protected $sqlFixtures = [
+		'EventStoreSnapshots'
+	];
+
 	/**
 	 * @var \PDO
 	 */
@@ -32,12 +41,10 @@ class PdoSqlStoreTest extends TestCase
 	{
 		parent::setUp();
 
-		$this->pdo = $this->getMockBuilder(PDO::class)
-			->disableOriginalConstructor()
-			->addMethods(['execute', 'prepare'])
-			->getMock();
-
-		$this->store = new PdoSqlStore($this->pdo, new SerializeSerializer());
+		$this->store = new PdoSqlStore(
+			$this->pdoTestConnection,
+			new SerializeSerializer()
+		);
 	}
 
 	/**
@@ -50,7 +57,15 @@ class PdoSqlStoreTest extends TestCase
 		$account = Account::create('test', 'test');
 		$accountId = $account->aggregateId();
 
-		$this->store->store($account);
+		$snapshot = new Snapshot(
+			get_class($account),
+			$account->aggregateId(),
+			$account,
+			$account->aggregateVersion(),
+			new DateTimeImmutable()
+		);
+
+		$this->store->store($snapshot);
 		$result = $this->store->get($accountId);
 		$this->store->delete($accountId);
 	}

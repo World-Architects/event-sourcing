@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Psa\EventSourcing\Aggregate;
 
+use Assert\Assert;
 use Psa\EventSourcing\Aggregate\Exception\AggregateTypeException;
 use InvalidArgumentException;
 
@@ -97,9 +98,7 @@ class AggregateType implements AggregateTypeInterface
 	 */
 	public static function fromString(string $aggregateTypeString): AggregateType
 	{
-		if (empty($aggregateTypeString)) {
-			throw new InvalidArgumentException('AggregateType must be a non empty string');
-		}
+		Assert::that($aggregateTypeString)->string()->notBlank();
 
 		$self = new static();
 		$self->aggregateType = $aggregateTypeString;

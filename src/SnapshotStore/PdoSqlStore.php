@@ -87,7 +87,7 @@ class PdoSqlStore implements SnapshotStoreInterface
 			'aggregate_id' => $snapshot->aggregateId(),
 			'aggregate_version' => $snapshot->lastVersion(),
 			'aggregate_root' => $this->serializer->serialize($snapshot->aggregateRoot()),
-			'created_at' => $snapshot->createdAt()
+			'created_at' => $snapshot->createdAt()->format('Y-m-d H:i:s')
 		];
 
 		$sql = "INSERT INTO $this->table (`aggregate_type`, `aggregate_id`, `aggregate_version`, `aggregate_root`, `created_at`) "

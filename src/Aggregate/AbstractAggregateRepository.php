@@ -228,9 +228,9 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	 *
 	 * @return void
 	 */
-	public function createSnapshot(EventSourcedAggregateInterface $aggregate): void
+	public function createSnapshot(SnapshotInterface $snapshot): void
 	{
-		$this->snapshotStore->store($aggregate);
+		$this->snapshotStore->store($snapshot);
 	}
 
 	/**
