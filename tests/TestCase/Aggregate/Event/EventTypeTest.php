@@ -95,15 +95,4 @@ class EventTypeTest extends TestCase
 		$this->expectException(\InvalidArgumentException::class);
 		EventType::fromEventClass('DoesNotExist');
 	}
-
-	/**
-	 * testFromEventClass
-	 *
-	 * @return void
-	 */
-	public function testFromEventEventTypeException(): void
-	{
-		$this->expectException(EventTypeException::class);
-		EventType::fromEvent('This is not an object!');
-	}
 }

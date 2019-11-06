@@ -58,7 +58,7 @@ final class AggregateReflectionTranslator implements AggregateTranslatorInterfac
 	}
 
 	/**
-	 * @param object
+	 * @param object|string $aggregate Aggregate object
 	 * @return \ReflectionClass
 	 */
 	protected function reflection($aggregate): ReflectionClass
@@ -79,7 +79,7 @@ final class AggregateReflectionTranslator implements AggregateTranslatorInterfac
 	 * @param object $aggregate Aggregate
 	 * @param string $property Property
 	 */
-	protected function extract($aggregate, string $propertyOrMethod, array $args = [])
+	protected function extract(object $aggregate, string $propertyOrMethod, array $args = [])
 	{
 		$this->reflection($aggregate);
 
@@ -123,21 +123,21 @@ final class AggregateReflectionTranslator implements AggregateTranslatorInterfac
 	}
 
 	/**
-	 * @param object $eventSourcedAggregateRoot
+	 * @param object $aggregate Aggregate
 	 *
 	 * @return int
 	 */
-	public function extractAggregateVersion($aggregate): int
+	public function extractAggregateVersion(object $aggregate): int
 	{
 		return $this->extract($aggregate, 'aggregateVersion');
 	}
 
 	/**
-	 * @param object $anEventSourcedAggregateRoot
+	 * @param object $aggregate Aggregate
 	 *
 	 * @return string
 	 */
-	public function extractAggregateId($aggregate): string
+	public function extractAggregateId(object $aggregate): string
 	{
 		return $this->extract($aggregate, 'aggregateId');
 	}
@@ -173,21 +173,20 @@ final class AggregateReflectionTranslator implements AggregateTranslatorInterfac
 	}
 
 	/**
-	 * @param object $anEventSourcedAggregateRoot
-	 *
+	 * @param object $aggregate Aggregate
 	 * @return array
 	 */
-	public function extractPendingStreamEvents($aggregate): array
+	public function extractPendingStreamEvents(object $aggregate): array
 	{
 		return $this->extract($aggregate, 'events');
 	}
 
 	/**
-	 * @param object $anEventSourcedAggregateRoot
+	 * @param object $aggregate Aggregate
 	 * @param Iterator $events
 	 * @return void
 	 */
-	public function replayStreamEvents($aggregate, Iterator $events): void
+	public function replayStreamEvents(object $aggregate, Iterator $events): void
 	{
 		$method = $this->methodeMap['replay'];
 		$reflection = $this->reflection($aggregate);

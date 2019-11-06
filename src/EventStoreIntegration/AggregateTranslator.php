@@ -22,24 +22,22 @@ final class AggregateTranslator implements AggregateTranslatorInterface
 
 	/**
 	 * @param object $eventSourcedAggregateRoot
-	 *
 	 * @return int
 	 */
-	public function extractAggregateVersion($eventSourcedAggregateRoot): int
+	public function extractAggregateVersion(object $anAggregateRoot): int
 	{
 		return $this->getAggregateRootDecorator()
-			->extractAggregateVersion($eventSourcedAggregateRoot);
+			->extractAggregateVersion($anAggregateRoot);
 	}
 
 	/**
-	 * @param object $anEventSourcedAggregateRoot
-	 *
+	 * @param object $anAggregateRoot
 	 * @return string
 	 */
-	public function extractAggregateId($anEventSourcedAggregateRoot): string
+	public function extractAggregateId(object $anAggregateRoot): string
 	{
 		return $this->getAggregateRootDecorator()
-			->extractAggregateId($anEventSourcedAggregateRoot);
+			->extractAggregateId($anAggregateRoot);
 	}
 
 	/**
@@ -60,25 +58,25 @@ final class AggregateTranslator implements AggregateTranslatorInterface
 	}
 
 	/**
-	 * @param object $anEventSourcedAggregateRoot
+	 * @param object $anAggregateRoot
 	 *
 	 * @return array
 	 */
-	public function extractPendingStreamEvents($anEventSourcedAggregateRoot): array
+	public function extractPendingStreamEvents(object $anAggregateRoot): array
 	{
 		return $this->getAggregateRootDecorator()
-			->extractRecordedEvents($anEventSourcedAggregateRoot);
+			->extractRecordedEvents($anAggregateRoot);
 	}
 
 	/**
-	 * @param object $anEventSourcedAggregateRoot
+	 * @param object $anAggregateRoot
 	 * @param Iterator $events
 	 * @return void
 	 */
-	public function replayStreamEvents($anEventSourcedAggregateRoot, Iterator $events): void
+	public function replayStreamEvents(object $anAggregateRoot, Iterator $events): void
 	{
 		$this->getAggregateRootDecorator()
-			->replayStreamEvents($anEventSourcedAggregateRoot, $events);
+			->replayStreamEvents($anAggregateRoot, $events);
 	}
 
 	/**
@@ -99,7 +97,7 @@ final class AggregateTranslator implements AggregateTranslatorInterface
 	 * @param object $anAggregateRootDecorator A decorator
 	 * @return void
 	 */
-	public function setAggregateRootDecorator($anAggregateRootDecorator): void
+	public function setAggregateRootDecorator(object $anAggregateRootDecorator): void
 	{
 		$this->aggregateRootDecorator = $anAggregateRootDecorator;
 	}

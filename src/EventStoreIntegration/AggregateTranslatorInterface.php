@@ -16,13 +16,13 @@ interface AggregateTranslatorInterface
 	 * @param object $aggregateRoot
 	 * @return int
 	 */
-	public function extractAggregateVersion($aggregateRoot): int;
+	public function extractAggregateVersion(object $aggregateRoot): int;
 
 	/**
 	 * @param object $aggregateRoot
 	 * @return string
 	 */
-	public function extractAggregateId($aggregateRoot): string;
+	public function extractAggregateId(object $aggregateRoot): string;
 
 	/**
 	 * @return object reconstructed EventSourcedAggregateRoot
@@ -36,12 +36,12 @@ interface AggregateTranslatorInterface
 	 * @param object $aggregateRoot
 	 * @return \Prooph\EventStore\EventData[]
 	 */
-	public function extractPendingStreamEvents($aggregateRoot): array;
+	public function extractPendingStreamEvents(object $aggregateRoot): array;
 
 	/**
 	 * @param object $aggregateRoot Aggregate Root
 	 * @param Iterator $events
 	 * @return void
 	 */
-	public function replayStreamEvents($aggregateRoot, Iterator $events): void;
+	public function replayStreamEvents(object $aggregateRoot, Iterator $events): void;
 }

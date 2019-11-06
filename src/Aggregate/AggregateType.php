@@ -42,12 +42,8 @@ class AggregateType implements AggregateTypeInterface
 	 * @param object $eventSourcedAggregateRoot
 	 * @throws Exception\AggregateTypeException
 	 */
-	public static function fromAggregateRoot($eventSourcedAggregateRoot): AggregateType
+	public static function fromAggregateRoot(object $eventSourcedAggregateRoot): AggregateType
 	{
-		if (!is_object($eventSourcedAggregateRoot)) {
-			throw AggregateTypeException::notAnObject($eventSourcedAggregateRoot);
-		}
-
 		// Check if the aggregate implements the type provider
 		if ($eventSourcedAggregateRoot instanceof AggregateTypeProviderInterface) {
 			return $eventSourcedAggregateRoot->aggregateType();
@@ -143,11 +139,10 @@ class AggregateType implements AggregateTypeInterface
 	}
 
 	/**
-	 * @param object $aggregateRoot
-	 *
+	 * @param object $aggregateRoot An aggregate
 	 * @throws Exception\AggregateTypeException
 	 */
-	public function assert($aggregateRoot): void
+	public function assert(object $aggregateRoot): void
 	{
 		$otherAggregateType = self::fromAggregateRoot($aggregateRoot);
 

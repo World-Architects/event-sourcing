@@ -322,7 +322,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	/**
 	 * @param object $eventSourcedAggregateRoot
 	 */
-	protected function assertAggregateType($eventSourcedAggregateRoot)
+	protected function assertAggregateType(object $eventSourcedAggregateRoot)
 	{
 		$this->aggregateType->assert($eventSourcedAggregateRoot);
 	}

@@ -91,7 +91,7 @@ class AggregateChangedEventTranslator implements EventTranslatorInterface
 			if (!$event instanceof AggregateChangedEventInterface) {
 				throw new RuntimeException(sprintf(
 					'Event %s does not implemt %s',
-					$eventType->toString(),
+					(string)$aggregateType,
 					AggregateChangedEventInterface::class
 				));
 			}

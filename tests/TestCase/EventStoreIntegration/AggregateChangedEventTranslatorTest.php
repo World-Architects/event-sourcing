@@ -8,12 +8,26 @@ use Prooph\EventStore\EventData;
 use Psa\EventSourcing\Aggregate\AggregateType;
 use Psa\EventSourcing\EventStoreIntegration\AggregateChangedEventTranslator;
 use Psa\EventSourcing\Test\TestApp\Domain\Account;
+use Psa\EventSourcing\Test\TestApp\Domain\AccountId;
 
 /**
  * AggregateChangedEventTranslatorTest
  */
 class AggregateChangedEventTranslatorTest extends TestCase
 {
+	/**
+	 * @return void
+	 */
+	public function testToStoreException(): void
+	{
+		$this->expectException(\RuntimeException::class);
+		$id = AccountId::generate();
+		$translator = new AggregateChangedEventTranslator();
+		$translator->toStore((string)$id, AggregateType::fromString('Account'), [
+			new \stdClass()
+		]);
+	}
+
 	/**
 	 * @return void
 	 */

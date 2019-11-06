@@ -43,12 +43,8 @@ class EventType
 	 * @param object $event Event object
 	 * @throws \Psa\EventSourcing\Aggregate\Event\Exception\EventTypeException
 	 */
-	public static function fromEvent($event): EventType
+	public static function fromEvent(object $event): EventType
 	{
-		if (!is_object($event)) {
-			throw EventTypeException::notAnObject($event);
-		}
-
 		// Check if the aggregate implements the type provider
 		if ($event instanceof EventTypeProviderInterface) {
 			return $event->eventType();
@@ -147,7 +143,7 @@ class EventType
 	 * @param object $event Event object
 	 * @throws \Psa\EventSourcing\Aggregate\Event\Exception\EventTypeException
 	 */
-	public function assert($event): void
+	public function assert(object $event): void
 	{
 		$otherEvent = self::fromEvent($event);
 
