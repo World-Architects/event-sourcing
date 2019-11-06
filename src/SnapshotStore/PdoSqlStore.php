@@ -12,7 +12,6 @@ use DateTimeImmutable;
 use PDO;
 use PDOException;
 use PDOStatement;
-use Ramsey\Uuid\Uuid;
 
 /**
  * PDO SQL based Snapshot Store
@@ -51,12 +50,12 @@ class PdoSqlStore implements SnapshotStoreInterface
 	 */
 	public function __construct(
 		PDO $pdo,
-		? SerializerInterface $serializer = null,
-		string $table = null
+		?SerializerInterface $serializer = null,
+		?string $table = null
 	) {
 		$this->pdo = $pdo;
 		$this->serializer = $serializer ?? new SerializeSerializer();
-		$this->table = $table === null ?? 'event_store_snapshots';
+		$this->table = $table === null ? 'event_store_snapshots' : $table;
 	}
 
 	/**
@@ -69,6 +68,7 @@ class PdoSqlStore implements SnapshotStoreInterface
 	{
 		if ($statement->errorCode() !== '00000') {
 			$errorInfo = $statement->errorInfo();
+
 			throw new PDOException($errorInfo[2], $errorInfo[1]);
 		}
 	}
@@ -76,22 +76,21 @@ class PdoSqlStore implements SnapshotStoreInterface
 	/**
 	 * Stores an aggregate snapshot
 	 *
-	 * @param \Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface
+	 * @param \Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface $aggregate Aggregate
 	 * @return void
 	 */
-	public function store(EventSourcedAggregateInterface $aggregate): void
+	public function store(SnapshotInterface $snapshot): void
 	{
 		$data = [
-			'id' => Uuid::uuid4()->toString(),
-			'aggregate_type' => get_class($aggregate),
-			'aggregate_id' => $aggregate->aggregateId(),
-			'aggregate_version' => $aggregate->aggregateVersion(),
-			'aggregate_root' => $this->serializer->serialize($aggregate),
-			'created_at' => (new DateTimeImmutable())->format('Y-m-d H:i:s')
+			'aggregate_type' => $snapshot->aggregateType(),
+			'aggregate_id' => $snapshot->aggregateId(),
+			'aggregate_version' => $snapshot->lastVersion(),
+			'aggregate_root' => $this->serializer->serialize($snapshot->aggregateRoot()),
+			'created_at' => $snapshot->createdAt()->format('Y-m-d H:i:s')
 		];
 
-		$sql = "INSERT INTO $this->table (`id`, `aggregate_type`, `aggregate_id`, `aggregate_version`, `aggregate_root`, `created_at`) "
-			 . "VALUES (:id, :aggregate_type, :aggregate_id, :aggregate_version, :aggregate_root, :created_at)";
+		$sql = "INSERT INTO $this->table (`aggregate_type`, `aggregate_id`, `aggregate_version`, `aggregate_root`, `created_at`) "
+			 . "VALUES (:aggregate_type, :aggregate_id, :aggregate_version, :aggregate_root, :created_at)";
 
 		$statement = $this->pdo->prepare($sql);
 		$statement->execute($data);
@@ -101,21 +100,20 @@ class PdoSqlStore implements SnapshotStoreInterface
 	/**
 	 * Gets an aggregate snapshot if one exist
 	 *
-	 * @return mixed
+	 * @param string $aggregateId Aggregate Id
+	 * @return null|\Psa\EventSourcing\SnapshotStore\SnapshotInterface
 	 */
 	public function get(string $aggregateId): ?SnapshotInterface
 	{
 		Assert::that($aggregateId)->uuid();
 
-		$sql = "SELECT * FROM event_store_snapshots "
-			 . "WHERE aggregate_id = :aggregateId "
-			 //. "AND aggregate_type = :aggregateType"
+		$sql = "SELECT * FROM {$this->table} "
+			 . "WHERE aggregate_id = :aggregate_id "
 			 . "ORDER BY aggregate_version";
 
 		$statement = $this->pdo->prepare($sql);
 		$statement->execute([
-			'aggregateId' => $aggregateId,
-			//'aggregateType' => null
+			'aggregate_id' => $aggregateId,
 		]);
 
 		$this->pdoErrorCheck($statement);
@@ -143,5 +141,24 @@ class PdoSqlStore implements SnapshotStoreInterface
 			(int)$data['aggregate_version'],
 			DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $data['created_at'])
 		);
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function delete(string $aggregateId): void
+	{
+		Assert::that($aggregateId)->uuid();
+
+		$sql = "DELETE FROM {$this->table} "
+			 . "WHERE aggregate_id = :aggregateId";
+
+		$statement = $this->pdo->prepare($sql);
+		$statement->execute([
+			'aggregateId' => $aggregateId,
+		]);
+
+		$this->pdoErrorCheck($statement);
+		$result = $statement->fetch(PDO::FETCH_ASSOC);
 	}
 }

@@ -3,13 +3,14 @@ declare(strict_types = 1);
 
 namespace Psa\EventSourcing\SnapshotStore;
 
+use Assert\Assert;
 use Assert\Assertion;
 use DateTimeImmutable;
 
 /**
  * Snapshot
  */
-final class Snapshot implements SnapshotInterface
+class Snapshot implements SnapshotInterface
 {
 	/**
 	 * @var string
@@ -51,9 +52,9 @@ final class Snapshot implements SnapshotInterface
 		int $lastVersion,
 		DateTimeImmutable $createdAt
 	) {
-		Assertion::notEmpty($aggregateType);
-		Assertion::uuid($aggregateId, 1);
-		Assertion::min($lastVersion, 1);
+		Assert::that($aggregateType)->notEmpty();
+		Assert::that($lastVersion)->min(1);
+		Assert::that($aggregateId)->uuid();
 
 		$this->aggregateType = $aggregateType;
 		$this->aggregateId = $aggregateId;

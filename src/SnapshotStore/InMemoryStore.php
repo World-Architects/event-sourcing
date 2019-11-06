@@ -4,6 +4,7 @@ declare(strict_types = 1);
 namespace Psa\EventSourcing\SnapshotStore;
 
 use Psa\EventSourcing\Aggregate\AggregateRoot;
+use Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface;
 use Psa\EventSourcing\SnapshotStore\Serializer\SerializerInterface;
 use Psa\EventSourcing\SnapshotStore\Serializer\SerializeSerializer;
 use Assert\Assert;
@@ -27,7 +28,7 @@ class InMemoryStore implements SnapshotStoreInterface
 	/**
 	 * Serializer
 	 *
-	 * @var \Psa\EventSourcing\SnapshotStore\Serializer\\SerializerInterface
+	 * @var \Psa\EventSourcing\SnapshotStore\Serializer\SerializerInterface
 	 */
 	protected $serializer;
 
@@ -37,32 +38,27 @@ class InMemoryStore implements SnapshotStoreInterface
 	 * @param \Psa\EventSourcing\SnapshotStore\Serializer\SerializerInterface $serializer Serializer
 	 */
 	public function __construct(
-		? SerializerInterface $serializer = null
+		?SerializerInterface $serializer = null
 	) {
-		$this->serializer = $serializer ?? new SerializeSerializer();
+		$this->serializer = $serializer ? $serializer : new SerializeSerializer();
 	}
 
 	/**
-	 * Stores an aggregate snapshot
-	 *
-	 * @return void
+	 * @inheritDoc
 	 */
-	public function store(AggregateRoot $aggregate)
+	public function store(SnapshotInterface $snapshot): void
 	{
-		$this->store[$aggregate->aggregateId()] = [
-			'id' => Uuid::uuid4()->toString(),
-			'aggregate_type' => get_class($aggregate),
-			'aggregate_id' => $aggregate->aggregateId(),
-			'aggregate_version' => $aggregate->aggregateVersion(),
-			'aggregate_root' => $this->serializer->serialize($aggregate),
-			'created_at' => new DateTimeImmutable()
+		$this->store[$snapshot->aggregateId()] = [
+			'aggregate_type' => $snapshot->aggregateType(),
+			'aggregate_id' => $snapshot->aggregateId(),
+			'aggregate_version' => $snapshot->lastVersion(),
+			'aggregate_root' => $this->serializer->serialize($snapshot->aggregateRoot()),
+			'created_at' => $snapshot->createdAt()->format('Y-m-d H:i:s')
 		];
 	}
 
 	/**
-	 * Gets an aggregate snapshot if one exist
-	 *
-	 * @return mixed
+	 * @inheritDoc
 	 */
 	public function get(string $aggregateId): ?SnapshotInterface
 	{
@@ -77,7 +73,15 @@ class InMemoryStore implements SnapshotStoreInterface
 			$data['aggregate_id'],
 			$this->serializer->unserialize($data['aggregate_root']),
 			(int)$data['aggregate_version'],
-			$data['created_at']
+			DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $data['created_at'])
 		);
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function delete(string $aggregateId): void
+	{
+		unset($this->store[$aggregateId]);
 	}
 }

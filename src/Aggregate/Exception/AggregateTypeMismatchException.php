@@ -8,7 +8,7 @@ use RuntimeException;
 /**
  * AggregateTypeMismatchException
  */
-class AggregateTypeMismatchException extends RuntimeException
+class AggregateTypeMismatchException extends AggregateTypeException
 {
 	/**
 	 */

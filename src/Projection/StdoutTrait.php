@@ -3,8 +3,6 @@ declare(strict_types = 1);
 
 namespace Psa\EventSourcing\Projection;
 
-use Prooph\EventStore\EventAppearedOnCatchupSubscription;
-use Prooph\EventStore\EventStoreCatchUpSubscription;
 use Prooph\EventStore\ResolvedEvent;
 
 /**
@@ -12,7 +10,7 @@ use Prooph\EventStore\ResolvedEvent;
  *
  * Writes a stream to STDOUT, useful for debugging
  */
-class StdoutProjection implements EventAppearedOnCatchupSubscription
+trait StdoutTrait
 {
 	/**
 	 * @var string
@@ -25,12 +23,11 @@ class StdoutProjection implements EventAppearedOnCatchupSubscription
 	protected $outputFormat = '{date} [{eventNumber}] {eventType}' . PHP_EOL;
 
 	/**
-	 * @inheritDoc
+	 * @param \Prooph\EventStore\ResolvedEvent
+	 * @return void
 	 */
-	public function __invoke(
-		EventStoreCatchUpSubscription $subscription,
-		ResolvedEvent $resolvedEvent
-	): void {
+	public function writeEventToStdOut(ResolvedEvent $resolvedEvent): void
+	{
 		$event = $resolvedEvent->event();
 
 		$vars = [

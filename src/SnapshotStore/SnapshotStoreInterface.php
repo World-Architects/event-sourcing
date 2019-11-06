@@ -17,12 +17,12 @@ interface SnapshotStoreInterface
 	 * @param \Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface $aggregate Aggregate
 	 * @return void
 	 */
-	public function store(EventSourcedAggregateInterface $aggregate);
+	public function store(SnapshotInterface $aggregate);
 
 	/**
 	 * Gets an aggregate snapshot if one exist
 	 *
-	 * @return mixed
+	 * @return null|\Psa\EventSourcing\SnapshotStore\SnapshotInterface
 	 */
 	public function get(string $aggregateId): ?SnapshotInterface;
 
@@ -31,5 +31,5 @@ interface SnapshotStoreInterface
 	 *
 	 * @return void
 	 */
-	// public function delete(string $aggregateId): void;
+	public function delete(string $aggregateId): void;
 }

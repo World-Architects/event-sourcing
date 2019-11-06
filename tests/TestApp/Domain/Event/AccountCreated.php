@@ -30,10 +30,6 @@ class AccountCreated extends AggregateChangedEvent
 			'description' => $description,
 		]);
 
-		$event->accountId = $accountId;
-		$event->name = $name;
-		$event->description = $description;
-
 		return $event;
 	}
 
@@ -48,11 +44,19 @@ class AccountCreated extends AggregateChangedEvent
 
 	public function name(): string
 	{
+		if ($this->name === null) {
+			$this->name = $this->payload['name'];
+		}
+
 		return $this->name;
 	}
 
 	public function description(): string
 	{
+		if ($this->description === null) {
+			$this->description = $this->payload['description'];
+		}
+
 		return $this->description;
 	}
 }

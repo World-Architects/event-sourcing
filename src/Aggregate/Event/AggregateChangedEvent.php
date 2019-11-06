@@ -6,11 +6,10 @@ namespace Psa\EventSourcing\Aggregate\Event;
 use Assert\Assert;
 use DateTimeImmutable;
 use DateTimeZone;
-use ReflectionClass;
 use Ramsey\Uuid\Uuid;
 
 /**
- * AggregateChangedEvent
+ * Aggregate Changed Event
  */
 class AggregateChangedEvent implements AggregateChangedEventInterface
 {
@@ -35,16 +34,13 @@ class AggregateChangedEvent implements AggregateChangedEventInterface
 	protected $metadata = [];
 
 	/**
-	 * @var \ReflectionClass
+	 * @inheritDoc
 	 */
-	protected $_reflection;
-
-	/**
-	 * @return static
-	 */
-	public static function occur(string $aggregateId, array $payload = []): AggregateChangedEventInterface
+	public static function occur(string $aggregateId, array $payload = [], array $metadata = []): AggregateChangedEventInterface
 	{
-		return new static($aggregateId, $payload);
+		Assert::that($aggregateId)->uuid();
+
+		return new static($aggregateId, $payload, $metadata);
 	}
 
 	/**
@@ -56,6 +52,8 @@ class AggregateChangedEvent implements AggregateChangedEventInterface
 	 */
 	protected function __construct(string $aggregateId, array $payload, array $metadata = [])
 	{
+		Assert::that($aggregateId)->uuid();
+
 		//metadata needs to be set before setAggregateId and setVersion is called
 		$this->metadata = $metadata;
 		$this->setAggregateId($aggregateId);
@@ -76,7 +74,10 @@ class AggregateChangedEvent implements AggregateChangedEventInterface
 		}
 
 		if ($this->createdAt === null) {
-			$this->createdAt = new DateTimeImmutable('now', new DateTimeZone('UTC'));
+			$this->createdAt = new DateTimeImmutable(
+				'now',
+				new DateTimeZone('UTC')
+			);
 		}
 	}
 
@@ -113,7 +114,16 @@ class AggregateChangedEvent implements AggregateChangedEventInterface
 	}
 
 	/**
-	 * With meta data
+	 * With    public function version(): int
+		 {
+			 return $this->metadata['_aggregate_version'];
+		 }
+		 public function withVersion(int $version): AggregateChanged
+		 {
+			 $self = clone $this;
+			 $self->setVersion($version);
+			 return $self;
+		 } meta data
 	 *
 	 * @return self
 	 */
@@ -134,7 +144,7 @@ class AggregateChangedEvent implements AggregateChangedEventInterface
 	 * @param mixed $value
 	 * @return self
 	 */
-	public function withAddMetadata(string $key, $value): AggregateChangedEventInterface
+	public function withAddedMetadata(string $key, $value): AggregateChangedEventInterface
 	{
 		$event = clone $this;
 		$event->metadata[$key] = $value;
@@ -156,6 +166,7 @@ class AggregateChangedEvent implements AggregateChangedEventInterface
 	 * With version
 	 *
 	 * @param int $version Version
+	 * @return \Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface
 	 */
 	public function withAggregateVersion(int $version): AggregateChangedEventInterface
 	{
@@ -198,5 +209,36 @@ class AggregateChangedEvent implements AggregateChangedEventInterface
 	protected function setPayload(array $payload): void
 	{
 		$this->payload = $payload;
+	}
+
+	/**
+	 * Gets a value from the payload
+	 *
+	 * @param string $property Property
+	 * @return mixed
+	 */
+	protected function getFromPayload(string $property)
+	{
+		if (!isset($this->{$property})
+			|| $this->{$property} === null
+			&& isset($this->payload[$property])
+		) {
+			$this->{$property} = $this->payload[$property];
+
+			return $this->payload[$property];
+		}
+
+		return $this->{$property};
+	}
+
+	/**
+	 * Magic Call
+	 *
+	 * @param string $name Name
+	 * @param array $arguments Arguments
+	 */
+	public function __call($name, $arguments)
+	{
+		return $this->getFromPayload($name);
 	}
 }

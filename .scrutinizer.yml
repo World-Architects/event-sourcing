@@ -10,6 +10,23 @@ build_failure_conditions:
   # Code Coverage decreased from previous inspection by more than 1%
   - 'project.metric_change("scrutinizer.test_coverage", < -0.1)'
 build:
+  environment:
+    docker: true
+    variables:
+      PDO_TEST_USER: 'root'
+      PDO_TEST_PASS: ''
+      PDO_TEST_HOST: '127.0.0.1'
+      PDO_TEST_DB: 'test'
+    php:
+      version: '7.3'
+  project_setup:
+    before:
+      - mysql -e "CREATE DATABASE test CHARSET=utf8 DEFAULT COLLATE utf8_general_ci"    
+      # We need to run eventstore on docker as ubuntu 14.4 is end of live at eventstore
+      # Scrutinizer does not support newer ubuntu version and tell people to use docker to run newer versions
+      - docker pull eventstore/eventstore
+      - docker run -d --name eventstore-node -it -p 2113:2113 -p 1113:1113 eventstore/eventstore
+      - sleep 10
   nodes:
     analysis:
       project_setup:
@@ -30,7 +47,7 @@ build:
               format: php-clover
       environment:
         php:
-          version: 7.2.13
+          version: 7.3
 filter:
   excluded_paths:
     - 'tests/*'

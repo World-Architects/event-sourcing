@@ -3,58 +3,77 @@ declare(strict_types=1);
 
 namespace Psa\EventSourcing\Test\TestCase\SnapshotStore;
 
+use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 use Psa\EventSourcing\SnapshotStore\Snapshot;
+use stdClass;
 
 /**
  * Snapshot Test
  */
 class SnapshotTest extends TestCase
 {
-
-	public function testAsserts()
+	/**
+	 * Testing an invalid aggregate type, it has to be a non empty string
+	 *
+	 * @return void
+	 */
+	public function testInvalidArgumentException(): void
 	{
-		$created = new \DateTimeImmutable('now');
-		$object = new \stdClass();
+		$this->expectException(\Assert\InvalidArgumentException::class);
 
-		try {
-			$snapshot = new Snapshot(
-				'',
-				'dcb6eef4-d2b8-4f1b-8302-33fdc0ec360b',
-				$object,
-				1,
-				$created
-			);
+		$created = new DateTimeImmutable('now');
+		$object = new stdClass();
 
-			$this->fail('No exception thrown, aggregate type can`t be empty');
-		}catch (\Assert\InvalidArgumentException $e) {
-		}
+		$snapshot = new Snapshot(
+			'',
+			'dcb6eef4-d2b8-4f1b-8302-33fdc0ec360b',
+			$object,
+			1,
+			$created
+		);
+	}
 
-		try {
-			$snapshot = new Snapshot(
-				'Account',
-				'must-be-a-uuid',
-				$object,
-				1,
-				$created
-			);
+	/**
+	 * Testing that the snapshot needs a valid aggregate UUID
+	 *
+	 * @return void
+	 */
+	public function testInvalidArgumentException2(): void
+	{
+		$this->expectException(\Assert\InvalidArgumentException::class);
 
-			$this->fail('No exception thrown, aggregate id must be an UUID');
-		}catch (\Assert\InvalidArgumentException $e) {
-		}
+		$created = new DateTimeImmutable('now');
+		$object = new stdClass();
 
-		try {
-			$snapshot = new Snapshot(
-				'Account',
-				'dcb6eef4-d2b8-4f1b-8302-33fdc0ec360b',
-				$object,
-				0,
-				$created
-			);
+		$snapshot = new Snapshot(
+			'Account',
+			'must-be-a-uuid',
+			$object,
+			1,
+			$created
+		);
+	}
 
-			$this->fail('No exception thrown, last version can`t be lower than 1');
-		}catch (\Assert\InvalidArgumentException $e) {
-		}
+	/**
+	 * Testing that the snapshot version cant be lower than 1
+	 *
+	 * @return void
+	 */
+	public function testInvalidArgumentException3(): void
+	{
+		$this->expectException(\Assert\InvalidArgumentException::class);
+
+		$created = new DateTimeImmutable('now');
+		$object = new stdClass();
+
+		$snapshot = new Snapshot(
+			'Account',
+			'dcb6eef4-d2b8-4f1b-8302-33fdc0ec360b',
+			$object,
+			0,
+			$created
+		);
 	}
 
 	/**
@@ -64,8 +83,8 @@ class SnapshotTest extends TestCase
 	 */
 	public function testSnapshot(): void
 	{
-		$created = new \DateTimeImmutable('now');
-		$object = new \stdClass();
+		$created = new DateTimeImmutable('now');
+		$object = new stdClass();
 
 		$snapshot = new Snapshot(
 			'Account',

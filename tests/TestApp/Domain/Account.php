@@ -3,15 +3,18 @@ declare(strict_types=1);
 
 namespace Psa\EventSourcing\Test\TestApp\Domain;
 
+use JsonSerializable;
 use Psa\EventSourcing\Test\TestApp\Domain\Event\AccountCreated;
 use Psa\EventSourcing\Test\TestApp\Domain\Event\AccountUpdated;
 use Psa\EventSourcing\Aggregate\AggregateRoot;
 
 /**
- * Account
+ * Account Aggregate
  */
-final class Account extends AggregateRoot
+final class Account extends AggregateRoot implements JsonSerializable
 {
+	const AGGREGATE_TYPE = 'Account';
+
 	/**
 	 * @var \App\Domain\Accounting\Model\AccountId
 	 */
@@ -60,7 +63,7 @@ final class Account extends AggregateRoot
 	public function update(string $name, string $description)
 	{
 		$this->recordThat(AccountUpdated::create(
-			$this->id,
+			AccountId::fromString((string)$this->id),
 			$name,
 			$description
 		));
@@ -104,6 +107,14 @@ final class Account extends AggregateRoot
 	 * @since 5.4.0
 	 */
 	public function jsonSerialize()
+	{
+		return $this->toArray();
+	}
+
+	/**
+	 * @return array
+	 */
+	public function toArray()
 	{
 		return [
 			'id' => (string)$this->id,

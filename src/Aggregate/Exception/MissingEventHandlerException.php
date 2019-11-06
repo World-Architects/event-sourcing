@@ -17,7 +17,7 @@ class MissingEventHandlerException extends RuntimeException
 	 * @param string $handler Method name of the handler
 	 * @return self
 	 */
-	public static function missingFor($class, string $handler): self
+	public static function missingFor(object $class, string $handler): self
 	{
 		return new self(sprintf(
 			'Missing event handler method `%s` for `%s`',

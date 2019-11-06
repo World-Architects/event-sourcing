@@ -18,7 +18,7 @@ trait EventSourcedTrait
 	 *
 	 * @var int
 	 */
-	protected $version = 0;
+	protected $aggregateVersion = 0;
 
 	/**
 	 * @throws RuntimeException
@@ -39,19 +39,12 @@ trait EventSourcedTrait
 	protected function replay(Iterator $historyEvents): void
 	{
 		foreach ($historyEvents as $pastEvent) {
-			/** @var AggregateChangedEvent $pastEvent */
-			if ($pastEvent->version() !== $this->version + 1) {
-				/*
-				throw new RuntimeException(sprintf(
-					'Event Type `%s` version %d is not the next in line with the current aggregate version %d.',
-					get_class($pastEvent),
-					$pastEvent->version(),
-					$this->version
-				));
-				*/
-			}
+			/**
+			 * @var \Psa\EventSourcing\Aggregate\Event\AggregateChangedEvent $pastEvent
+			 */
+			$this->aggregateVersion = $pastEvent->aggregateVersion();
+			$this->id = $pastEvent->aggregateId();
 
-			$this->version = $pastEvent->version();
 			$this->apply($pastEvent);
 		}
 	}
@@ -91,7 +84,7 @@ trait EventSourcedTrait
 	 */
 	public function aggregateVersion(): int
 	{
-		return $this->version;
+		return $this->aggregateVersion;
 	}
 
 	/**

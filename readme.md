@@ -6,9 +6,24 @@
 
 This library provides tools for an event sourcing implementation.
 
+## Installation
+
+Add it via composer to your project
+
+```sh
+composer require psa/event-sourcing
+```
+
 ## Documentation
 
-Please see the [docs folder](../docs/index.md)
+Please see the [docs folder](./docs/index.md)
+
+## Composer Commands
+
+* **csfix** - Runs phpcbf and fixes coding standard problems
+* **cscheck** - Checks the coding standard
+* **analyze** - Runs the static code analyzer
+* **test** - Runs phpunit
 
 ## Copyright
 
