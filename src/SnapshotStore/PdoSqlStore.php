@@ -12,7 +12,6 @@ use DateTimeImmutable;
 use PDO;
 use PDOException;
 use PDOStatement;
-use Ramsey\Uuid\Uuid;
 
 /**
  * PDO SQL based Snapshot Store
