@@ -26,6 +26,7 @@ build:
       # Scrutinizer does not support newer ubuntu version and tell people to use docker to run newer versions
       - docker pull eventstore/eventstore
       - docker run -d --name eventstore-node -it -p 2113:2113 -p 1113:1113 eventstore/eventstore
+      - sleep 10
   nodes:
     analysis:
       project_setup:
