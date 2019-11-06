@@ -23,6 +23,7 @@ build:
       - mysql -e "CREATE DATABASE test CHARSET=utf8 DEFAULT COLLATE utf8_general_ci"
       - curl -s https://packagecloud.io/install/repositories/EventStore/EventStore-OSS/script.deb.sh | sudo bash
       - sudo apt-get install eventstore-oss=5.0.3-1
+      - sudo systemctl start eventstore
   nodes:
     analysis:
       project_setup:
