@@ -22,7 +22,7 @@ interface AggregateRepositoryInterface
 	/**
 	 * Persist an aggregate
 	 *
-	 * @param \Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface $aggregate Event Sourced Aggregate
+	 * @param object $aggregate Event Sourced Aggregate
 	 */
-	public function saveAggregate(EventSourcedAggregateInterface $aggregate);
+	public function saveAggregate(object $aggregate);
 }

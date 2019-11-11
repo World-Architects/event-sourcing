@@ -15,7 +15,7 @@ use ReflectionClass;
  * Converts domain events to whatever the store implementation expects and vice
  * versa.
  */
-final class AggregateReflectionTranslator implements AggregateTranslatorInterface
+class AggregateReflectionTranslator implements AggregateTranslatorInterface
 {
 	/**
 	 * @var object
@@ -66,6 +66,10 @@ final class AggregateReflectionTranslator implements AggregateTranslatorInterfac
 		$className = $aggregate;
 		if (is_object($aggregate)) {
 			$className = get_class($aggregate);
+		}
+
+		if (!class_exists($className)) {
+			throw new RuntimeException(sprintf('Aggregate class `%s` does not exist', $className));
 		}
 
 		if (!$this->reflection || $this->reflection->getName() !== $className) {

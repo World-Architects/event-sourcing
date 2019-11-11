@@ -23,7 +23,7 @@ interface EventTranslatorInterface
 	 * @param \Prooph\EventStore\RecordedEvent $recordedEvent Recorded Event
 	 * @return object
 	 */
-	public function fromStore(RecordedEvent $recordedEvent);
+	public function fromStore(RecordedEvent $recordedEvent): object;
 
 	/**
 	 * @param array $typeMap Type Mapping

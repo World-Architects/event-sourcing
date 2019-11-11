@@ -9,10 +9,11 @@
 		}
 	],
 	"require": {
-		"ext-json": "*",
 		"php": "^7.2",
+		"ext-json": "*",
 		"beberlei/assert": "^3.2",
 		"prooph/event-store": "dev-master as v8.0.0-RC-1",
+		"psr/log": "^1.1",
 		"ramsey/uuid": "^3.8"
 	},
 	"require-dev": {
