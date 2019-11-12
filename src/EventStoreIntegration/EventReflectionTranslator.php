@@ -15,17 +15,29 @@ use ReflectionClass;
 use RuntimeException;
 
 /**
- * Event Translator
+ * Reflection based Event Translator
  *
- * Converts domain events to whatever the store implementation expects and vice
- * versa.
+ * The reflection based translator will read *all* properties of an event object
+ * and use them as a payload for the event that gets persistet.
+ *
+ * It will also take the class name of the event object and add it to the meta
+ * data of the persistet event.
  */
 class EventReflectionTranslator implements EventTranslatorInterface
 {
 	/**
-	 *
+	 * @var array
 	 */
-	public function __construct() {
+	protected $excludedProperties = [];
+
+	/**
+	 * Constructor
+	 *
+	 * @param array $excludedProperties Exclude this properties from conversion
+	 */
+	public function __construct(array $excludedProperties = [])
+	{
+		$this->excludedProperties = $excludedProperties;
 	}
 
 	/**
@@ -42,6 +54,10 @@ class EventReflectionTranslator implements EventTranslatorInterface
 			$payload = [];
 
 			foreach ($reflection->getProperties() as $property) {
+				if (in_array($property->getName(), $this->excludedProperties)) {
+					continue;
+				}
+
 				if (!$property->isPublic()) {
 					$property->setAccessible(true);
 				}
@@ -72,8 +88,11 @@ class EventReflectionTranslator implements EventTranslatorInterface
 	 */
 	public function fromStore(RecordedEvent $recordedEvent): object
 	{
-		$metadata = $recordedEvent->metadata();
+		$metadata = json_decode($recordedEvent->metadata(), true);
 		$payload = $recordedEvent->data();
+		if ($recordedEvent->isJson()) {
+			$payload = json_decode($payload, true);
+		}
 
 		if (!isset($metadata['event_class'])) {
 			throw new RuntimeException(sprintf(
@@ -91,7 +110,7 @@ class EventReflectionTranslator implements EventTranslatorInterface
 
 			$property = $reflection->getProperty($key);
 			$property->setAccessible(true);
-			$property->setValue($property);
+			$property->setValue($event, $value);
 		}
 
 		return $event;
@@ -103,6 +122,6 @@ class EventReflectionTranslator implements EventTranslatorInterface
 	 */
 	public function withTypeMap(array $typeMap): EventTranslatorInterface
 	{
-		return self;
+		return $this;
 	}
 }

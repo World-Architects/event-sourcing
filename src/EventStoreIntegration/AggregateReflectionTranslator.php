@@ -176,7 +176,7 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 			));
 		}
 
-		$aggregateRootClass::{$this->methodeMap['reconstitute']}($historyEvents);
+		return $aggregateRootClass::{$this->methodeMap['reconstitute']}($historyEvents);
 	}
 
 	/**

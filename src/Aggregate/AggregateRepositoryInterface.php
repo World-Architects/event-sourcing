@@ -15,9 +15,9 @@ interface AggregateRepositoryInterface
 	 * Gets an aggregate
 	 *
 	 * @param string $aggregateId Aggregate UUID
-	 * @return \Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface
+	 * @return object
 	 */
-	public function getAggregate(string $aggregateId): EventSourcedAggregateInterface;
+	public function getAggregate(string $aggregateId): object;
 
 	/**
 	 * Persist an aggregate

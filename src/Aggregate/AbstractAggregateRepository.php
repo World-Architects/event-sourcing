@@ -5,7 +5,6 @@ namespace Psa\EventSourcing\Aggregate;
 
 use ArrayIterator;
 use Assert\Assert;
-use Prooph\EventStore\EventStoreConnection;
 use Psa\EventSourcing\Aggregate\Event\EventType;
 use Psa\EventSourcing\Aggregate\Exception\AggregateTypeMismatchException;
 use Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface;
@@ -19,10 +18,10 @@ use Psa\EventSourcing\SnapshotStore\SnapshotInterface;
 use Psa\EventSourcing\SnapshotStore\SnapshotStoreInterface;
 use Prooph\EventStore\EventData;
 use Prooph\EventStore\EventId;
+use Prooph\EventStore\EventStoreConnection;
 use Prooph\EventStore\ExpectedVersion;
 use Prooph\EventStore\SliceReadStatus;
 use Prooph\EventStore\StreamEventsSlice;
-use Psa\Foundation\CorrelationId;
 use RuntimeException;
 
 /**

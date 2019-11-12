@@ -22,8 +22,8 @@ use Prooph\EventStore\EventId;
 use Prooph\EventStore\ExpectedVersion;
 use Prooph\EventStore\SliceReadStatus;
 use Prooph\EventStore\StreamEventsSlice;
-use Psa\Foundation\CorrelationId;
 use RuntimeException;
+use Throwable;
 
 /**
  * Abstract Aggregate Repository
@@ -237,9 +237,9 @@ abstract class AbtractAsyncAggregateRepository implements AggregateRepositoryInt
 	 * Gets an aggregate
 	 *
 	 * @param string $aggregateId Aggregate UUID
-	 * @return \Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface
+	 * @return object
 	 */
-	public function getAggregate(string $aggregateId): EventSourcedAggregateInterface
+	public function getAggregate(string $aggregateId): object
 	{
 		Assert::that($aggregateId)->uuid($aggregateId);
 
@@ -267,7 +267,7 @@ abstract class AbtractAsyncAggregateRepository implements AggregateRepositoryInt
 	{
 		Assert::that($aggregateId)->uuid($aggregateId);
 
-		$events = new ArrayIterator([]);
+		$events = yield new ArrayIterator([]);
 		$eventTranslator = $this->eventTranslator->withTypeMap($this->eventTypeMapping);
 		$streamName = $this->determineStreamName($aggregateId);
 
@@ -277,31 +277,71 @@ abstract class AbtractAsyncAggregateRepository implements AggregateRepositoryInt
 			$this->eventsPerSlice
 		);
 
-		yield $promise->onResolve(function($eventsSlice) use ($events, $eventTranslator) {
-			if ($eventsSlice->isEndOfStream()) {
-				foreach ($eventsSlice->events() as $resolvedEvent) {
+		/*
+		if ($slice === null) {
+			return $events;
+		}
+
+		if (!$slice->status()->equals(SliceReadStatus::success())) {
+			// Handle error
+			var_dump($slice);
+		}
+
+		if ($slice->isEndOfStream()) {
+			foreach ($slice->events() as $resolvedEvent) {
+				$events[] = $eventTranslator->fromStore($resolvedEvent->event());
+			}
+
+			return $events;
+		}
+
+		while (!$slice->isEndOfStream()) {
+			$slice = $this->eventStore->readStreamEventsForwardAsync(
+				$streamName,
+				$slice->lastEventNumber() + 1,
+				$this->eventsPerSlice
+			);
+
+			foreach ($slice->events() as $resolvedEvent) {
+				$events[] = $eventTranslator->fromStore($resolvedEvent->event());
+			}
+		}
+
+		return $events;
+		*/
+		$promise->onResolve(function(?Throwable $reason, $slice) use ($events, $eventTranslator) {
+			if ($reason !== null) {
+				var_dump($reason);
+				die();
+			}
+
+			if (!$slice->status()->equals(SliceReadStatus::success())) {
+				// Handle error
+				var_dump($slice);
+			}
+
+			if ($slice->isEndOfStream()) {
+				foreach ($slice->events() as $resolvedEvent) {
 					$events[] = $eventTranslator->fromStore($resolvedEvent->event());
 				}
 
 				return $events;
 			}
 
-			while (!$eventsSlice->isEndOfStream()) {
-				$eventsSlice = $this->eventStore->readStreamEventsForwardAsync(
+			while (!$slice->isEndOfStream()) {
+				$slice = $this->eventStore->readStreamEventsForwardAsync(
 					$streamName,
-					$eventsSlice->lastEventNumber() + 1,
+					$slice->lastEventNumber() + 1,
 					$this->eventsPerSlice
 				);
 
-				foreach ($eventsSlice->events() as $resolvedEvent) {
+				foreach ($slice->events() as $resolvedEvent) {
 					$events[] = $eventTranslator->fromStore($resolvedEvent->event());
 				}
 			}
-
-			return $events;
 		});
 
-		return;
+		return $events;
 	}
 
 	/**
