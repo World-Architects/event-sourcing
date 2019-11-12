@@ -301,10 +301,10 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	}
 
 	/**
-	 * @param \Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface $aggregate Aggregate
+	 * @param object $aggregate Aggregate
 	 * @return void
 	 */
-	public function saveAggregate(EventSourcedAggregateInterface $aggregate): void
+	public function saveAggregate(object $aggregate): void
 	{
 		$aggregateId = $this->aggregateTranslator->extractAggregateId($aggregate);
 		$events = $this->aggregateTranslator->extractPendingStreamEvents($aggregate);

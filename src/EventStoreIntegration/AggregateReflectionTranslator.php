@@ -69,7 +69,10 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 		}
 
 		if (!class_exists($className)) {
-			throw new RuntimeException(sprintf('Aggregate class `%s` does not exist', $className));
+			throw new RuntimeException(sprintf(
+				'Aggregate class `%s` does not exist',
+				$className
+			));
 		}
 
 		if (!$this->reflection || $this->reflection->getName() !== $className) {

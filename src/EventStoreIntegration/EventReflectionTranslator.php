@@ -4,11 +4,15 @@ declare(strict_types=1);
 namespace Psa\EventSourcing\EventStoreIntegration;
 
 use Iterator;
+use Prooph\EventStore\EventData;
+use Prooph\EventStore\EventId;
+use Prooph\EventStore\RecordedEvent;
 use Psa\EventSourcing\Aggregate\AggregateType;
 use Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface;
 use Psa\EventSourcing\Aggregate\Event\EventType;
 use Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface;
 use ReflectionClass;
+use RuntimeException;
 
 /**
  * Event Translator
@@ -41,7 +45,8 @@ class EventReflectionTranslator implements EventTranslatorInterface
 				if (!$property->isPublic()) {
 					$property->setAccessible(true);
 				}
-				$payload[$property->getName()] = $property->getValue();
+
+				$payload[$property->getName()] = $property->getValue($event);
 			}
 
 			$eventType = EventType::fromEvent($event);
@@ -52,9 +57,9 @@ class EventReflectionTranslator implements EventTranslatorInterface
 				$eventType->toString(),
 				true,
 				json_encode($payload),
-				[
+				json_encode([
 					'event_class' => get_class($event)
-				]
+				])
 			);
 		}
 
@@ -71,10 +76,25 @@ class EventReflectionTranslator implements EventTranslatorInterface
 		$payload = $recordedEvent->data();
 
 		if (!isset($metadata['event_class'])) {
-			// exception?
+			throw new RuntimeException(sprintf(
+				'Event class is missing from metadata'
+			));
 		}
 
-		$reflection = new ReflectionClass($metadata['event_class']);
+		$event = new $metadata['event_class']();
+		$reflection = new ReflectionClass($event);
+
+		foreach ($payload as $key => $value) {
+			if (!$reflection->hasProperty($key)) {
+				continue;
+			}
+
+			$property = $reflection->getProperty($key);
+			$property->setAccessible(true);
+			$property->setValue($property);
+		}
+
+		return $event;
 	}
 
 	/**

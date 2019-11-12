@@ -306,7 +306,6 @@ abstract class AbtractAsyncAggregateRepository implements AggregateRepositoryInt
 
 	/**
 	 * @param object $aggregate Aggregate
-	 * @return void
 	 */
 	public function saveAggregate(object $aggregate): void
 	{
