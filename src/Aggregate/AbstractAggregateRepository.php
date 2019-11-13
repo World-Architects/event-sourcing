@@ -119,8 +119,8 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	 */
 	protected function determineAggregateType(): void
 	{
-		if (defined(self::class . 'AGGREGATE_TYPE')) {
-			$this->aggregateType = self::AGGREGATE_TYPE;
+		if (defined('static::AGGREGATE_TYPE')) {
+			$this->aggregateType = static::AGGREGATE_TYPE;
 		}
 
 		if (is_string($this->aggregateType)) {
@@ -236,9 +236,9 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	 * Gets an aggregate
 	 *
 	 * @param string $aggregateId Aggregate UUID
-	 * @return \Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface
+	 * @return object
 	 */
-	public function getAggregate(string $aggregateId): EventSourcedAggregateInterface
+	public function getAggregate(string $aggregateId): object
 	{
 		Assert::that($aggregateId)->uuid($aggregateId);
 
