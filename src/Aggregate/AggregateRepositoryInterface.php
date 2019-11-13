@@ -23,6 +23,7 @@ interface AggregateRepositoryInterface
 	 * Persist an aggregate
 	 *
 	 * @param object $aggregate Event Sourced Aggregate
+	 * @return mixed
 	 */
 	public function saveAggregate(object $aggregate);
 }

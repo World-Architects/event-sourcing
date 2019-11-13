@@ -66,7 +66,6 @@ class EventReflectionTranslator implements EventTranslatorInterface
 			}
 
 			$eventType = EventType::fromEvent($event);
-			$event = $reflection->newInstance();
 
 			$storeEvents[] = new EventData(
 				EventId::generate(),
@@ -74,6 +73,7 @@ class EventReflectionTranslator implements EventTranslatorInterface
 				true,
 				json_encode($payload),
 				json_encode([
+					'aggregate_id' => $aggregateId,
 					'event_class' => get_class($event)
 				])
 			);
