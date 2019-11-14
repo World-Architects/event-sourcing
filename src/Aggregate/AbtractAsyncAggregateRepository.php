@@ -3,11 +3,11 @@ declare(strict_types = 1);
 
 namespace Psa\EventSourcing\Aggregate;
 
+use Amp\Failure;
 use Amp\Loop;
 use Amp\Success;
 use ArrayIterator;
 use Assert\Assert;
-use Prooph\EventStore\EventStoreConnection;
 use Psa\EventSourcing\Aggregate\Event\EventType;
 use Psa\EventSourcing\Aggregate\Exception\AggregateTypeMismatchException;
 use Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface;
@@ -19,6 +19,7 @@ use Psa\EventSourcing\EventStoreIntegration\AggregateChangedEventTranslator;
 use Psa\EventSourcing\EventStoreIntegration\EventTranslatorInterface;
 use Psa\EventSourcing\SnapshotStore\SnapshotInterface;
 use Psa\EventSourcing\SnapshotStore\SnapshotStoreInterface;
+use Prooph\EventStore\Async\EventStoreConnection;
 use Prooph\EventStore\EventData;
 use Prooph\EventStore\EventId;
 use Prooph\EventStore\ExpectedVersion;
@@ -26,6 +27,8 @@ use Prooph\EventStore\SliceReadStatus;
 use Prooph\EventStore\StreamEventsSlice;
 use RuntimeException;
 use Throwable;
+
+use function Amp\Promise\wait;
 
 /**
  * Abstract Aggregate Repository
@@ -102,7 +105,7 @@ abstract class AbtractAsyncAggregateRepository implements AggregateRepositoryInt
 	 * @param \Prooph\EventStore\EventStoreConnection $eventStore Event Store Connection
 	 */
 	public function __construct(
-		\Prooph\EventStore\Async\EventStoreConnection $eventStore,
+		EventStoreConnection $eventStore,
 		AggregateTranslatorInterface $aggregateTranslator,
 		EventTranslatorInterface $eventTranslator,
 		?SnapshotStoreInterface $snapshotStore = null
@@ -251,9 +254,11 @@ abstract class AbtractAsyncAggregateRepository implements AggregateRepositoryInt
 			}
 		}
 
+		$events = $this->getEventsFromPosition($aggregateId, 0);
+
 		return $this->aggregateTranslator->reconstituteAggregateFromHistory(
 			$this->aggregateType,
-			$this->getEventsFromPosition($aggregateId, 0)
+			$events
 		);
 	}
 
@@ -273,43 +278,42 @@ abstract class AbtractAsyncAggregateRepository implements AggregateRepositoryInt
 		$streamName = $this->determineStreamName($aggregateId);
 
 		$promise = $this->eventStore->readStreamEventsForwardAsync(
-			$streamName,
-			$position,
-			$this->eventsPerSlice
-		);
+				$streamName,
+				$position,
+				$this->eventsPerSlice
+			);
 
-		$promise->onResolve(function($error, $slice) use($streamName, $events, $eventTranslator) {
-			if (!$slice->status()->equals(SliceReadStatus::success())) {
-				throw new RuntimeException(sprintf(
-					'Could not read stream: %s',
-					$slice->status()->name()
-				));
+		$slice = wait($promise);
+
+		if (!$slice->status()->equals(SliceReadStatus::success())) {
+			throw new RuntimeException(sprintf(
+				'Could not read stream: %s',
+				$slice->status()->name()
+			));
+		}
+
+		if ($slice->isEndOfStream()) {
+			foreach ($slice->events() as $resolvedEvent) {
+				$events[] = $eventTranslator->fromStore($resolvedEvent->event());
 			}
 
-			if ($slice->isEndOfStream()) {
-				foreach ($slice->events() as $resolvedEvent) {
-					$events[] = $eventTranslator->fromStore($resolvedEvent->event());
-				}
+			return $events;
+		}
 
-				return $events;
+		while (!$slice->isEndOfStream()) {
+			$promise = $this->eventStore->readStreamEventsForwardAsync(
+				$streamName,
+				$slice->lastEventNumber() + 1,
+				$this->eventsPerSlice
+			);
+
+			$slice = wait($promise);
+			foreach ($slice->events() as $resolvedEvent) {
+				$events[] = $eventTranslator->fromStore($resolvedEvent->event());
 			}
+		}
 
-			while (!$slice->isEndOfStream()) {
-				$promise2 = $this->eventStore->readStreamEventsForwardAsync(
-					$streamName,
-					$slice->lastEventNumber() + 1,
-					$this->eventsPerSlice
-				);
-
-				$promise2->onResolve(function($error, $slice) use ($streamName, $events, $eventTranslator) {
-					foreach ($slice->events() as $resolvedEvent) {
-						$events[] = $eventTranslator->fromStore($resolvedEvent->event());
-					}
-				});
-			}
-
-			return new Success($events);
-		});
+		return $events;
 	}
 
 	/**
@@ -318,19 +322,19 @@ abstract class AbtractAsyncAggregateRepository implements AggregateRepositoryInt
 	 */
 	public function saveAggregate(object $aggregate)
 	{
-		return \Amp\call(function() use($aggregate) : \Generator {
-			$aggregateId = $this->aggregateTranslator->extractAggregateId($aggregate);
-			$events = $this->aggregateTranslator->extractPendingStreamEvents($aggregate);
-			$events = $this->eventTranslator->toStore($aggregateId, $this->aggregateType, $events);
-			$streamName = $this->determineStreamName($aggregateId);
-			$this->assertAggregateType($aggregate);
+		$aggregateId = $this->aggregateTranslator->extractAggregateId($aggregate);
+		$events = $this->aggregateTranslator->extractPendingStreamEvents($aggregate);
+		$events = $this->eventTranslator->toStore($aggregateId, $this->aggregateType, $events);
+		$streamName = $this->determineStreamName($aggregateId);
+		$this->assertAggregateType($aggregate);
 
-			yield $this->eventStore->appendToStreamAsync(
-				$streamName,
-				ExpectedVersion::ANY,
-				$events
-			);
-		});
+		$promise = $this->eventStore->appendToStreamAsync(
+			$streamName,
+			ExpectedVersion::ANY,
+			$events
+		);
+
+		return wait($promise);;
 	}
 
 	/**
