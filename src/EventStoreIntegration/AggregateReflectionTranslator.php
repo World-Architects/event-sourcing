@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Psa\EventSourcing\EventStoreIntegration;
 
+use Assert\Assert;
 use Iterator;
 use Psa\EventSourcing\Aggregate\AggregateType;
 use Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface;
@@ -136,7 +137,7 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 	 */
 	public function extractAggregateVersion(object $aggregate): int
 	{
-		return $this->extract($aggregate, 'aggregateVersion');
+		return (int)$this->extract($aggregate, 'aggregateVersion');
 	}
 
 	/**
