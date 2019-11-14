@@ -203,7 +203,7 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 			throw new RuntimeException(sprintf(
 				'Method %s::%s() does not exist.',
 				$method,
-				get_class($aggregate),
+				get_class($aggregate)
 			));
 		}
 
