@@ -44,7 +44,7 @@ use function Amp\Promise\wait;
  *
  * The third possibility is to implement the AggregateTypeProviderInterface.
  */
-abstract class AbtractAsyncAggregateRepository implements AggregateRepositoryInterface
+abstract class AbstractAsyncAggregateRepository implements AggregateRepositoryInterface
 {
 	/**
 	 * @var \Prooph\EventStore\EventStoreConnection
