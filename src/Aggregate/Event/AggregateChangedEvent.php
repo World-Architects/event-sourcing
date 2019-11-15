@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Psa\EventSourcing\Aggregate\Event;
@@ -219,10 +220,7 @@ class AggregateChangedEvent implements AggregateChangedEventInterface
 	 */
 	protected function getFromPayload(string $property)
 	{
-		if (!isset($this->{$property})
-			|| $this->{$property} === null
-			&& isset($this->payload[$property])
-		) {
+		if (!isset($this->{$property}) || $this->{$property} === null && isset($this->payload[$property])) {
 			$this->{$property} = $this->payload[$property];
 
 			return $this->payload[$property];

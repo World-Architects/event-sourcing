@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Psa\EventSourcing\Test\TestApp\Domain;
@@ -13,7 +14,7 @@ use Psa\EventSourcing\Aggregate\AggregateRoot;
  */
 final class Account extends AggregateRoot implements JsonSerializable
 {
-	const AGGREGATE_TYPE = 'Account';
+	public const AGGREGATE_TYPE = 'Account';
 
 	/**
 	 * @var \App\Domain\Accounting\Model\AccountId

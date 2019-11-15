@@ -1,5 +1,6 @@
 <?php
-declare(strict_types = 1);
+
+declare(strict_types=1);
 
 namespace Psa\EventSourcing\Projection;
 
@@ -23,7 +24,7 @@ trait StdoutTrait
 	protected $outputFormat = '{date} [{eventNumber}] {eventType}' . PHP_EOL;
 
 	/**
-	 * @param \Prooph\EventStore\ResolvedEvent
+	 * @param \Prooph\EventStore\ResolvedEvent $resolvedEvent Resolved Event
 	 * @return void
 	 */
 	public function writeEventToStdOut(ResolvedEvent $resolvedEvent): void

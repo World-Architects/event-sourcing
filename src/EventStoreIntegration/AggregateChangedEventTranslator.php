@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Psa\EventSourcing\EventStoreIntegration;
@@ -115,7 +116,7 @@ class AggregateChangedEventTranslator implements EventTranslatorInterface
 	 * @param \Prooph\EventStore\RecordedEvent $recordedEvent Recorded Event
 	 * @return object
 	 */
-	public function fromStore(RecordedEvent $recordedEvent)
+	public function fromStore(RecordedEvent $recordedEvent): object
 	{
 		$eventType = $recordedEvent->eventType();
 		$eventClass = '';

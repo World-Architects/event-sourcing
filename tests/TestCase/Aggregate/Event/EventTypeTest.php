@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Psa\EventSourcing\Test\TestCase\Aggregate\Event;
@@ -21,7 +22,7 @@ class EventTypeTest extends TestCase
 	 */
 	public function testEventObjectWithProvider(): void
 	{
-		$class = new class() implements EventTypeProviderInterface {
+		$class = new class () implements EventTypeProviderInterface {
 			public function eventType(): EventType
 			{
 				return EventType::fromString('Interfaced-Event');
@@ -40,8 +41,8 @@ class EventTypeTest extends TestCase
 	 */
 	public function testEventObjectWithConstant(): void
 	{
-		$class = new class() {
-			const EVENT_TYPE = 'Type-Constant';
+		$class = new class () {
+			public const EVENT_TYPE = 'Type-Constant';
 		};
 
 		$result = EventType::fromEvent($class);

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Psa\EventSourcing\EventStoreIntegration;
@@ -17,13 +18,17 @@ interface EventTranslatorInterface
 	 * @param array $events Events
 	 * @return array
 	 */
-	public function toStore(string $aggregateId, AggregateType $aggregateType, array $events): array;
+	public function toStore(
+		string $aggregateId,
+		AggregateType $aggregateType,
+		array $events
+	): array;
 
 	/**
 	 * @param \Prooph\EventStore\RecordedEvent $recordedEvent Recorded Event
 	 * @return object
 	 */
-	public function fromStore(RecordedEvent $recordedEvent);
+	public function fromStore(RecordedEvent $recordedEvent): object;
 
 	/**
 	 * @param array $typeMap Type Mapping

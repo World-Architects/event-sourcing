@@ -1,8 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Psa\EventSourcing\EventStoreIntegration;
 
+use Assert\Assert;
 use Iterator;
 use Psa\EventSourcing\Aggregate\AggregateType;
 use Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface;
@@ -15,7 +17,7 @@ use ReflectionClass;
  * Converts domain events to whatever the store implementation expects and vice
  * versa.
  */
-final class AggregateReflectionTranslator implements AggregateTranslatorInterface
+class AggregateReflectionTranslator implements AggregateTranslatorInterface
 {
 	/**
 	 * @var object
@@ -49,7 +51,8 @@ final class AggregateReflectionTranslator implements AggregateTranslatorInterfac
 	];
 
 	/**
-	 * @param array $map Map
+	 * @param array $propertyMap Property mapping
+	 * @param array $methodMap Method mapping
 	 */
 	public function __construct(array $propertyMap = [], array $methodMap = [])
 	{
@@ -68,6 +71,13 @@ final class AggregateReflectionTranslator implements AggregateTranslatorInterfac
 			$className = get_class($aggregate);
 		}
 
+		if (!class_exists($className)) {
+			throw new RuntimeException(sprintf(
+				'Aggregate class `%s` does not exist',
+				$className
+			));
+		}
+
 		if (!$this->reflection || $this->reflection->getName() !== $className) {
 			$this->reflection = new ReflectionClass($aggregate);
 		}
@@ -77,7 +87,8 @@ final class AggregateReflectionTranslator implements AggregateTranslatorInterfac
 
 	/**
 	 * @param object $aggregate Aggregate
-	 * @param string $property Property
+	 * @param string $propertyOrMethod Property
+	 * @param array $args Arguments
 	 */
 	protected function extract(object $aggregate, string $propertyOrMethod, array $args = [])
 	{
@@ -129,7 +140,13 @@ final class AggregateReflectionTranslator implements AggregateTranslatorInterfac
 	 */
 	public function extractAggregateVersion(object $aggregate): int
 	{
-		return $this->extract($aggregate, 'aggregateVersion');
+		$version = $this->extract($aggregate, 'aggregateVersion');
+
+		Assert::that($version)
+			->integer($version)
+			->greaterOrEqualThan(0);
+
+		return $version;
 	}
 
 	/**
@@ -139,7 +156,10 @@ final class AggregateReflectionTranslator implements AggregateTranslatorInterfac
 	 */
 	public function extractAggregateId(object $aggregate): string
 	{
-		return $this->extract($aggregate, 'aggregateId');
+		$aggregateId = (string)$this->extract($aggregate, 'aggregateId');
+		Assert::that($aggregateId)->uuid();
+
+		return $aggregateId;
 	}
 
 	/**
@@ -169,7 +189,7 @@ final class AggregateReflectionTranslator implements AggregateTranslatorInterfac
 			));
 		}
 
-		$aggregateRootClass::{$this->methodeMap['reconstitute']}($historyEvents);
+		return $aggregateRootClass::{$this->methodeMap['reconstitute']}($historyEvents);
 	}
 
 	/**
@@ -195,7 +215,7 @@ final class AggregateReflectionTranslator implements AggregateTranslatorInterfac
 			throw new RuntimeException(sprintf(
 				'Method %s::%s() does not exist.',
 				$method,
-				get_class($aggregate),
+				get_class($aggregate)
 			));
 		}
 

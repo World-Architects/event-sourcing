@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Psa\EventSourcing\Test\TestCase\Aggregate;
@@ -23,7 +24,7 @@ class AggregateTypeTest extends TestCase
 	 */
 	public function testAggregateObjectWithProvider(): void
 	{
-		$class = new class() implements AggregateTypeProviderInterface {
+		$class = new class () implements AggregateTypeProviderInterface {
 			public function aggregateType(): AggregateType
 			{
 				return AggregateType::fromString('Interfaced-Aggregate');
@@ -41,8 +42,8 @@ class AggregateTypeTest extends TestCase
 	 */
 	public function testAggregateObjectWithConstant(): void
 	{
-		$class = new class() {
-			const AGGREGATE_TYPE = 'Type-Constant';
+		$class = new class () {
+			public const AGGREGATE_TYPE = 'Type-Constant';
 		};
 
 		$result = AggregateType::fromAggregateRoot($class);

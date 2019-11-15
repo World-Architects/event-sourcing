@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Psa\EventSourcing\Test\TestApp\Infrastructure\Repository;
@@ -15,7 +16,7 @@ use Psa\EventSourcing\Test\TestApp\Domain\Event\AccountUpdated;
  */
 class AccountRepository extends AbstractAggregateRepository
 {
-	const AGGREGATGE_TYPE = [
+	public const AGGREGATGE_TYPE = [
 		Account::AGGREGATE_TYPE => Account::class
 	];
 

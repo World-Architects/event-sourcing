@@ -1,5 +1,6 @@
 <?php
-declare(strict_types = 1);
+
+declare(strict_types=1);
 
 namespace Psa\EventSourcing\Aggregate;
 
@@ -15,14 +16,15 @@ interface AggregateRepositoryInterface
 	 * Gets an aggregate
 	 *
 	 * @param string $aggregateId Aggregate UUID
-	 * @return \Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface
+	 * @return object
 	 */
-	public function getAggregate(string $aggregateId): EventSourcedAggregateInterface;
+	public function getAggregate(string $aggregateId): object;
 
 	/**
 	 * Persist an aggregate
 	 *
-	 * @param \Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface $aggregate Event Sourced Aggregate
+	 * @param object $aggregate Event Sourced Aggregate
+	 * @return mixed
 	 */
-	public function saveAggregate(EventSourcedAggregateInterface $aggregate);
+	public function saveAggregate(object $aggregate);
 }
