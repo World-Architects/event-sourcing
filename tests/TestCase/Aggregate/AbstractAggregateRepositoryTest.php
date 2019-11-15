@@ -1,28 +1,25 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Psa\EventSourcing\Test\TestCase\Aggregate;
 
-use Psa\EventSourcing\EventStoreIntegration\AggregateChangedEventTranslator;
-use Psa\EventSourcing\Test\TestApp\Infrastructure\Repository\AccountRepository;
-use function Clue\StreamFilter\fun;
+use GuzzleHttp\Client as GuzzleClient;
+use Http\Adapter\Guzzle6\Client;
 use PHPUnit\Framework\TestCase;
 use Prooph\EventStore\EndPoint;
 use Prooph\EventStore\UserCredentials;
-//use Prooph\EventStoreClient\ConnectionSettings;
-//use Prooph\EventStoreClient\EventStoreConnectionFactory;
-
-use GuzzleHttp\Client as GuzzleClient;
-use Http\Adapter\Guzzle6\Client;
-
 use Prooph\EventStore\Transport\Http\EndpointExtensions;
 use Prooph\EventStoreHttpClient\ConnectionSettings;
 use Prooph\EventStoreHttpClient\EventStoreConnectionFactory;
-
 use Psa\EventSourcing\Aggregate\AggregateType;
 use Psa\EventSourcing\EventStoreIntegration\AggregateTranslator;
 use Psa\EventSourcing\Test\TestApp\Domain\Account;
 use Psa\EventSourcing\Test\TestApp\Domain\AccountId;
+use Psa\EventSourcing\EventStoreIntegration\AggregateChangedEventTranslator;
+use Psa\EventSourcing\Test\TestApp\Infrastructure\Repository\AccountRepository;
+
+use function Clue\StreamFilter\fun;
 
 /**
  * Abstract Aggregate Repository Test

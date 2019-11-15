@@ -1,5 +1,6 @@
 <?php
-declare(strict_types = 1);
+
+declare(strict_types=1);
 
 namespace Psa\EventSourcing\SnapshotStore;
 
@@ -76,7 +77,7 @@ class PdoSqlStore implements SnapshotStoreInterface
 	/**
 	 * Stores an aggregate snapshot
 	 *
-	 * @param \Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface $aggregate Aggregate
+	 * @param \Psa\EventSourcing\SnapshotStore\SnapshotInterface $snapshot Snapshot
 	 * @return void
 	 */
 	public function store(SnapshotInterface $snapshot): void

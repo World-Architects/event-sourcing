@@ -1,5 +1,6 @@
 <?php
-declare(strict_types = 1);
+
+declare(strict_types=1);
 
 namespace Psa\EventSourcing\Aggregate;
 
@@ -47,7 +48,7 @@ use function Amp\Promise\wait;
 abstract class AbstractAsyncAggregateRepository implements AggregateRepositoryInterface
 {
 	/**
-	 * @var \Prooph\EventStore\EventStoreConnection
+	 * @var \Prooph\EventStore\Async\EventStoreConnection
 	 */
 	protected $eventStore;
 
@@ -102,7 +103,10 @@ abstract class AbstractAsyncAggregateRepository implements AggregateRepositoryIn
 	/**
 	 * Constructor
 	 *
-	 * @param \Prooph\EventStore\EventStoreConnection $eventStore Event Store Connection
+	 * @param \Prooph\EventStore\Async\EventStoreConnection $eventStore Event Store Connection
+	 * @param \Psa\EventSourcing\EventStoreIntegration\AggregateTranslatorInterface $aggregateTranslator Aggregate Translator
+	 * @param \Psa\EventSourcing\EventStoreIntegration\EventTranslatorInterface $eventTranslator Event Translator
+	 * @param null|\Psa\EventSourcing\SnapshotStore\SnapshotStoreInterface $snapshotStore Snapshotstore
 	 */
 	public function __construct(
 		EventStoreConnection $eventStore,
@@ -169,7 +173,11 @@ abstract class AbstractAsyncAggregateRepository implements AggregateRepositoryIn
 			$this->snapshotStore->delete($aggregateId);
 		}
 
-		$this->eventStore->deleteStream($aggregateId, ExpectedVersion::ANY, $hardDelete);
+		return $this->eventStore->deleteStreamAsync(
+			$aggregateId,
+			ExpectedVersion::ANY,
+			$hardDelete
+		);
 	}
 
 	/**
@@ -183,7 +191,7 @@ abstract class AbstractAsyncAggregateRepository implements AggregateRepositoryIn
 	 * @param string $aggregateId Aggregate UUID
 	 * @return null|\Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface
 	 */
-	protected function loadFromSnapshotStore(string $aggregateId): EventSourcedAggregateInterface
+	protected function loadFromSnapshotStore(string $aggregateId): ?EventSourcedAggregateInterface
 	{
 		Assert::that($aggregateId)->uuid();
 
@@ -278,10 +286,18 @@ abstract class AbstractAsyncAggregateRepository implements AggregateRepositoryIn
 		$streamName = $this->determineStreamName($aggregateId);
 
 		$promise = $this->eventStore->readStreamEventsForwardAsync(
-				$streamName,
-				$position,
-				$this->eventsPerSlice
-			);
+			$streamName,
+			$position,
+			$this->eventsPerSlice
+		);
+
+		$promise->onResolve(function ($error, $result) {
+			if ($error !== null) {
+				throw $error;
+			}
+
+			return $result;
+		});
 
 		$slice = wait($promise);
 
@@ -334,7 +350,8 @@ abstract class AbstractAsyncAggregateRepository implements AggregateRepositoryIn
 			$events
 		);
 
-		return wait($promise);;
+		return wait($promise);
+		;
 	}
 
 	/**

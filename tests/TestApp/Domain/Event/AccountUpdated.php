@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Psa\EventSourcing\Test\TestApp\Domain\Event;
@@ -11,7 +12,7 @@ use Psa\EventSourcing\Test\TestApp\Domain\AccountId;
  */
 class AccountUpdated extends AggregateChangedEvent
 {
-	const EVENT_TYPE = 'Accounting.Account.updated';
+	public const EVENT_TYPE = 'Accounting.Account.updated';
 
 	protected $accountId;
 	protected $name;

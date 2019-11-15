@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Psa\EventSourcing\EventStoreIntegration;
@@ -72,14 +73,27 @@ class EventReflectionTranslator implements EventTranslatorInterface
 				$eventType->toString(),
 				true,
 				json_encode($payload),
-				json_encode([
-					'aggregate_id' => $aggregateId,
-					'event_class' => get_class($event)
-				])
+				json_encode($this->buildMetadata(
+					$aggregateId,
+					$aggregateType,
+					$event,
+					$eventType
+				))
 			);
 		}
 
 		return $storeEvents;
+	}
+
+	/**
+	 * @return array
+	 */
+	protected function buildMetadata($aggregateId, $aggregateType, $event, $eventType): array
+	{
+		return [
+			'aggregate_id' => $aggregateId,
+			'event_class' => get_class($event)
+		];
 	}
 
 	/**
@@ -96,7 +110,7 @@ class EventReflectionTranslator implements EventTranslatorInterface
 
 		if (!isset($metadata['event_class'])) {
 			throw new RuntimeException(sprintf(
-				'Event class is missing from metadata'
+				'Key `event_class` is missing in metadata array'
 			));
 		}
 

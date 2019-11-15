@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Psa\EventSourcing\EventStoreIntegration;
@@ -50,7 +51,8 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 	];
 
 	/**
-	 * @param array $map Map
+	 * @param array $propertyMap Property mapping
+	 * @param array $methodMap Method mapping
 	 */
 	public function __construct(array $propertyMap = [], array $methodMap = [])
 	{
@@ -85,7 +87,8 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 
 	/**
 	 * @param object $aggregate Aggregate
-	 * @param string $property Property
+	 * @param string $propertyOrMethod Property
+	 * @param array $args Arguments
 	 */
 	protected function extract(object $aggregate, string $propertyOrMethod, array $args = [])
 	{
@@ -137,7 +140,13 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 	 */
 	public function extractAggregateVersion(object $aggregate): int
 	{
-		return (int)$this->extract($aggregate, 'aggregateVersion');
+		$version = $this->extract($aggregate, 'aggregateVersion');
+
+		Assert::that($version)
+			->integer($version)
+			->greaterOrEqualThan(0);
+
+		return $version;
 	}
 
 	/**
@@ -147,7 +156,10 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 	 */
 	public function extractAggregateId(object $aggregate): string
 	{
-		return $this->extract($aggregate, 'aggregateId');
+		$aggregateId = (string)$this->extract($aggregate, 'aggregateId');
+		Assert::that($aggregateId)->uuid();
+
+		return $aggregateId;
 	}
 
 	/**

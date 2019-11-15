@@ -17,4 +17,3 @@ This is an interface based aggregate translator. Your aggregates must implement 
 ## Implementing your own translators
 
 An aggregate translator must implement the `Psa\EventSourcing\EventStoreIntegration\AggregateTranslatorInterface`.
-

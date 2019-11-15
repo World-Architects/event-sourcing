@@ -1,8 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Psa\EventSourcing\EventStoreIntegration;
 
+use Assert\Assert;
 use Iterator;
 use Psa\EventSourcing\Aggregate\AggregateType;
 use Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface;
@@ -21,7 +23,7 @@ final class AggregateTranslator implements AggregateTranslatorInterface
 	protected $aggregateRootDecorator;
 
 	/**
-	 * @param object $eventSourcedAggregateRoot
+	 * @param object $anAggregateRoot Aggregate object
 	 * @return int
 	 */
 	public function extractAggregateVersion(object $anAggregateRoot): int
@@ -31,13 +33,17 @@ final class AggregateTranslator implements AggregateTranslatorInterface
 	}
 
 	/**
-	 * @param object $anAggregateRoot
+	 * @param object $anAggregateRoot Aggregate object
 	 * @return string
 	 */
 	public function extractAggregateId(object $anAggregateRoot): string
 	{
-		return $this->getAggregateRootDecorator()
+		$aggreagteId = $this->getAggregateRootDecorator()
 			->extractAggregateId($anAggregateRoot);
+
+		Assert::that($aggreagteId)->uuid();
+
+		return $aggreagteId;
 	}
 
 	/**

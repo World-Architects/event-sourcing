@@ -1,5 +1,6 @@
 <?php
-declare(strict_types = 1);
+
+declare(strict_types=1);
 
 namespace Psa\EventSourcing\Aggregate;
 
@@ -138,11 +139,11 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 			return;
 		}
 
-		if (!$this->aggregateType instanceof AggregateType) {
+		if (!$this->aggregateType instanceof AggregateTypeInterface) {
 			throw new RuntimeException(sprintf(
-				'%s::$aggregateType is a not string or %s. %s given.',
+				'%s::$aggregateType is not an object implementing `%s`. %s given.',
 				self::class,
-				AggregateType::class,
+				AggregateTypeInterface::class,
 				is_object($this->aggregateType)
 					? get_class($this->aggregateType)
 					: gettype($this->aggregateType)

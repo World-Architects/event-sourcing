@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Psa\EventSourcing\Test\TestCase\EventStoreIntegration;
@@ -10,6 +11,7 @@ use Psa\EventSourcing\EventStoreIntegration\AggregateReflectionTranslator;
 use Psa\EventSourcing\Test\TestApp\Domain\Account;
 use Iterator;
 
+//@codingStandardsIgnoreStart
 class TestAggregate
 {
 	protected $aggregateType = [
@@ -26,6 +28,7 @@ class TestAggregate
 	{
 	}
 }
+//@codingStandardsIgnoreEnd
 
 /**
  * AggregateReflectionTranslatorTest
