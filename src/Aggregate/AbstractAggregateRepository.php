@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * PSA Event Sourcing Library
+ * Copyright PSA Ltd. All rights reserved.
+ */
+
 declare(strict_types=1);
 
 namespace Psa\EventSourcing\Aggregate;
@@ -56,7 +61,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	/**
 	 * Aggregate Type
 	 *
-	 * @var null|string|array|\Psa\EventSourcing\Aggregate\AggregateTypeInterface
+	 * @var \Psa\EventSourcing\Aggregate\AggregateTypeInterface
 	 */
 	protected $aggregateType;
 
