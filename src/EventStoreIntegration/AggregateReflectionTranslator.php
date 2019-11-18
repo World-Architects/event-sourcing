@@ -7,6 +7,7 @@ namespace Psa\EventSourcing\EventStoreIntegration;
 use Assert\Assert;
 use Iterator;
 use Psa\EventSourcing\Aggregate\AggregateType;
+use Psa\EventSourcing\Aggregate\AggregateTypeInterface;
 use Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface;
 use RuntimeException;
 use ReflectionClass;
@@ -171,7 +172,7 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 	 * @return object reconstructed AggregateRoot
 	 */
 	public function reconstituteAggregateFromHistory(
-		AggregateType $aggregateType,
+		AggregateTypeInterface $aggregateType,
 		Iterator $historyEvents
 	) {
 		if (!$aggregateRootClass = $aggregateType->mappedClass()) {

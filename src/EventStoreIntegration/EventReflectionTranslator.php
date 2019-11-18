@@ -9,6 +9,7 @@ use Prooph\EventStore\EventData;
 use Prooph\EventStore\EventId;
 use Prooph\EventStore\RecordedEvent;
 use Psa\EventSourcing\Aggregate\AggregateType;
+use Psa\EventSourcing\Aggregate\AggregateTypeInterface;
 use Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface;
 use Psa\EventSourcing\Aggregate\Event\EventType;
 use Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface;
@@ -47,8 +48,11 @@ class EventReflectionTranslator implements EventTranslatorInterface
 	 * @param array $events Events
 	 * @return array
 	 */
-	public function toStore(string $aggregateId, AggregateType $aggregateType, array $events): array
-	{
+	public function toStore(
+		string $aggregateId,
+		AggregateTypeInterface $aggregateType,
+		array $events
+	): array {
 		$storeEvents = [];
 		foreach ($events as $event) {
 			$reflection = new ReflectionClass($event);
