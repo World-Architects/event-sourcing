@@ -40,18 +40,18 @@ class AggregateType implements AggregateTypeInterface
 	/**
 	 * Use this factory when aggregate type should be detected based on given aggregate root
 	 *
-	 * @param object $eventSourcedAggregateRoot
+	 * @param object $aggregateRoot Aggregate
 	 * @throws Exception\AggregateTypeException
 	 */
-	public static function fromAggregateRoot(object $eventSourcedAggregateRoot): AggregateType
+	public static function fromAggregateRoot(object $aggregateRoot): AggregateTypeInterface
 	{
 		// Check if the aggregate implements the type provider
-		if ($eventSourcedAggregateRoot instanceof AggregateTypeProviderInterface) {
-			return $eventSourcedAggregateRoot->aggregateType();
+		if ($aggregateRoot instanceof AggregateTypeProviderInterface) {
+			return $aggregateRoot->aggregateType();
 		}
 
 		$self = new static();
-		$aggregateClass = get_class($eventSourcedAggregateRoot);
+		$aggregateClass = get_class($aggregateRoot);
 		$typeConstant = $aggregateClass . '::' . $self->aggregateTypeConstant;
 
 		// Check if the aggregate has the type defined as constant
@@ -75,10 +75,13 @@ class AggregateType implements AggregateTypeInterface
 	 *
 	 * @throws \InvalidArgumentException
 	 */
-	public static function fromAggregateRootClass(string $aggregateRootClass): AggregateType
+	public static function fromAggregateRootClass(string $aggregateRootClass): AggregateTypeInterface
 	{
 		if (!class_exists($aggregateRootClass)) {
-			throw new InvalidArgumentException(sprintf('Aggregate root class %s can not be found', $aggregateRootClass));
+			throw new InvalidArgumentException(sprintf(
+				'Aggregate root class %s can not be found',
+				$aggregateRootClass
+			));
 		}
 
 		$self = new static();
@@ -93,7 +96,7 @@ class AggregateType implements AggregateTypeInterface
 	 * @param string $aggregateTypeString Aggregate Type String
 	 * @throws \InvalidArgumentException
 	 */
-	public static function fromString(string $aggregateTypeString): AggregateType
+	public static function fromString(string $aggregateTypeString): AggregateTypeInterface
 	{
 		Assert::that($aggregateTypeString)->string()->notBlank();
 
@@ -107,7 +110,7 @@ class AggregateType implements AggregateTypeInterface
 	 * @param array $mapping Mapping
 	 * @return static
 	 */
-	public static function fromMapping(array $mapping): AggregateType
+	public static function fromMapping(array $mapping): AggregateTypeInterface
 	{
 		$self = new static();
 		$self->mapping = $mapping;
