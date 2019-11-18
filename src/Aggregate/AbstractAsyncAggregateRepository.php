@@ -62,7 +62,7 @@ abstract class AbstractAsyncAggregateRepository implements AggregateRepositoryIn
 	/**
 	 * Aggregate Type
 	 *
-	 * @var \Psa\EventSourcing\Aggregate\AggregateType
+	 * @var string|array|\Psa\EventSourcing\Aggregate\AggregateType
 	 */
 	protected $aggregateType;
 

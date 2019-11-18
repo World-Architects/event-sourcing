@@ -78,7 +78,7 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 			));
 		}
 
-		if (!$this->reflection || $this->reflection->getName() !== $className) {
+		if ($this->reflection === null || $this->reflection->getName() !== $className) {
 			$this->reflection = new ReflectionClass($aggregate);
 		}
 

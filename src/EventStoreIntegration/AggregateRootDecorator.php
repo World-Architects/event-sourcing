@@ -35,8 +35,6 @@ class AggregateRootDecorator extends AggregateRoot
 	}
 
 	/**
-	 * @param AggregateRoot $anAggregateRoot
-	 *
 	 * @param \Psa\EventSourcing\Aggregate\AggregateRoot $anAggregateRoot An Aggregate Root
 	 * @return array
 	 */

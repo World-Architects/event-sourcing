@@ -44,8 +44,6 @@ trait EventSourcedTrait
 			 * @var \Psa\EventSourcing\Aggregate\Event\AggregateChangedEvent $pastEvent
 			 */
 			$this->aggregateVersion = $pastEvent->aggregateVersion();
-			$this->id = $pastEvent->aggregateId();
-
 			$this->apply($pastEvent);
 		}
 	}

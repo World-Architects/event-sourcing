@@ -56,7 +56,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	/**
 	 * Aggregate Type
 	 *
-	 * @var \Psa\EventSourcing\Aggregate\AggregateType
+	 * @var null|string|array|\Psa\EventSourcing\Aggregate\AggregateType
 	 */
 	protected $aggregateType;
 
