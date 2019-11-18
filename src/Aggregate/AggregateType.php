@@ -163,7 +163,7 @@ class AggregateType implements AggregateTypeInterface
 	 *
 	 * @return bool
 	 */
-	public function equals(AggregateType $other): bool
+	public function equals(AggregateTypeInterface $other): bool
 	{
 		if (!$aggregateTypeString = $this->mappedClass()) {
 			$aggregateTypeString = $this->toString();

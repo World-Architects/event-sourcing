@@ -56,7 +56,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	/**
 	 * Aggregate Type
 	 *
-	 * @var null|string|array|\Psa\EventSourcing\Aggregate\AggregateType
+	 * @var null|string|array|\Psa\EventSourcing\Aggregate\AggregateTypeInterface
 	 */
 	protected $aggregateType;
 
@@ -121,6 +121,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	protected function determineAggregateType(): void
 	{
 		if (defined('static::AGGREGATE_TYPE')) {
+			/** @phpstan-ignore PHPStan.Rules */
 			$this->aggregateType = static::AGGREGATE_TYPE;
 		}
 
@@ -176,9 +177,9 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	 * - Fetches and replays the events after the aggregate version of restored from the snapshot
 	 *
 	 * @param string $aggregateId Aggregate Id
-	 * @return null|\Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface
+	 * @return null|object
 	 */
-	protected function loadFromSnapshotStore(string $aggregateId): EventSourcedAggregateInterface
+	protected function loadFromSnapshotStore(string $aggregateId): ?object
 	{
 		Assert::that($aggregateId)->uuid($aggregateId);
 
