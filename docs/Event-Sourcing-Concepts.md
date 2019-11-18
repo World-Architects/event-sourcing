@@ -27,7 +27,7 @@ This describes what happens when an aggregate is read / it's state restored.
 
  * Attempt to read the aggregate 
    * Check snapshot store
-     * If snapshot of the AG is present, get it from there
+     * If snapshot of the aggregate is present, get it from there
      * Get remaining events if there are any after the version of the snapshot
    * If no snapshot is present read *all* events from the event store from the beginning
    * Replay the events on the aggregate

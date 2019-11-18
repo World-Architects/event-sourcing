@@ -10,7 +10,16 @@ It also has to call at least one static method that will take care of rebuilding
 
 The aggregate reflection translators constructor args allow you to define the mapping of the aggregate objectes properties to what the translator expects.
 
-## Aggregate Translator
+Your aggregate needs at least three properties and two methods that are required to work with event sourcing:
+ * $aggregateId
+ * $aggregateVersion
+ * $events
+ * reconstituteFromHistory()
+ * replay()
+
+When constructing this translator you can pass a map of properties and methods to the constructor to map your properties to what is expected internally by the translator.
+
+## Aggregate Interface Translator
 
 This is an interface based aggregate translator. Your aggregates must implement the `Psa\EventSourching\Aggregate\EventSourcedAggregateInterface` to be able to work with this translator.
 
