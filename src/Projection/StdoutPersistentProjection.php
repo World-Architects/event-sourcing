@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Psa\EventSourcing\Projection;
 
-use Prooph\EventStore\EventAppearedOnCatchupSubscription;
 use Prooph\EventStore\EventAppearedOnPersistentSubscription;
 use Prooph\EventStore\EventStoreCatchUpSubscription;
 use Prooph\EventStore\EventStorePersistentSubscription;
 use Prooph\EventStore\ResolvedEvent;
+use function Amp\call;
 
 /**
  * Stdout Projection
@@ -20,6 +20,18 @@ class StdoutPersistentProjection implements EventAppearedOnPersistentSubscriptio
 	use StdoutTrait;
 
 	/**
+	 * @var \Prooph\EventStore\EventAppearedOnPersistentSubscription
+	 */
+	protected $subscription;
+
+	/**
+	 * @param|null \Prooph\EventStore\EventAppearedOnPersistentSubscription $subscription Subscription
+	 */
+	public function __construct(?EventAppearedOnPersistentSubscription $subscription = null) {
+		$this->subscription;
+	}
+
+	/**
 	 * @inheritDoc
 	 */
 	public function __invoke(
@@ -28,5 +40,10 @@ class StdoutPersistentProjection implements EventAppearedOnPersistentSubscriptio
 		?int $retryCount = null
 	): void {
 		$this->writeEventToStdOut($resolvedEvent);
+
+		if ($this->subscription !== null) {
+			$callback = $this->subscription;
+			$callback($subscription, $resolvedEvent, $retryCount);
+		}
 	}
 }
