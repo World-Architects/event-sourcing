@@ -8,6 +8,7 @@ use Prooph\EventStore\EventAppearedOnPersistentSubscription;
 use Prooph\EventStore\EventStoreCatchUpSubscription;
 use Prooph\EventStore\EventStorePersistentSubscription;
 use Prooph\EventStore\ResolvedEvent;
+
 use function Amp\call;
 
 /**
@@ -20,15 +21,16 @@ class StdoutPersistentProjection implements EventAppearedOnPersistentSubscriptio
 	use StdoutTrait;
 
 	/**
-	 * @var \Prooph\EventStore\EventAppearedOnPersistentSubscription
+	 * @var null|\Prooph\EventStore\EventAppearedOnPersistentSubscription
 	 */
 	protected $subscription;
 
 	/**
-	 * @param|null \Prooph\EventStore\EventAppearedOnPersistentSubscription $subscription Subscription
+	 * @param null|\Prooph\EventStore\EventAppearedOnPersistentSubscription $subscription Subscription
 	 */
-	public function __construct(?EventAppearedOnPersistentSubscription $subscription = null) {
-		$this->subscription;
+	public function __construct(?EventAppearedOnPersistentSubscription $subscription = null)
+	{
+		$this->subscription = $subscription;
 	}
 
 	/**

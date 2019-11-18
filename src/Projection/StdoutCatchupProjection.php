@@ -18,15 +18,16 @@ class StdoutCatchupProjection implements EventAppearedOnCatchupSubscription
 	use StdoutTrait;
 
 	/**
-	 * @var \Prooph\EventStore\EventAppearedOnPersistentSubscription
+	 * @var null|\Prooph\EventStore\EventAppearedOnCatchupSubscription
 	 */
 	protected $subscription;
 
 	/**
-	 * @param|null \Prooph\EventStore\EventAppearedOnPersistentSubscription $subscription Subscription
+	 * @param null|\Prooph\EventStore\EventAppearedOnCatchupSubscription $subscription Subscription
 	 */
-	public function __construct(?EventAppearedOnPersistentSubscription $subscription = null) {
-		$this->subscription;
+	public function __construct(?EventAppearedOnCatchupSubscription $subscription = null)
+	{
+		$this->subscription = $subscription;
 	}
 
 	/**
@@ -40,7 +41,7 @@ class StdoutCatchupProjection implements EventAppearedOnCatchupSubscription
 
 		if ($this->subscription !== null) {
 			$callback = $this->subscription;
-			$callback($subscription, $resolvedEvent, $retryCount);
+			$callback($subscription, $resolvedEvent);
 		}
 	}
 }

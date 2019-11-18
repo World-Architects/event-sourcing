@@ -11,7 +11,7 @@ use Psa\EventSourcing\EventStoreIntegration\AggregateReflectionTranslator;
 use Psa\EventSourcing\Test\TestApp\Domain\Account;
 use Iterator;
 
-// phpcs:disable
+// phpcs:enable
 class TestAggregate
 {
 	protected $aggregateType = [
@@ -28,7 +28,7 @@ class TestAggregate
 	{
 	}
 }
-// phpcs:enable
+// phpcs:disable
 
 /**
  * AggregateReflectionTranslatorTest
