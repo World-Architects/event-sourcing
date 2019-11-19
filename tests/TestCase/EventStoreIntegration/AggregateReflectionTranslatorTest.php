@@ -19,7 +19,7 @@ class TestAggregate
 	];
 	protected $aggregateId = 'e37ad7f3-91df-440c-9568-6a2b90fd7fdb';
 	protected $aggregateVersion = 1;
-	protected $events = ['first' => 'event'];
+	protected $recordedEvents = ['first' => 'event'];
 	public static function reconstituteFromHistory(Iterator $historyEvents): self
 	{
 		return new self();

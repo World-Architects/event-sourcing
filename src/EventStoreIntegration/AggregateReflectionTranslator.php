@@ -41,7 +41,7 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 	protected $propertyMap = [
 		'aggregateId' => 'aggregateId',
 		'aggregateVersion' => 'aggregateVersion',
-		'events' => 'events'
+		'recordedEvents' => 'recordedEvents'
 	];
 
 	/**
@@ -53,7 +53,7 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 		// Optional
 		'aggregateId' => 'aggregateId',
 		'aggregateVersion' => 'aggregateVersion',
-		'events' => 'events'
+		'recordedEvents' => 'recordedEvents'
 	];
 
 	/**
@@ -204,7 +204,33 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 	 */
 	public function extractPendingStreamEvents(object $aggregate): array
 	{
-		return $this->extract($aggregate, 'events');
+		$reflection = $this->reflection($aggregate);
+
+		$property = $this->propertyMap['recordedEvents'];
+		if ($reflection->hasProperty($property)) {
+			$property = $reflection->getProperty($property);
+			$property->setAccessible(true);
+			$events = $property->getValue($aggregate);
+			$property->setValue($aggregate, []);
+
+			return $events;
+		}
+
+		$methodName = $this->methodeMap['recordedEvents'];
+		if ($reflection->hasMethod($methodName)) {
+			$method = $reflection->getMethod($methodName);
+			if ($method->isPublic()) {
+				return $aggregate->{$methodName}();
+			}
+
+			$method->isPublic(true);
+			return $method->invoke($aggregate);
+		}
+
+		throw new RuntimeException(sprintf(
+			'Could not extract pending events from aggregate %s',
+			get_class($aggregate)
+		));
 	}
 
 	/**
