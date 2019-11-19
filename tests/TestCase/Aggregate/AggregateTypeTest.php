@@ -10,7 +10,7 @@ use Psa\EventSourcing\Aggregate\AggregateType;
 use Psa\EventSourcing\Aggregate\AggregateTypeInterface;
 use Psa\EventSourcing\Aggregate\AggregateTypeProviderInterface;
 use Psa\EventSourcing\Aggregate\Exception\AggregateTypeException;
-use Psa\EventSourcing\Test\TestApp\Domain\Account;
+use Psa\EventSourcing\Test\TestApp\Domain\InterfaceBased\Account;
 
 /**
  * Aggregate Type Test

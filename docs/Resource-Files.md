@@ -4,11 +4,13 @@ The library provides a few resources in the `/resources` folder, that provide yo
 
 ## [EventStore/AuditLogProjection.js](../resources/EventStore/AuditLogProjection.js)
 
-This contains a JS script for the [Event Store](https://eventstore.org) that creates a projection to generate an audit log for user activities.
+This contains Javascript for the [Event Store](https://eventstore.org) that creates a projection to generate an audit log for user activities.
 
 By default your events must have a `_userId` field in the event meta data, that is used to to create the stream of events for this user id. 
 
 It will by default generate a stream named `UserAudit-<userId>` for each user.
+
+Check [the official event store documentation](https://eventstore.org/docs/projections/index.html) if you need to figure out how to use this file.
  
 ## [SQL/event_Store_snapshots_table.sql](../resources/SQL/event_Store_snapshots_table.sql)
 

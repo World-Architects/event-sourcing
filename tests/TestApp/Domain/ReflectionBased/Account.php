@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Psa\EventSourcing\Test\TestApp\Domain;
+namespace Psa\EventSourcing\Test\TestApp\Domain\ReflectionBased;
 
 use JsonSerializable;
-use Psa\EventSourcing\Test\TestApp\Domain\Event\AccountCreated;
-use Psa\EventSourcing\Test\TestApp\Domain\Event\AccountUpdated;
+use Psa\EventSourcing\Test\TestApp\Domain\ReflectionBased\Event\AccountCreated;
+use Psa\EventSourcing\Test\TestApp\Domain\ReflectionBased\Event\AccountUpdated;
 use Psa\EventSourcing\Aggregate\AggregateRoot;
 
 /**

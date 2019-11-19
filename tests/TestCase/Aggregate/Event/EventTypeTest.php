@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Psa\EventSourcing\Aggregate\Event\EventType;
 use Psa\EventSourcing\Aggregate\Event\EventTypeProviderInterface;
 use Psa\EventSourcing\Aggregate\Event\Exception\EventTypeException;
-use Psa\EventSourcing\Test\TestApp\Domain\Account;
+use Psa\EventSourcing\Test\TestApp\Domain\InterfaceBased\Account;
 
 /**
  * Event Type Test

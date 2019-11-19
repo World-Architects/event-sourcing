@@ -8,7 +8,7 @@ use ArrayIterator;
 use PHPUnit\Framework\TestCase;
 use Psa\EventSourcing\Aggregate\AggregateType;
 use Psa\EventSourcing\EventStoreIntegration\AggregateReflectionTranslator;
-use Psa\EventSourcing\Test\TestApp\Domain\Account;
+use Psa\EventSourcing\Test\TestApp\Domain\InterfaceBased\Account;
 use Iterator;
 
 // phpcs:enable

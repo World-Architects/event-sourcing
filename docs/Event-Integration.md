@@ -1,8 +1,10 @@
 # Event Integration
 
-The events your business logic or domain model is going to produce **muts** implement the `\Psa\EventSourcing\Aggregate\Event\\AggregateChangedEventInterface`. The interfaces ensures that your event is compatible with the event store system and the library can read and process it.
+The events your business logic or domain model is going to produce **must** implement the `\Psa\EventSourcing\Aggregate\Event\\AggregateChangedEventInterface`. The interfaces ensures that your event is compatible with the event store system and the library can read and process it.
 
 If you don't want to implement all of that on your own you can extend the provided `\Psa\EventSourcing\Aggregate\Event\\AggregateChangedEvent` class. 
+
+## Integration via Interface
 
 ```php
 <?php
@@ -16,3 +18,7 @@ class AccountCreated extends AggregateChangedEvent
 {
 }
 ```
+
+## Integration via Reflection
+
+

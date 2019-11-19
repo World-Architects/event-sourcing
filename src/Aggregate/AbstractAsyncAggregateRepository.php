@@ -345,7 +345,9 @@ abstract class AbstractAsyncAggregateRepository implements AggregateRepositoryIn
 	public function saveAggregate(object $aggregate)
 	{
 		$aggregateId = $this->aggregateTranslator->extractAggregateId($aggregate);
+		$aggregateVersion = $this->aggregateTranslator->extractAggregateVersion($aggregate);
 		$events = $this->aggregateTranslator->extractPendingStreamEvents($aggregate);
+
 		$events = $this->eventTranslator->toStore($aggregateId, $this->aggregateType, $events);
 		$streamName = $this->determineStreamName($aggregateId);
 		$this->assertAggregateType($aggregate);
@@ -357,7 +359,6 @@ abstract class AbstractAsyncAggregateRepository implements AggregateRepositoryIn
 		);
 
 		return wait($promise);
-		;
 	}
 
 	/**

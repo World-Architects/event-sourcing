@@ -14,9 +14,9 @@ use Prooph\EventStoreHttpClient\ConnectionSettings;
 use Prooph\EventStoreHttpClient\EventStoreConnectionFactory;
 use Psa\EventSourcing\Aggregate\AggregateType;
 use Psa\EventSourcing\EventStoreIntegration\AggregateTranslator;
-use Psa\EventSourcing\Test\TestApp\Domain\Account;
-use Psa\EventSourcing\Test\TestApp\Domain\AccountId;
 use Psa\EventSourcing\EventStoreIntegration\AggregateChangedEventTranslator;
+use Psa\EventSourcing\Test\TestApp\Domain\InterfaceBased\Account;
+use Psa\EventSourcing\Test\TestApp\Domain\InterfaceBased\AccountId;
 use Psa\EventSourcing\Test\TestApp\Infrastructure\Repository\AccountRepository;
 
 use function Clue\StreamFilter\fun;

@@ -6,7 +6,7 @@ namespace Psa\EventSourcing\Test\TestCase\EventStoreIntegration;
 
 use PHPUnit\Framework\TestCase;
 use Psa\EventSourcing\EventStoreIntegration\AggregateTranslator;
-use Psa\EventSourcing\Test\TestApp\Domain\Account;
+use Psa\EventSourcing\Test\TestApp\Domain\InterfaceBased\Account;
 
 /**
  * AggregateTranslatorTest

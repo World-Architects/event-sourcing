@@ -12,10 +12,10 @@ use Prooph\EventStore\RecordedEvent;
 use Psa\EventSourcing\Aggregate\AggregateType;
 use Psa\EventSourcing\EventStoreIntegration\AggregateTranslator;
 use Psa\EventSourcing\EventStoreIntegration\EventReflectionTranslator;
-use Psa\EventSourcing\Test\TestApp\Domain\Account;
-use Psa\EventSourcing\Test\TestApp\Domain\AccountId;
-use Psa\EventSourcing\Test\TestApp\Domain\Event\AccountCreated;
-use Psa\EventSourcing\Test\TestApp\Domain\Event\AccountUpdated;
+use Psa\EventSourcing\Test\TestApp\Domain\ReflectionBased\Account;
+use Psa\EventSourcing\Test\TestApp\Domain\ReflectionBased\AccountId;
+use Psa\EventSourcing\Test\TestApp\Domain\ReflectionBased\Event\AccountCreated;
+use Psa\EventSourcing\Test\TestApp\Domain\ReflectionBased\Event\AccountUpdated;
 
 /**
  * EventReflectionTranslatorTest
@@ -51,12 +51,15 @@ class EventReflectionTranslatorTest extends TestCase
 		$this->assertInstanceOf(EventData::class, $result[1]);
 
 		$eventData = json_decode($result[0]->data(), true);
+
 		$expected = [
 			'accountId' => 'c98ffa8f-ecda-494a-9412-ce7ff7aa0b93',
+			'accountNumber' => null,
+			'currency' => null,
 			'name' => 'Just created',
-			'description' => 'Just created'
+			'description' => 'Just created',
 		];
-		$this->assertEquals($eventData['payload'], $expected);
+		$this->assertEquals($eventData, $expected);
 
 		$eventData = json_decode($result[1]->data(), true);
 		$expected = [
@@ -64,7 +67,7 @@ class EventReflectionTranslatorTest extends TestCase
 			'name' => 'Changed',
 			'description' => 'Changed'
 		];
-		$this->assertEquals($eventData['payload'], $expected);
+		$this->assertEquals($eventData, $expected);
 	}
 
 	/**
@@ -92,6 +95,7 @@ class EventReflectionTranslatorTest extends TestCase
 
 		$result = $translator->fromStore($event);
 		$this->assertInstanceOf(AccountCreated::class, $result);
-		var_dump($result);
+
+		//var_export($result);
 	}
 }

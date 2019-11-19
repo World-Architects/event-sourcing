@@ -6,6 +6,10 @@ This library provides two traits `Psa\EventSourcing\Aggregate\EventSourcedTrait`
 
 The `EventSourcedTrait` will process the events while the `EventProducerTrait` provides the methods to record the events:
 
+## Integration via Reflection
+
+## Integration via Interface
+
 ```php
 use Psa\EventSourcing\Aggregate\EventSourcedTrait;
 use Psa\EventSourcing\Aggregate\EventProducerTrait;

@@ -8,8 +8,8 @@ use PHPUnit\Framework\TestCase;
 use Prooph\EventStore\EventData;
 use Psa\EventSourcing\Aggregate\AggregateType;
 use Psa\EventSourcing\EventStoreIntegration\AggregateChangedEventTranslator;
-use Psa\EventSourcing\Test\TestApp\Domain\Account;
-use Psa\EventSourcing\Test\TestApp\Domain\AccountId;
+use Psa\EventSourcing\Test\TestApp\Domain\InterfaceBased\Account;
+use Psa\EventSourcing\Test\TestApp\Domain\InterfaceBased\AccountId;
 
 /**
  * AggregateChangedEventTranslatorTest

@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Psa\EventSourcing\SnapshotStore\Snapshot;
 use Psa\EventSourcing\SnapshotStore\SnapshotFactory;
 use Psa\EventSourcing\SnapshotStore\SnapshotInterface;
-use Psa\EventSourcing\Test\TestApp\Domain\Account;
+use Psa\EventSourcing\Test\TestApp\Domain\InterfaceBased\Account;
 
 /**
  * Snapshot Factory Test

@@ -11,7 +11,7 @@ use Psa\EventSourcing\SnapshotStore\Serializer\JsonSerializer;
 use Psa\EventSourcing\SnapshotStore\Serializer\SerializeSerializer;
 use Psa\EventSourcing\SnapshotStore\Snapshot;
 use Psa\EventSourcing\SnapshotStore\SnapshotInterface;
-use Psa\EventSourcing\Test\TestApp\Domain\Account;
+use Psa\EventSourcing\Test\TestApp\Domain\InterfaceBased\Account;
 use Psa\EventSourcing\Test\TestCase\TestCase;
 
 /**
