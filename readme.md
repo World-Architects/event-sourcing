@@ -14,6 +14,10 @@ This library provides tools for an [event sourcing](https://martinfowler.com/eaa
 
 The event store system that this library is using is https://eventstore.org/ and using the [Prooph](https://github.com/prooph) client libraries ([Async](https://github.com/prooph/event-store-client), [HTTP](https://github.com/prooph/event-store-http-client)) to communicate with it. 
 
+## Requirements
+
+The default event store implementation that library uses is the event store from https://eventstore.org. Make sure you installed it and it is running properly. Consult the [documentation](https://eventstore.org/docs/) if you need to know how to set it up.
+
 ## Installation
 
 Add it via composer to your project
