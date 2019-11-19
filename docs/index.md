@@ -7,6 +7,7 @@
  * [Event Translators](Event-Translators.md)
  * [Snapshot Stores](Snapshot-Stores.md)
  * [Projections](Projections.md)
+ * [Resource Files](Resource-Files.md)
  * [Resources](Resources.md)
  * [Optional: CQRS Guide](CQRS.md)
 

@@ -33,6 +33,8 @@ Serializers are the objects that take care of the serialization of the aggregate
 
 You are free to implement your own serializers by implementing the interface `Psa\EventSourcing\SnapshotStore\Serializer\SerializerInterface`.
 
+Keep in mind that to be able to serialize and restore your object properly, you need to make sure that your object shouldn't have any open resource handlers or connections. You might be able tore restore them, but your aggregate shouldn't have anything like that and if it has you can't be sure to be able to restore them again correctly!
+
 ## Using Stores
 
 Event stores accept only an object that implements the `Psa\EventSourcing\SnapshotStore\SnapshotInterface` as argument.
