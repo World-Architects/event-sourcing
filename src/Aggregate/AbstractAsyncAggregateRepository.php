@@ -14,6 +14,7 @@ use Amp\Loop;
 use Amp\Success;
 use ArrayIterator;
 use Assert\Assert;
+use DateTimeImmutable;
 use Psa\EventSourcing\Aggregate\Event\EventType;
 use Psa\EventSourcing\Aggregate\Exception\AggregateTypeMismatchException;
 use Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface;
@@ -23,6 +24,7 @@ use Psa\EventSourcing\EventStoreIntegration\AggregateTranslator;
 use Psa\EventSourcing\EventStoreIntegration\AggregateTranslatorInterface;
 use Psa\EventSourcing\EventStoreIntegration\AggregateChangedEventTranslator;
 use Psa\EventSourcing\EventStoreIntegration\EventTranslatorInterface;
+use Psa\EventSourcing\SnapshotStore\Snapshot;
 use Psa\EventSourcing\SnapshotStore\SnapshotInterface;
 use Psa\EventSourcing\SnapshotStore\SnapshotStoreInterface;
 use Prooph\EventStore\Async\EventStoreConnection;
@@ -217,10 +219,10 @@ abstract class AbstractAsyncAggregateRepository implements AggregateRepositoryIn
 
 		$events = $this->getEventsFromPosition(
 			$snapshot->aggregateId(),
-			$snapshot->lastVersion() + 1
+			$snapshot->lastVersion()
 		);
 
-		$this->aggregateDecorator->replayStreamEvents($aggregateRoot, $events);
+		$this->aggregateTranslator->replayStreamEvents($aggregateRoot, $events);
 
 		return $aggregateRoot;
 	}
@@ -233,7 +235,7 @@ abstract class AbstractAsyncAggregateRepository implements AggregateRepositoryIn
 	 */
 	protected function snapshotMatchesAggregateType(SnapshotInterface $snapshot): void
 	{
-		if ($snapshot->aggregateType() !== $this->aggregateType) {
+		if ($snapshot->aggregateType() !== $this->aggregateType->toString()) {
 			throw AggregateTypeMismatchException::mismatch(
 				$snapshot->aggregateType(),
 				$this->aggregateType->toString()
@@ -244,10 +246,26 @@ abstract class AbstractAsyncAggregateRepository implements AggregateRepositoryIn
 	/**
 	 * Creates a snapshot of the aggregate
 	 *
+	 * @param object $aggregate Aggregate
 	 * @return void
 	 */
-	public function createSnapshot(SnapshotInterface $snapshot): void
+	public function createSnapshot(object $aggregate): void
 	{
+		if ($this->snapshotStore === null) {
+			return;
+		}
+
+		$aggregateId = $this->aggregateTranslator->extractAggregateId($aggregate);
+		$aggregateVersion = $this->aggregateTranslator->extractAggregateVersion($aggregate);
+
+		$snapshot = new Snapshot(
+			$this->aggregateType->toString(),
+			$aggregateId,
+			$aggregate,
+			$aggregateVersion,
+			new DateTimeImmutable()
+		);
+
 		$this->snapshotStore->store($snapshot);
 	}
 

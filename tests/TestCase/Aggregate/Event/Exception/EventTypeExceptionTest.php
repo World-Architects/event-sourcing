@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Psa\EventSourcing\Test\TestCase\Aggregate\Event;
 
 use PHPUnit\Framework\TestCase;
-
 use Psa\EventSourcing\Aggregate\Event\Exception\EventTypeException;
 
 /**
@@ -40,7 +39,7 @@ class EventTypeExceptionTest extends TestCase
 	 */
 	public function testMappingFailed(): void
 	{
-		$result = EventTypeException::mappingFailed('\Some\Class', 12,'1234');
+		$result = EventTypeException::mappingFailed('\Some\Class', 12, '1234');
 		$this->assertInstanceOf(EventTypeException::class, $result);
 		$expected = 'Mapping of \Some\Class failed. Version 12 ID 1234';
 		$this->assertEquals($expected, $result->getMessage());

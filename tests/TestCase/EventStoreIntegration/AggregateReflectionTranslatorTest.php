@@ -24,7 +24,7 @@ class TestAggregate
 	{
 		return new self();
 	}
-	protected function replay(Iterator $historyEvents): void
+	protected function replayEvents(Iterator $historyEvents): void
 	{
 	}
 }

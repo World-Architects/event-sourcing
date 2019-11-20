@@ -49,7 +49,7 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 	 */
 	protected $methodeMap = [
 		'reconstitute' => 'reconstituteFromHistory',
-		'replay' => 'replay',
+		'replay' => 'replayEvents',
 		// Optional
 		'aggregateId' => 'aggregateId',
 		'aggregateVersion' => 'aggregateVersion',
