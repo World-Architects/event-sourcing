@@ -36,7 +36,7 @@ class EventTypeException extends EventException
 	public static function typeMismatch(string $aggregateType, string $otherAggregateType)
 	{
 		return new self(sprintf(
-			'Event types must be equal. %s != %s',
+			'Event types must be equal: `%s` does not match `%s`',
 			$aggregateType,
 			$otherAggregateType
 		));
@@ -44,13 +44,13 @@ class EventTypeException extends EventException
 
 	/**
 	 * @param string $class Class
-	 * @param string $eventNumber Event Number
+	 * @param int $eventNumber Event Number
 	 * @param string $eventId Event Id
 	 * @return self
 	 */
 	public static function mappingFailed(
 		string $class,
-		string $eventNumber,
+		int $eventNumber,
 		string $eventId
 	) {
 		return new self(sprintf(

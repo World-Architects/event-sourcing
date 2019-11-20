@@ -36,7 +36,7 @@ class AggregateTypeException extends AggregateException
 	public static function typeMismatch(string $aggregateType, string $otherAggregateType)
 	{
 		return new self(sprintf(
-			'Aggregate types must be equal. %s != %s',
+			'Aggregate types must be equal: `%s` does not match `%s`',
 			$aggregateType,
 			$otherAggregateType
 		));
