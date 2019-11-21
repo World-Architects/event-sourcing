@@ -157,8 +157,8 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 		}
 
 		throw new RuntimeException(sprintf(
-			'Property %s does not exist',
-			$property
+			'Property or method %s does not exist',
+			$propertyOrMethod
 		));
 	}
 
