@@ -32,10 +32,10 @@ interface AggregateTypeInterface
 	public function __toString(): string;
 
 	/**
-	 * @param object $aggregateRoot An aggregate
+	 * @param object $aggregateType An aggregate
 	 * @throws Exception\AggregateTypeException
 	 */
-	public function assert(object $aggregateRoot): void;
+	public function assert(AggregateTypeInterface $aggregateType): void;
 
 	/**
 	 * Checks if two instances of this class are equal

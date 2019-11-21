@@ -1,5 +1,6 @@
 # Event Sourcing Library
 
+ * [Installation](Installation.md)
  * [Event Sourcing Concepts](Event-Sourcing-Concepts.md)
  * [Aggregate Integration](Aggregate-Integration.md)
  * [Aggregate Repository](Aggregate-Repository.md)

@@ -12,6 +12,7 @@ namespace Psa\EventSourcing\Aggregate;
 use Assert\Assert;
 use Psa\EventSourcing\Aggregate\Exception\AggregateTypeException;
 use InvalidArgumentException;
+use Psa\EventSourcing\Aggregate\Exception\AggregateTypeMismatchException;
 
 /**
  * Aggregate Type
@@ -48,7 +49,7 @@ class AggregateType implements AggregateTypeInterface
 	 * @param object $aggregateRoot Aggregate
 	 * @throws Exception\AggregateTypeException
 	 */
-	public static function fromAggregateRoot(object $aggregateRoot): AggregateTypeInterface
+	public static function fromAggregate(object $aggregateRoot): AggregateTypeInterface
 	{
 		// Check if the aggregate implements the type provider
 		if ($aggregateRoot instanceof AggregateTypeProviderInterface) {
@@ -80,7 +81,7 @@ class AggregateType implements AggregateTypeInterface
 	 *
 	 * @throws \InvalidArgumentException
 	 */
-	public static function fromAggregateRootClass(string $aggregateRootClass): AggregateTypeInterface
+	public static function fromAggregateClass(string $aggregateRootClass): AggregateTypeInterface
 	{
 		if (!class_exists($aggregateRootClass)) {
 			throw new InvalidArgumentException(sprintf(
@@ -151,14 +152,12 @@ class AggregateType implements AggregateTypeInterface
 	 * @param object $aggregateRoot An aggregate
 	 * @throws Exception\AggregateTypeException
 	 */
-	public function assert(object $aggregateRoot): void
+	public function assert(AggregateTypeInterface $otherType): void
 	{
-		$otherAggregateType = self::fromAggregateRoot($aggregateRoot);
-
-		if (!$this->equals($otherAggregateType)) {
-			throw AggregateTypeException::typeMismatch(
-				$this->toString(),
-				$otherAggregateType->toString()
+		if (!$this->equals($otherType)) {
+			throw AggregateTypeMismatchException::mismatch(
+				(string)$this,
+				(string)$otherType
 			);
 		}
 	}
@@ -170,11 +169,11 @@ class AggregateType implements AggregateTypeInterface
 	 */
 	public function equals(AggregateTypeInterface $other): bool
 	{
-		if (!$aggregateTypeString = $this->mappedClass()) {
-			$aggregateTypeString = $this->toString();
+		if (!$typeString = $this->mappedClass()) {
+			$typeString = $this->toString();
 		}
 
-		return $aggregateTypeString === $other->toString()
-			|| $aggregateTypeString === $other->mappedClass();
+		return $typeString === $other->toString()
+			|| $typeString === $other->mappedClass();
 	}
 }

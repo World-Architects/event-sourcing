@@ -11,6 +11,7 @@ namespace Psa\EventSourcing\Aggregate\Event;
 
 use InvalidArgumentException;
 use Psa\EventSourcing\Aggregate\AggregateTypeProviderInterface;
+use Psa\EventSourcing\Aggregate\Event\Exception\EventTypeMismatchException;
 use Psa\EventSourcing\Aggregate\Exception\AggregateTypeException;
 use Psa\EventSourcing\Aggregate\Event\Exception\EventTypeException;
 
@@ -63,12 +64,14 @@ class EventType
 		// Check if the aggregate has the type defined as constant
 		if (defined($typeConstant)) {
 			$self->eventType = constant($typeConstant);
+			$self->mapping = [$self->eventType => $eventClass];
 
 			return $self;
 		}
 
 		// Fall back to the FQCN as type
 		$self->eventType = $eventClass;
+		$self->mapping = [$eventClass => $eventClass];
 
 		return $self;
 	}
@@ -87,6 +90,7 @@ class EventType
 
 		$self = new static();
 		$self->eventType = $eventRootClass;
+		$self->mapping = [$eventRootClass => $eventRootClass];
 
 		return $self;
 	}
@@ -149,14 +153,12 @@ class EventType
 	 * @param object $event Event object
 	 * @throws \Psa\EventSourcing\Aggregate\Event\Exception\EventTypeException
 	 */
-	public function assert(object $event): void
+	public function assert(EventType $otherType): void
 	{
-		$otherEvent = self::fromEvent($event);
-
-		if (!$this->equals($otherEvent)) {
-			throw EventTypeException::typeMismatch(
-				$this->toString(),
-				$otherEvent->toString()
+		if (!$this->equals($otherType)) {
+			throw EventTypeMismatchException::mismatch(
+				(string)$this,
+				(string)$otherType
 			);
 		}
 	}

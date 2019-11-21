@@ -29,16 +29,16 @@ class EventTypeException extends EventException
 	}
 
 	/**
-	 * @param string $aggregateType Aggregate Type
-	 * @param string $otherAggregateType Other Aggregate Type
+	 * @param string $eventType Aggregate Type
+	 * @param string $otherEventType Other Aggregate Type
 	 * @return static
 	 */
-	public static function typeMismatch(string $aggregateType, string $otherAggregateType)
+	public static function typeMismatch(string $eventType, string $otherEventType)
 	{
 		return new self(sprintf(
 			'Event types must be equal: `%s` does not match `%s`',
-			$aggregateType,
-			$otherAggregateType
+			$eventType,
+			$otherEventType
 		));
 	}
 

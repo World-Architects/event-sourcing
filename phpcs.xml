@@ -2,7 +2,7 @@
 <ruleset name="PSA1">
     <description>PSR12 with tabs instead of spaces.</description>
     <arg name="tab-width" value="4"/>
-    <rule ref="PSR2">
+    <rule ref="PSR12">
         <exclude name="Generic.WhiteSpace.DisallowTabIndent"/>
     </rule>
     <rule ref="Generic.WhiteSpace.DisallowSpaceIndent"/>
@@ -14,5 +14,7 @@
     </rule>
     <rule ref="./vendor/squizlabs/php_codesniffer/src/Standards/PSR12/ruleset.xml">
         <exclude name="Generic.Files.LineLength.TooLong"/>
+        <!-- Damn inline exclude sytnax doesn work, so screw it -->
+        <exclude name="PSR1.Classes.ClassDeclaration"/>
     </rule>
 </ruleset>

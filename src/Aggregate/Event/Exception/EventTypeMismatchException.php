@@ -24,7 +24,7 @@ class EventTypeMismatchException extends RuntimeException
 	public static function mismatch(string $type1, string $type2): self
 	{
 		return new self(sprintf(
-			'Event type mismatch: `%s` doesn`t match the repositories type `%s`',
+			'Event type mismatch: `%s` doesn`t match `%s`',
 			$type1,
 			$type2
 		));

@@ -19,7 +19,7 @@ class EventTypeMismatchExceptionTest extends TestCase
 	{
 		$result = EventTypeMismatchException::mismatch('first', 'second');
 		$this->assertInstanceOf(EventTypeMismatchException::class, $result);
-		$expected = 'Event type mismatch: `first` doesn`t match the repositories type `second`';
+		$expected = 'Event type mismatch: `first` doesn`t match `second`';
 		$this->assertEquals($expected, $result->getMessage());
 	}
 }

@@ -9,6 +9,9 @@ declare(strict_types=1);
 
 namespace Psa\EventSourcing\Aggregate;
 
+use Amp\Failure;
+use Amp\Loop;
+use Amp\Success;
 use ArrayIterator;
 use Assert\Assert;
 use DateTimeImmutable;
@@ -16,6 +19,7 @@ use Psa\EventSourcing\Aggregate\Event\EventType;
 use Psa\EventSourcing\Aggregate\Exception\AggregateTypeMismatchException;
 use Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface;
 use Psa\EventSourcing\Aggregate\Event\Exception\EventTypeException;
+use Psa\EventSourcing\EventStoreIntegration\AggregateRootDecorator;
 use Psa\EventSourcing\EventStoreIntegration\AggregateTranslator;
 use Psa\EventSourcing\EventStoreIntegration\AggregateTranslatorInterface;
 use Psa\EventSourcing\EventStoreIntegration\AggregateChangedEventTranslator;
@@ -23,13 +27,16 @@ use Psa\EventSourcing\EventStoreIntegration\EventTranslatorInterface;
 use Psa\EventSourcing\SnapshotStore\Snapshot;
 use Psa\EventSourcing\SnapshotStore\SnapshotInterface;
 use Psa\EventSourcing\SnapshotStore\SnapshotStoreInterface;
+use Prooph\EventStore\Async\EventStoreConnection;
 use Prooph\EventStore\EventData;
 use Prooph\EventStore\EventId;
-use Prooph\EventStore\EventStoreConnection;
 use Prooph\EventStore\ExpectedVersion;
 use Prooph\EventStore\SliceReadStatus;
 use Prooph\EventStore\StreamEventsSlice;
 use RuntimeException;
+use Throwable;
+
+use function Amp\Promise\wait;
 
 /**
  * Abstract Aggregate Repository
@@ -45,10 +52,10 @@ use RuntimeException;
  *
  * The third possibility is to implement the AggregateTypeProviderInterface.
  */
-abstract class AbstractAggregateRepository implements AggregateRepositoryInterface
+abstract class AsyncAggregateRepository extends AbstractRepository
 {
 	/**
-	 * @var \Prooph\EventStore\EventStoreConnection
+	 * @var \Prooph\EventStore\Async\EventStoreConnection
 	 */
 	protected $eventStore;
 
@@ -62,7 +69,7 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	/**
 	 * Aggregate Type
 	 *
-	 * @var \Psa\EventSourcing\Aggregate\AggregateTypeInterface
+	 * @var string|array|\Psa\EventSourcing\Aggregate\AggregateType
 	 */
 	protected $aggregateType;
 
@@ -103,7 +110,10 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	/**
 	 * Constructor
 	 *
-	 * @param \Prooph\EventStore\EventStoreConnection $eventStore Event Store Connection
+	 * @param \Prooph\EventStore\Async\EventStoreConnection $eventStore Event Store Connection
+	 * @param \Psa\EventSourcing\EventStoreIntegration\AggregateTranslatorInterface $aggregateTranslator Aggregate Translator
+	 * @param \Psa\EventSourcing\EventStoreIntegration\EventTranslatorInterface $eventTranslator Event Translator
+	 * @param null|\Psa\EventSourcing\SnapshotStore\SnapshotStoreInterface $snapshotStore Snapshotstore
 	 */
 	public function __construct(
 		EventStoreConnection $eventStore,
@@ -115,46 +125,8 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 		$this->aggregateTranslator = $aggregateTranslator;
 		$this->eventTranslator = $eventTranslator;
 		$this->snapshotStore = $snapshotStore;
+		$this->aggregateDecorator = AggregateRootDecorator::newInstance();
 		$this->determineAggregateType();
-	}
-
-	/**
-	 * Determines and checks the aggregate type for this repository
-	 *
-	 * @return void
-	 */
-	protected function determineAggregateType(): void
-	{
-		if (defined('static::AGGREGATE_TYPE')) {
-			/** @phpstan-ignore PHPStan.Rules */
-			$this->aggregateType = static::AGGREGATE_TYPE;
-		}
-
-		if (is_string($this->aggregateType)) {
-			$this->aggregateType = AggregateType::fromString($this->aggregateType);
-			return;
-		}
-
-		if ($this instanceof AggregateTypeProviderInterface) {
-			$this->aggregateType = $this->aggregateType();
-			return;
-		}
-
-		if (is_array($this->aggregateType)) {
-			$this->aggregateType = AggregateType::fromMapping($this->aggregateType);
-			return;
-		}
-
-		if (!$this->aggregateType instanceof AggregateTypeInterface) {
-			throw new RuntimeException(sprintf(
-				'%s::$aggregateType is not an object implementing `%s`. %s given.',
-				self::class,
-				AggregateTypeInterface::class,
-				is_object($this->aggregateType)
-					? get_class($this->aggregateType)
-					: gettype($this->aggregateType)
-			));
-		}
 	}
 
 	/**
@@ -164,13 +136,17 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	 */
 	public function delete(string $aggregateId, $hardDelete = false)
 	{
-		Assert::that($aggregateId)->uuid($aggregateId);
+		Assert::that($aggregateId)->uuid();
 
 		if ($this->snapshotStore) {
 			$this->snapshotStore->delete($aggregateId);
 		}
 
-		$this->eventStore->deleteStream($aggregateId, ExpectedVersion::ANY, $hardDelete);
+		return $this->eventStore->deleteStreamAsync(
+			$aggregateId,
+			ExpectedVersion::ANY,
+			$hardDelete
+		);
 	}
 
 	/**
@@ -181,14 +157,14 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	 * - Checks if the snapshots aggregate type matches the repositories type
 	 * - Fetches and replays the events after the aggregate version of restored from the snapshot
 	 *
-	 * @param string $aggregateId Aggregate Id
+	 * @param string $aggregateId Aggregate UUID
 	 * @return null|object
 	 */
 	protected function loadFromSnapshotStore(string $aggregateId): ?object
 	{
-		Assert::that($aggregateId)->uuid($aggregateId);
+		Assert::that($aggregateId)->uuid();
 
-		if ($this->snapshotStore === null) {
+		if (!$this->snapshotStore) {
 			return null;
 		}
 
@@ -264,16 +240,18 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	{
 		Assert::that($aggregateId)->uuid($aggregateId);
 
-		if ($this->snapshotStore !== null) {
+		if ($this->snapshotStore) {
 			$result = $this->loadFromSnapshotStore($aggregateId);
 			if ($result !== null) {
 				return $result;
 			}
 		}
 
+		$events = $this->getEventsFromPosition($aggregateId, 0);
+
 		return $this->aggregateTranslator->reconstituteAggregateFromHistory(
 			$this->aggregateType,
-			$this->getEventsFromPosition($aggregateId, 0)
+			$events
 		);
 	}
 
@@ -284,36 +262,54 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 	 * @param int $position Position
 	 * @return \Iterator
 	 */
-	protected function getEventsFromPosition(string $aggregateId, int $position): \Iterator
+	protected function getEventsFromPosition(string $aggregateId, int $position)
 	{
-		Assert::that($aggregateId)->uuid($aggregateId);
+		Assert::that($aggregateId)->uuid();
 
 		$events = new ArrayIterator([]);
 		$eventTranslator = $this->eventTranslator->withTypeMap($this->eventTypeMapping);
 		$streamName = $this->determineStreamName($aggregateId);
 
-		$eventsSlice = $this->eventStore->readStreamEventsForward(
+		$promise = $this->eventStore->readStreamEventsForwardAsync(
 			$streamName,
 			$position,
 			$this->eventsPerSlice
 		);
 
-		if ($eventsSlice->isEndOfStream()) {
-			foreach ($eventsSlice->events() as $resolvedEvent) {
+		$promise->onResolve(function ($error, $result) {
+			if ($error !== null) {
+				throw $error;
+			}
+
+			return $result;
+		});
+
+		$slice = wait($promise);
+
+		if (!$slice->status()->equals(SliceReadStatus::success())) {
+			throw new RuntimeException(sprintf(
+				'Could not read stream: %s',
+				$slice->status()->name()
+			));
+		}
+
+		if ($slice->isEndOfStream()) {
+			foreach ($slice->events() as $resolvedEvent) {
 				$events[] = $eventTranslator->fromStore($resolvedEvent->event());
 			}
 
 			return $events;
 		}
 
-		while (!$eventsSlice->isEndOfStream()) {
-			$eventsSlice = $this->eventStore->readStreamEventsForward(
+		while (!$slice->isEndOfStream()) {
+			$promise = $this->eventStore->readStreamEventsForwardAsync(
 				$streamName,
-				$eventsSlice->lastEventNumber() + 1,
+				$slice->lastEventNumber() + 1,
 				$this->eventsPerSlice
 			);
 
-			foreach ($eventsSlice->events() as $resolvedEvent) {
+			$slice = wait($promise);
+			foreach ($slice->events() as $resolvedEvent) {
 				$events[] = $eventTranslator->fromStore($resolvedEvent->event());
 			}
 		}
@@ -323,45 +319,24 @@ abstract class AbstractAggregateRepository implements AggregateRepositoryInterfa
 
 	/**
 	 * @param object $aggregate Aggregate
-	 * @return void
+	 * @return mixed
 	 */
-	public function saveAggregate(object $aggregate): void
+	public function saveAggregate(object $aggregate)
 	{
 		$aggregateId = $this->aggregateTranslator->extractAggregateId($aggregate);
+		$aggregateVersion = $this->aggregateTranslator->extractAggregateVersion($aggregate);
 		$events = $this->aggregateTranslator->extractPendingStreamEvents($aggregate);
+
 		$events = $this->eventTranslator->toStore($aggregateId, $this->aggregateType, $events);
 		$streamName = $this->determineStreamName($aggregateId);
 		$this->assertAggregateType($aggregate);
 
-		$this->eventStore->appendToStream(
+		$promise = $this->eventStore->appendToStreamAsync(
 			$streamName,
 			ExpectedVersion::ANY,
 			$events
 		);
-	}
 
-	/**
-	 * @param object $eventSourcedAggregateRoot
-	 */
-	protected function assertAggregateType(object $eventSourcedAggregateRoot)
-	{
-		$this->aggregateType->assert($eventSourcedAggregateRoot);
-	}
-
-	/**
-	 * Default stream name generation.
-	 *
-	 * Override this method in an extending repository to provide a custom name
-	 */
-	protected function determineStreamName(string $aggregateId): string
-	{
-		if ($this->streamName === null) {
-			$prefix = (string)$this->aggregateType;
-			$prefix = str_replace('\\', '', $prefix);
-		} else {
-			$prefix = $this->streamName;
-		}
-
-		return $prefix . '-' . $aggregateId;
+		return wait($promise);
 	}
 }

@@ -30,6 +30,34 @@ class TestAggregate
 }
 // phpcs:disable
 
+// phpcs:enable
+class TestTwoAggregate
+{
+	protected $aggregateType = [
+		'TestAggregate' => TestAggregate::class
+	];
+	public function aggregateId()
+	{
+		return 'e37ad7f3-91df-440c-9568-6a2b90fd7fdb';
+	}
+	protected function aggregateVersion(): int
+	{
+		return 1;
+	}
+	protected function recordedEvents(): array
+	{
+		return ['first' => 'event'];
+	}
+	public static function reconstituteFromHistory(Iterator $historyEvents): self
+	{
+		return new self();
+	}
+	protected function replayEvents(Iterator $historyEvents): void
+	{
+	}
+}
+// phpcs:disable
+
 /**
  * AggregateReflectionTranslatorTest
  */
@@ -64,5 +92,20 @@ class AggregateReflectionTranslatorTest extends TestCase
 			AggregateType::fromMapping(['TestAggregate' => TestAggregate::class]),
 			new ArrayIterator(['first' => 'event'])
 		);
+	}
+
+	/**
+	 * @return void
+	 */
+	public function testExtractPendingStreamEvents(): void
+	{
+		$aggregate = new TestTwoAggregate();
+		$translator = new AggregateReflectionTranslator();
+
+		$result = $translator->extractAggregateId($aggregate);
+		$this->assertEquals('e37ad7f3-91df-440c-9568-6a2b90fd7fdb', $result);
+
+		$result = $translator->extractPendingStreamEvents($aggregate);
+		$this->assertEquals(['first' => 'event'], $result);
 	}
 }
