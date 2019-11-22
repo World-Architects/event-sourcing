@@ -63,7 +63,14 @@ class AggregateType implements AggregateTypeInterface
 		// Check if the aggregate has the type defined as constant
 		if (defined($typeConstant)) {
 			$self->aggregateType = constant($typeConstant);
-			$self->mapping = [$self->aggregateType => $aggregateClass];
+			if (is_string($self->aggregateType)) {
+				$self->mapping = [$self->aggregateType => $aggregateClass];
+			}
+
+			if (is_array($self->aggregateType)) {
+				$self->mapping = $self->aggregateType;
+				$self->aggregateType = array_keys($self->aggregateType)[0];
+			}
 
 			return $self;
 		}

@@ -14,7 +14,7 @@
     </rule>
     <rule ref="./vendor/squizlabs/php_codesniffer/src/Standards/PSR12/ruleset.xml">
         <exclude name="Generic.Files.LineLength.TooLong"/>
-        <!-- Damn inline exclude sytnax doesn work, so screw it -->
+        <!-- Damn inline exclude syntax doesn work, so screw it -->
         <exclude name="PSR1.Classes.ClassDeclaration"/>
     </rule>
 </ruleset>

@@ -50,7 +50,7 @@ trait AggregateTrait
 	 */
 	public static function reconstituteFromHistory(Iterator $events): self
 	{
-		$instance = new self();
+		$instance = new static();
 		$instance->replayEvents($events);
 
 		return $instance;

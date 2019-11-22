@@ -28,12 +28,15 @@ class AggregateTypeTest extends TestCase
 		$class = new class () implements AggregateTypeProviderInterface {
 			public function aggregateType(): AggregateType
 			{
-				return AggregateType::fromString('Interfaced-Aggregate');
+				return AggregateType::fromMapping([
+					'Interfaced-Aggregate' => static::class
+				]);
 			}
 		};
 
 		$result = AggregateType::fromAggregate($class);
 		$this->assertEquals('Interfaced-Aggregate', $result->toString());
+		$this->assertEquals(get_class($class), $result->mappedClass());
 	}
 
 	/**
@@ -49,6 +52,15 @@ class AggregateTypeTest extends TestCase
 
 		$result = AggregateType::fromAggregate($class);
 		$this->assertEquals('Type-Constant', $result->toString());
+		$this->assertEquals(get_class($class), $result->mappedClass());
+
+		$class = new class () {
+			public const AGGREGATE_TYPE = ['Type-Constant' => self::class];
+		};
+
+		$result = AggregateType::fromAggregate($class);
+		$this->assertEquals('Type-Constant', $result->toString());
+		$this->assertEquals(get_class($class), $result->mappedClass());
 	}
 
 	/**

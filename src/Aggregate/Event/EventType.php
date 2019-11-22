@@ -64,7 +64,15 @@ class EventType
 		// Check if the aggregate has the type defined as constant
 		if (defined($typeConstant)) {
 			$self->eventType = constant($typeConstant);
-			$self->mapping = [$self->eventType => $eventClass];
+
+			if (is_string($self->eventType)) {
+				$self->mapping = [$self->eventType => $eventClass];
+			}
+
+			if (is_array($self->eventType)) {
+				$self->mapping = $self->eventType;
+				$self->eventType = array_keys($self->eventType)[0];
+			}
 
 			return $self;
 		}
