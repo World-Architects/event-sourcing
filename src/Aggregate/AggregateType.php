@@ -115,6 +115,7 @@ class AggregateType implements AggregateTypeInterface
 
 		$self = new static();
 		$self->aggregateType = $aggregateTypeString;
+		$self->mapping = [$aggregateTypeString => $aggregateTypeString];
 
 		return $self;
 	}
@@ -127,6 +128,7 @@ class AggregateType implements AggregateTypeInterface
 	{
 		$self = new static();
 		$self->mapping = $mapping;
+		$self->aggregateType = array_keys($mapping)[0];
 
 		return $self;
 	}

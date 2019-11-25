@@ -6,7 +6,10 @@ namespace Psa\EventSourcing\Aggregate;
 use Iterator;
 
 /**
- * Account Aggregate
+ * Aggregate Trait
+ *
+ * This trait features a dependency minimalistic implementation for an event
+ * sourced aggregate.
  */
 trait AggregateTrait
 {

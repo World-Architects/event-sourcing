@@ -66,11 +66,6 @@ abstract class AbstractRepository implements AggregateRepositoryInterface
 			$this->aggregateType = static::AGGREGATE_TYPE;
 		}
 
-		if (is_string($this->aggregateType)) {
-			$this->aggregateType = AggregateType::fromString($this->aggregateType);
-			return;
-		}
-
 		if ($this instanceof AggregateTypeProviderInterface) {
 			$this->aggregateType = $this->aggregateType();
 			return;
@@ -81,11 +76,11 @@ abstract class AbstractRepository implements AggregateRepositoryInterface
 			return;
 		}
 
-		if (!$this->aggregateType instanceof AggregateType) {
+		if (!$this->aggregateType instanceof AggregateTypeInterface) {
 			throw new RuntimeException(sprintf(
-				'%s::$aggregateType is a not string or %s. %s given.',
+				'%s::$aggregateType could not resolve to %s. %s was provided.',
 				self::class,
-				AggregateType::class,
+				AggregateTypeInterface::class,
 				is_object($this->aggregateType)
 					? get_class($this->aggregateType)
 					: gettype($this->aggregateType)

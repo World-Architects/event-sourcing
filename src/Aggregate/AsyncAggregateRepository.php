@@ -119,14 +119,18 @@ abstract class AsyncAggregateRepository extends AbstractRepository
 		EventStoreConnection $eventStore,
 		AggregateTranslatorInterface $aggregateTranslator,
 		EventTranslatorInterface $eventTranslator,
-		?SnapshotStoreInterface $snapshotStore = null
+		?SnapshotStoreInterface $snapshotStore = null,
+		?AggregateTypeInterface $aggregateType = null
 	) {
 		$this->eventStore = $eventStore;
 		$this->aggregateTranslator = $aggregateTranslator;
 		$this->eventTranslator = $eventTranslator;
 		$this->snapshotStore = $snapshotStore;
 		$this->aggregateDecorator = AggregateRootDecorator::newInstance();
-		$this->determineAggregateType();
+
+		if ($aggregateType === null) {
+			$this->determineAggregateType();
+		}
 	}
 
 	/**

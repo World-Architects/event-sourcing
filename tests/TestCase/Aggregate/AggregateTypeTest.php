@@ -19,6 +19,18 @@ use Psa\EventSourcing\Test\TestApp\Domain\InterfaceBased\Account;
 class AggregateTypeTest extends TestCase
 {
 	/**
+	 * @return void
+	 */
+	public function testFromAggregateToFQCN(): void
+	{
+		$class = new class () {};
+
+		$result = AggregateType::fromAggregate($class);
+		$this->assertEquals(get_class($class), $result->toString());
+		$this->assertEquals(get_class($class), $result->mappedClass());
+	}
+
+	/**
 	 * testAggregateRoot
 	 *
 	 * @return void
