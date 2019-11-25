@@ -1,14 +1,61 @@
 # Aggregate Integration
 
-To make an aggregate event sourced it must implement `\Psa\EventSourcing\Aggregat\EventSourcedAggregateInterface`.
+## Integration via Reflection
+
+You aggregate doesn't have to implement any interface or inherit a specific class, but it has to fulfil a few event sourcing requirements. The reflection based aggregate translator of this library acts like a mapper for properties and methods.
+
+A lot of methods and properties will be protected in your aggregates even a few related to event sourcing. The
+reflection implementation can still call them. You can change the properties and method names if you like to, but you'll then have to pass the mapping to the reflection translators constructor to make it fetch the right things from the aggregate.
+
+```php
+class PersonAggregate
+{
+	protected $storedEvents = [];
+	protected $aggregateId;
+	protected $aggregateVersion = 0;
+
+	/**
+	 * @param \Iterator $events Events
+	 * @return self
+	 */
+	public static function reconstituteFromHistory(Iterator $events): self
+	{
+		$instance = new static();
+		$instance->replayEvents($events);
+
+		return $instance;
+	}
+
+	/**
+	 * Replays a list of events on this aggregate
+	 *
+	 * It is protected for the reason of not allowing the "public" to access this
+	 * method from the outside. Our event store implementation will take care
+	 * of that by using reflections to call the method anyway when we need to
+	 * add events.
+	 *
+	 * @param \Iterator $events Events
+	 * @return void
+	 */
+	protected function replayEvents(Iterator $events): void
+	{
+		foreach ($events as $event) {
+			// Do something to re-apply them, this is totally up to your implementation
+		}
+	}
+}
+```
+
+If you want an easy way to get started you can as well simply use the dependency free `\Psa\EventSourcing\Aggregate\AggregateTrait` to get started. You can also copy and paste the content of the file and adept it
+to your needs in your application.
+
+## Integration via Interface
+
+To make an aggregate event sourced using the interface implementation it must implement `\Psa\EventSourcing\Aggregat\EventSourcedAggregateInterface`.
 
 This library provides two traits `Psa\EventSourcing\Aggregate\EventSourcedTrait` and ``Psa\EventSourcing\Aggregate\EventProducerTrait`.
 
 The `EventSourcedTrait` will process the events while the `EventProducerTrait` provides the methods to record the events:
-
-## Integration via Reflection
-
-## Integration via Interface
 
 ```php
 use Psa\EventSourcing\Aggregate\EventSourcedTrait;
@@ -57,7 +104,3 @@ If the aggregate provides a constant, by default `AGGREGATE_TYPE`, the repositor
 ### FQCN fallback
 
 If you don't do anything the repository receiving the aggregate will use the FQCN as aggregate type.
-
-## Domain Events
-
-Event sourced aggregate events **must** implement `Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface`.
