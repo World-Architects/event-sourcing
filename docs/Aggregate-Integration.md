@@ -91,16 +91,52 @@ class PersonAggregate implements EventSourcedAggregateInterface
 
 The aggregate type is an identifier used by the store to distinguis different aggregates. Keep in mind that when using the ubiquious language of DDD it is easy to end up with duplicates. Think of the two different contexts of *user* account` and a *book keeping* account. Your system is very likely going to have two Account aggregates in different domains.
 
-Depending on what kind of strategy to determine the aggregate type you've choosen there are several ways of providing it:
+Also if you're not using the classname of the aggregate as type, you'll have to be able to map it. The way the library solves this is that you define the type as array, where the key is type string and the value the class:
+
+```php
+['User.Account' => Account::class];
+```
+
+Depending on what kind of strategy to determine the aggregate type you've choosen there are several ways of providing it. The aggregate translators
+provided by this library will be smart enough to extract the correct type automatically for you.
 
 ### via Interface
 
-If the aggregate implements `Psa\EventSourcing\Aggregate\AggregateProviderInterface` the repository will call that method on the aggregate and use the returned type.
+If the aggregate implements `Psa\EventSourcing\Aggregate\AggregateTypeProviderInterface` the repository will call that method on the aggregate and use the returned type.
+
+```php
+namespace App\Domain\Accounting;
+
+use Psa\EventSourcing\Aggregate\AggregateTypeInterface;
+use Psa\EventSourcing\Aggregate\AggregateTypeProviderInterface;
+use Psa\EventSourcing\Aggregate\AggregateType;
+
+class Account implements AggregateTypeProviderInterface
+{ 
+    public function aggregateType(): AggregateTypeInterface
+    { 
+        return AggregateType::fromMapping([
+            'Accounting.Account' => Account::class
+        ]);
+    }
+}
+```
 
 ### via Constant
 
 If the aggregate provides a constant, by default `AGGREGATE_TYPE`, the repository will use this as type.
 
+```php
+namespace App\Domain\Accounting;
+
+class Account implements AggregateTypeProviderInterface
+{ 
+    public const AGGREGATE_TYPE = [
+        'Accounting.Account' => Account::class
+    ];
+}
+```
+
 ### FQCN fallback
 
-If you don't do anything the repository receiving the aggregate will use the FQCN as aggregate type.
+If you don't do anything the repository receiving the aggregate will use the FQCN as aggregate type. In this case the name and class mapped to it will be the FQCN of aggregate.
