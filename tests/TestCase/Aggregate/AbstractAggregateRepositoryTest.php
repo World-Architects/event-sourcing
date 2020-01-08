@@ -6,7 +6,6 @@ namespace Psa\EventSourcing\Test\TestCase\Aggregate;
 
 use GuzzleHttp\Client as GuzzleClient;
 use Http\Adapter\Guzzle6\Client;
-use PHPUnit\Framework\TestCase;
 use Prooph\EventStore\EndPoint;
 use Prooph\EventStore\UserCredentials;
 use Prooph\EventStore\Transport\Http\EndpointExtensions;
@@ -18,8 +17,9 @@ use Psa\EventSourcing\EventStoreIntegration\AggregateChangedEventTranslator;
 use Psa\EventSourcing\Test\TestApp\Domain\InterfaceBased\Account;
 use Psa\EventSourcing\Test\TestApp\Domain\InterfaceBased\AccountId;
 use Psa\EventSourcing\Test\TestApp\Infrastructure\Repository\AccountRepository;
+use Psa\EventSourcing\Test\TestCase\TestCase;
 
-use function Clue\StreamFilter\fun;
+use Psa\EventSourcing\Test\TestCase\getenv;
 
 /**
  * Abstract Aggregate Repository Test
@@ -31,19 +31,7 @@ class AbstractAggregateRepositoryTest extends TestCase
 	 */
 	public function testAbstractRepository(): void
 	{
-		//$this->markTestSkipped();
-
-		$httpClient = new Client(new GuzzleClient());
-		$userCredentials = new UserCredentials('admin', 'changeit');
-
-		$eventStore = EventStoreConnectionFactory::create(
-			new ConnectionSettings(
-				new EndPoint('127.0.0.1', 2113),
-				EndpointExtensions::HTTP_SCHEMA,
-				$userCredentials
-			),
-			$httpClient
-		);
+		$eventStore = $this->eventstore();
 
 		$account = Account::create(
 			'Test',
