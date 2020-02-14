@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Psa\EventSourcing\Test\TestApp\Domain;
+namespace Psa\EventSourcing\Test\TestApp\Domain\ReflectionBased;
 
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;

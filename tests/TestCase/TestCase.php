@@ -4,16 +4,26 @@ declare(strict_types=1);
 
 namespace Psa\EventSourcing\Test\TestCase;
 
+use GuzzleHttp\Client as GuzzleClient;
+use Http\Adapter\Guzzle6\Client;
 use PDO;
 use PHPUnit\Framework\TestCase as PhpUnitTestCase;
 use Prooph\EventStore\EndPoint;
-use Prooph\EventStoreClient\EventStoreConnectionFactory;
+use Prooph\EventStore\UserCredentials;
+use Prooph\EventStore\Transport\Http\EndpointExtensions;
+use Prooph\EventStoreHttpClient\ConnectionSettings;
+use Prooph\EventStoreHttpClient\EventStoreConnectionFactory;
 
 /**
  * Test Case
  */
 class TestCase extends PhpUnitTestCase
 {
+	/**
+	 * @var \Prooph\EventStore\EventStoreConnection
+	 */
+	protected $eventstore;
+
 	/**
 	 * @var array
 	 */
@@ -60,6 +70,33 @@ class TestCase extends PhpUnitTestCase
 			$sql = file_get_contents($fixtureFile);
 			$this->pdo()->exec($sql);
 		}
+	}
+
+	/**
+	 * @return \Prooph\EventStoreHttpClient\EventStoreConnectionFactory
+	 */
+	public function eventstore()
+	{
+		if ($this->eventstore !== null) {
+			return $this->eventstore;
+		}
+
+		$httpClient = new Client(new GuzzleClient());
+		$userCredentials = new UserCredentials('admin', 'changeit');
+
+		$this->eventstore = EventStoreConnectionFactory::create(
+			new ConnectionSettings(
+				new EndPoint(
+					getenv('EVENTSTORE_HOST', '127.0.0.1'),
+					(int)getenv('EVENTSTORE_PORT', 2113)
+				),
+				EndpointExtensions::HTTP_SCHEMA,
+				$userCredentials
+			),
+			$httpClient
+		);
+
+		return $this->eventstore;
 	}
 
 	/**

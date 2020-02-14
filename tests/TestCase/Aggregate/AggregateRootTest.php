@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Psa\EventSourcing\Test\TestCase\Aggregate;
 
 use PHPUnit\Framework\TestCase;
-use Psa\EventSourcing\Test\TestApp\Domain\Account;
+use Psa\EventSourcing\Test\TestApp\Domain\InterfaceBased\Account;
 
 /**
  * Aggregate Root Test

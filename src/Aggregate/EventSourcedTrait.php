@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * PSA Event Sourcing Library
+ * Copyright PSA Ltd. All rights reserved.
+ */
+
 declare(strict_types=1);
 
 namespace Psa\EventSourcing\Aggregate;
@@ -44,8 +49,6 @@ trait EventSourcedTrait
 			 * @var \Psa\EventSourcing\Aggregate\Event\AggregateChangedEvent $pastEvent
 			 */
 			$this->aggregateVersion = $pastEvent->aggregateVersion();
-			$this->id = $pastEvent->aggregateId();
-
 			$this->apply($pastEvent);
 		}
 	}

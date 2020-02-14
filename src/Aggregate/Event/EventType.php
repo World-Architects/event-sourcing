@@ -1,11 +1,17 @@
 <?php
 
+/**
+ * PSA Event Sourcing Library
+ * Copyright PSA Ltd. All rights reserved.
+ */
+
 declare(strict_types=1);
 
 namespace Psa\EventSourcing\Aggregate\Event;
 
 use InvalidArgumentException;
 use Psa\EventSourcing\Aggregate\AggregateTypeProviderInterface;
+use Psa\EventSourcing\Aggregate\Event\Exception\EventTypeMismatchException;
 use Psa\EventSourcing\Aggregate\Exception\AggregateTypeException;
 use Psa\EventSourcing\Aggregate\Event\Exception\EventTypeException;
 
@@ -59,11 +65,21 @@ class EventType
 		if (defined($typeConstant)) {
 			$self->eventType = constant($typeConstant);
 
+			if (is_string($self->eventType)) {
+				$self->mapping = [$self->eventType => $eventClass];
+			}
+
+			if (is_array($self->eventType)) {
+				$self->mapping = $self->eventType;
+				$self->eventType = array_keys($self->eventType)[0];
+			}
+
 			return $self;
 		}
 
 		// Fall back to the FQCN as type
 		$self->eventType = $eventClass;
+		$self->mapping = [$eventClass => $eventClass];
 
 		return $self;
 	}
@@ -82,6 +98,7 @@ class EventType
 
 		$self = new static();
 		$self->eventType = $eventRootClass;
+		$self->mapping = [$eventRootClass => $eventRootClass];
 
 		return $self;
 	}
@@ -144,14 +161,12 @@ class EventType
 	 * @param object $event Event object
 	 * @throws \Psa\EventSourcing\Aggregate\Event\Exception\EventTypeException
 	 */
-	public function assert(object $event): void
+	public function assert(EventType $otherType): void
 	{
-		$otherEvent = self::fromEvent($event);
-
-		if (!$this->equals($otherEvent)) {
-			throw EventTypeException::typeMismatch(
-				$this->toString(),
-				$otherEvent->toString()
+		if (!$this->equals($otherType)) {
+			throw EventTypeMismatchException::mismatch(
+				(string)$this,
+				(string)$otherType
 			);
 		}
 	}

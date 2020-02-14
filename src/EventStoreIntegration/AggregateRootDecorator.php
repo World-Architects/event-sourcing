@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * PSA Event Sourcing Library
+ * Copyright PSA Ltd. All rights reserved.
+ */
+
 declare(strict_types=1);
 
 namespace Psa\EventSourcing\EventStoreIntegration;
@@ -35,8 +40,6 @@ class AggregateRootDecorator extends AggregateRoot
 	}
 
 	/**
-	 * @param AggregateRoot $anAggregateRoot
-	 *
 	 * @param \Psa\EventSourcing\Aggregate\AggregateRoot $anAggregateRoot An Aggregate Root
 	 * @return array
 	 */

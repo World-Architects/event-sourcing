@@ -1,12 +1,19 @@
 <?php
 
+/**
+ * PSA Event Sourcing Library
+ * Copyright PSA Ltd. All rights reserved.
+ */
+
 declare(strict_types=1);
 
 namespace Psa\EventSourcing\EventStoreIntegration;
 
 use Assert\Assert;
 use Iterator;
+use InvalidArgumentException;
 use Psa\EventSourcing\Aggregate\AggregateType;
+use Psa\EventSourcing\Aggregate\AggregateTypeInterface;
 use Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface;
 use RuntimeException;
 use ReflectionClass;
@@ -35,7 +42,7 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 	protected $propertyMap = [
 		'aggregateId' => 'aggregateId',
 		'aggregateVersion' => 'aggregateVersion',
-		'events' => 'events'
+		'recordedEvents' => 'recordedEvents'
 	];
 
 	/**
@@ -43,11 +50,11 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 	 */
 	protected $methodeMap = [
 		'reconstitute' => 'reconstituteFromHistory',
-		'replay' => 'replay',
+		'replay' => 'replayEvents',
 		// Optional
 		'aggregateId' => 'aggregateId',
 		'aggregateVersion' => 'aggregateVersion',
-		'events' => 'events'
+		'recordedEvents' => 'recordedEvents'
 	];
 
 	/**
@@ -61,24 +68,33 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 	}
 
 	/**
+	 * Returns the reflection for the given object
+	 *
 	 * @param object|string $aggregate Aggregate object
 	 * @return \ReflectionClass
 	 */
 	protected function reflection($aggregate): ReflectionClass
 	{
+		if (!is_string($aggregate) && !is_object($aggregate)) {
+			throw new InvalidArgumentException(sprintf(
+				'Expected string or object but `%s` was given',
+				gettype($aggregate)
+			));
+		}
+
+		if (is_string($aggregate) && !class_exists($aggregate)) {
+			throw new RuntimeException(sprintf(
+				'Aggregate class `%s` does not exist',
+				$aggregate
+			));
+		}
+
 		$className = $aggregate;
 		if (is_object($aggregate)) {
 			$className = get_class($aggregate);
 		}
 
-		if (!class_exists($className)) {
-			throw new RuntimeException(sprintf(
-				'Aggregate class `%s` does not exist',
-				$className
-			));
-		}
-
-		if (!$this->reflection || $this->reflection->getName() !== $className) {
+		if ($this->reflection === null || $this->reflection->getName() !== $className) {
 			$this->reflection = new ReflectionClass($aggregate);
 		}
 
@@ -86,31 +102,44 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 	}
 
 	/**
+	 * Extracts data from an object via reflecting properties and methods
+	 *
 	 * @param object $aggregate Aggregate
 	 * @param string $propertyOrMethod Property
 	 * @param array $args Arguments
+	 * @return mixed
 	 */
 	protected function extract(object $aggregate, string $propertyOrMethod, array $args = [])
 	{
 		$this->reflection($aggregate);
 
-		if (!isset($this->propertyMap[$propertyOrMethod]) && !isset($this->propertyMap[$propertyOrMethod . 'Method'])) {
+		if (
+			!isset($this->propertyMap[$propertyOrMethod])
+			&& !isset($this->propertyMap[$propertyOrMethod])
+		) {
 			throw new RuntimeException(sprintf(
-				'Property or method %s not mapped',
+				'Property or method `%s` is not mapped',
 				$propertyOrMethod
 			));
 		}
 
-		$property = $this->propertyMap[$propertyOrMethod];
+		if (
+			isset($this->propertyMap[$propertyOrMethod])
+			&& is_string($this->propertyMap[$propertyOrMethod])
+		) {
+			$property = $this->propertyMap[$propertyOrMethod];
+			if ($this->reflection->hasProperty($property)) {
+				$property = $this->reflection->getProperty($property);
+				$property->setAccessible(true);
 
-		if ($this->reflection->hasProperty($property)) {
-			$property = $this->reflection->getProperty($property);
-			$property->setAccessible(true);
-
-			return $property->getValue($aggregate);
+				return $property->getValue($aggregate);
+			}
 		}
 
-		if (isset($this->methodeMap[$propertyOrMethod])) {
+		if (
+			isset($this->methodeMap[$propertyOrMethod])
+			&& is_string($this->methodeMap[$propertyOrMethod])
+		) {
 			$method = $this->methodeMap[$propertyOrMethod];
 
 			if ($this->reflection->hasMethod($method)) {
@@ -128,8 +157,8 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 		}
 
 		throw new RuntimeException(sprintf(
-			'Property %s does not exist',
-			$property
+			'Property or method %s does not exist',
+			$propertyOrMethod
 		));
 	}
 
@@ -171,7 +200,7 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 	 * @return object reconstructed AggregateRoot
 	 */
 	public function reconstituteAggregateFromHistory(
-		AggregateType $aggregateType,
+		AggregateTypeInterface $aggregateType,
 		Iterator $historyEvents
 	) {
 		if (!$aggregateRootClass = $aggregateType->mappedClass()) {
@@ -193,15 +222,46 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 	}
 
 	/**
+	 * Extracts pending events from aggregate
+	 *
 	 * @param object $aggregate Aggregate
 	 * @return array
 	 */
 	public function extractPendingStreamEvents(object $aggregate): array
 	{
-		return $this->extract($aggregate, 'events');
+		$reflection = $this->reflection($aggregate);
+
+		$property = $this->propertyMap['recordedEvents'];
+		if (is_string($property) && $reflection->hasProperty($property)) {
+			$property = $reflection->getProperty($property);
+			$property->setAccessible(true);
+			$events = $property->getValue($aggregate);
+			$property->setValue($aggregate, []);
+
+			return $events;
+		}
+
+		$methodName = $this->methodeMap['recordedEvents'];
+		if (is_string($methodName) && $reflection->hasMethod($methodName)) {
+			$method = $reflection->getMethod($methodName);
+			if ($method->isPublic()) {
+				return $aggregate->{$methodName}();
+			}
+
+			$method->setAccessible(true);
+
+			return $method->invoke($aggregate);
+		}
+
+		throw new RuntimeException(sprintf(
+			'Could not extract pending events from aggregate %s',
+			get_class($aggregate)
+		));
 	}
 
 	/**
+	 * Replay stream events on the aggregate
+	 *
 	 * @param object $aggregate Aggregate
 	 * @param Iterator $events
 	 * @return void

@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * PSA Event Sourcing Library
+ * Copyright PSA Ltd. All rights reserved.
+ */
+
 declare(strict_types=1);
 
 namespace Psa\EventSourcing\EventStoreIntegration;
@@ -9,6 +14,7 @@ use Prooph\EventStore\EventData;
 use Prooph\EventStore\EventId;
 use Prooph\EventStore\RecordedEvent;
 use Psa\EventSourcing\Aggregate\AggregateType;
+use Psa\EventSourcing\Aggregate\AggregateTypeInterface;
 use Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface;
 use Psa\EventSourcing\Aggregate\Event\EventType;
 use Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface;
@@ -36,7 +42,7 @@ class EventReflectionTranslator implements EventTranslatorInterface
 	 *
 	 * @param array $excludedProperties Exclude this properties from conversion
 	 */
-	public function __construct(array $excludedProperties = [])
+	public function __construct(array $excludedProperties = [], array $propertyHandlers = [])
 	{
 		$this->excludedProperties = $excludedProperties;
 	}
@@ -47,38 +53,17 @@ class EventReflectionTranslator implements EventTranslatorInterface
 	 * @param array $events Events
 	 * @return array
 	 */
-	public function toStore(string $aggregateId, AggregateType $aggregateType, array $events): array
-	{
+	public function toStore(
+		string $aggregateId,
+		AggregateTypeInterface $aggregateType,
+		array $events
+	): array {
 		$storeEvents = [];
 		foreach ($events as $event) {
-			$reflection = new ReflectionClass($event);
-			$payload = [];
-
-			foreach ($reflection->getProperties() as $property) {
-				if (in_array($property->getName(), $this->excludedProperties)) {
-					continue;
-				}
-
-				if (!$property->isPublic()) {
-					$property->setAccessible(true);
-				}
-
-				$payload[$property->getName()] = $property->getValue($event);
-			}
-
-			$eventType = EventType::fromEvent($event);
-
-			$storeEvents[] = new EventData(
-				EventId::generate(),
-				$eventType->toString(),
-				true,
-				json_encode($payload),
-				json_encode($this->buildMetadata(
-					$aggregateId,
-					$aggregateType,
-					$event,
-					$eventType
-				))
+			$storeEvents[] = $this->buildEventStoreData(
+				$aggregateId,
+				$aggregateType,
+				$event
 			);
 		}
 
@@ -86,6 +71,65 @@ class EventReflectionTranslator implements EventTranslatorInterface
 	}
 
 	/**
+	 * @param string $aggregateId Aggregate Id
+	 * @param string $aggregateType Aggregate Type
+	 * @param object $event Event Object
+	 * @return \Prooph\EventStore\EventData
+	 */
+	protected function buildEventStoreData($aggregateId, $aggregateType, $event): EventData
+	{
+		$eventType = EventType::fromEvent($event)->toString();
+
+		return new EventData(
+			EventId::generate(),
+			$eventType,
+			true,
+			json_encode($this->buildPayload(
+				$aggregateId,
+				$aggregateType,
+				$event,
+				$eventType
+			)),
+			json_encode($this->buildMetadata(
+				$aggregateId,
+				$aggregateType,
+				$event,
+				$eventType
+			))
+		);
+	}
+
+	/**
+	 * @param string $aggregateId Aggregate Id
+	 * @param AggregateTypeInterface $aggregateType Aggregate Type
+	 * @param object $event Event Object
+	 * @param string $eventType Event Type
+	 */
+	protected function buildPayload($aggregateId, $aggregateType, $event, $eventType): array
+	{
+		$reflection = new ReflectionClass($event);
+		$payload = [];
+
+		foreach ($reflection->getProperties() as $property) {
+			if (in_array($property->getName(), $this->excludedProperties)) {
+				continue;
+			}
+
+			if (!$property->isPublic()) {
+				$property->setAccessible(true);
+			}
+
+			$payload[$property->getName()] = $property->getValue($event);
+		}
+
+		return $payload;
+	}
+
+	/**
+	 * @param string $aggregateId Aggregate Id
+	 * @param AggregateTypeInterface $aggregateType Aggregate Type
+	 * @param object $event Event Object
+	 * @param string $eventType Event Type
 	 * @return array
 	 */
 	protected function buildMetadata($aggregateId, $aggregateType, $event, $eventType): array
@@ -102,8 +146,10 @@ class EventReflectionTranslator implements EventTranslatorInterface
 	 */
 	public function fromStore(RecordedEvent $recordedEvent): object
 	{
+		$version = $recordedEvent->eventNumber();
 		$metadata = json_decode($recordedEvent->metadata(), true);
 		$payload = $recordedEvent->data();
+
 		if ($recordedEvent->isJson()) {
 			$payload = json_decode($payload, true);
 		}
@@ -114,8 +160,8 @@ class EventReflectionTranslator implements EventTranslatorInterface
 			));
 		}
 
-		$event = new $metadata['event_class']();
-		$reflection = new ReflectionClass($event);
+		$reflection = new ReflectionClass($metadata['event_class']);
+		$event = $reflection->newInstanceWithoutConstructor();
 
 		foreach ($payload as $key => $value) {
 			if (!$reflection->hasProperty($key)) {
@@ -125,6 +171,14 @@ class EventReflectionTranslator implements EventTranslatorInterface
 			$property = $reflection->getProperty($key);
 			$property->setAccessible(true);
 			$property->setValue($event, $value);
+		}
+
+		if ($reflection->hasProperty('aggregateVersion')) {
+			$versionProperty = $reflection->getProperty('aggregateVersion');
+			$versionProperty->setAccessible(true);
+			$versionProperty->setValue($event, $version);
+		} else {
+			$event->aggregateVersion = $version;
 		}
 
 		return $event;

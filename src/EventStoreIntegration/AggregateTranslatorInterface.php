@@ -1,11 +1,17 @@
 <?php
 
+/**
+ * PSA Event Sourcing Library
+ * Copyright PSA Ltd. All rights reserved.
+ */
+
 declare(strict_types=1);
 
 namespace Psa\EventSourcing\EventStoreIntegration;
 
 use Iterator;
 use Psa\EventSourcing\Aggregate\AggregateType;
+use Psa\EventSourcing\Aggregate\AggregateTypeInterface;
 use Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface;
 
 /**
@@ -29,7 +35,7 @@ interface AggregateTranslatorInterface
 	 * @return object reconstructed EventSourcedAggregateRoot
 	 */
 	public function reconstituteAggregateFromHistory(
-		AggregateType $aggregateType,
+		AggregateTypeInterface $aggregateType,
 		Iterator $historyEvents
 	);
 

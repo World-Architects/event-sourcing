@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Psa\EventSourcing\Test\TestApp\Domain\Event;
+namespace Psa\EventSourcing\Test\TestApp\Domain\Interfacebased\Event;
 
 use Psa\EventSourcing\Aggregate\Event\AggregateChangedEvent;
-use Psa\EventSourcing\Test\TestApp\Domain\AccountId;
+use Psa\EventSourcing\Test\TestApp\Domain\Interfacebased\AccountId;
 
 /**
  * Account Created Event

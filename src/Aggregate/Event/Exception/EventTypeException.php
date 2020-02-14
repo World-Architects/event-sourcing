@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * PSA Event Sourcing Library
+ * Copyright PSA Ltd. All rights reserved.
+ */
+
 declare(strict_types=1);
 
 namespace Psa\EventSourcing\Aggregate\Event\Exception;
@@ -24,28 +29,28 @@ class EventTypeException extends EventException
 	}
 
 	/**
-	 * @param string $aggregateType Aggregate Type
-	 * @param string $otherAggregateType Other Aggregate Type
+	 * @param string $eventType Aggregate Type
+	 * @param string $otherEventType Other Aggregate Type
 	 * @return static
 	 */
-	public static function typeMismatch(string $aggregateType, string $otherAggregateType)
+	public static function typeMismatch(string $eventType, string $otherEventType)
 	{
 		return new self(sprintf(
-			'Event types must be equal. %s != %s',
-			$aggregateType,
-			$otherAggregateType
+			'Event types must be equal: `%s` does not match `%s`',
+			$eventType,
+			$otherEventType
 		));
 	}
 
 	/**
 	 * @param string $class Class
-	 * @param string $eventNumber Event Number
+	 * @param int $eventNumber Event Number
 	 * @param string $eventId Event Id
 	 * @return self
 	 */
 	public static function mappingFailed(
 		string $class,
-		string $eventNumber,
+		int $eventNumber,
 		string $eventId
 	) {
 		return new self(sprintf(

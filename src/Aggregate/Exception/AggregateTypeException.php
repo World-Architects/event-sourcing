@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * PSA Event Sourcing Library
+ * Copyright PSA Ltd. All rights reserved.
+ */
+
 declare(strict_types=1);
 
 namespace Psa\EventSourcing\Aggregate\Exception;
@@ -31,7 +36,7 @@ class AggregateTypeException extends AggregateException
 	public static function typeMismatch(string $aggregateType, string $otherAggregateType)
 	{
 		return new self(sprintf(
-			'Aggregate types must be equal. %s != %s',
+			'Aggregate types must be equal: `%s` does not match `%s`',
 			$aggregateType,
 			$otherAggregateType
 		));

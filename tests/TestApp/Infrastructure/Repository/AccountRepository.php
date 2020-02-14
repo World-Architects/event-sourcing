@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Psa\EventSourcing\Test\TestApp\Infrastructure\Repository;
 
-use Psa\EventSourcing\Aggregate\AbstractAggregateRepository;
+use Psa\EventSourcing\Aggregate\AggregateRepository;
 use Psa\EventSourcing\Aggregate\AggregateRoot;
-use Psa\EventSourcing\Test\TestApp\Domain\Account;
-use Psa\EventSourcing\Test\TestApp\Domain\AccountId;
-use Psa\EventSourcing\Test\TestApp\Domain\Event\AccountCreated;
-use Psa\EventSourcing\Test\TestApp\Domain\Event\AccountUpdated;
+use Psa\EventSourcing\Test\TestApp\Domain\InterfaceBased\Account;
+use Psa\EventSourcing\Test\TestApp\Domain\InterfaceBased\AccountId;
+use Psa\EventSourcing\Test\TestApp\Domain\InterfaceBased\Event\AccountCreated;
+use Psa\EventSourcing\Test\TestApp\Domain\InterfaceBased\Event\AccountUpdated;
 
 /**
  * Account Repository
  */
-class AccountRepository extends AbstractAggregateRepository
+class AccountRepository extends AggregateRepository
 {
 	public const AGGREGATGE_TYPE = [
 		Account::AGGREGATE_TYPE => Account::class

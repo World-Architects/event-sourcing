@@ -1,5 +1,6 @@
 # Event Sourcing Library
 
+ * [Installation](Installation.md)
  * [Event Sourcing Concepts](Event-Sourcing-Concepts.md)
  * [Aggregate Integration](Aggregate-Integration.md)
  * [Aggregate Repository](Aggregate-Repository.md)
@@ -7,6 +8,7 @@
  * [Event Translators](Event-Translators.md)
  * [Snapshot Stores](Snapshot-Stores.md)
  * [Projections](Projections.md)
+ * [Resource Files](Resource-Files.md)
  * [Resources](Resources.md)
  * [Optional: CQRS Guide](CQRS.md)
 

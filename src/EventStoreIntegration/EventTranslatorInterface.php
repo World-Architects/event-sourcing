@@ -1,11 +1,16 @@
 <?php
 
+/**
+ * PSA Event Sourcing Library
+ * Copyright PSA Ltd. All rights reserved.
+ */
+
 declare(strict_types=1);
 
 namespace Psa\EventSourcing\EventStoreIntegration;
 
 use Prooph\EventStore\RecordedEvent;
-use Psa\EventSourcing\Aggregate\AggregateType;
+use Psa\EventSourcing\Aggregate\AggregateTypeInterface;
 
 /**
  * EventTranslatorInterface
@@ -20,7 +25,7 @@ interface EventTranslatorInterface
 	 */
 	public function toStore(
 		string $aggregateId,
-		AggregateType $aggregateType,
+		AggregateTypeInterface $aggregateType,
 		array $events
 	): array;
 

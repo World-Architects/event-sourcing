@@ -17,6 +17,17 @@ use PDO;
 $store = new PdoSqlStore(new PDO(/*...*/)));
 ```
 
+You can use either the SQL file [event_Store_snapshots_table.sql](../resources/SQL/event_Store_snapshots_table.sql) provided by this library in the resources folder, or you can come up with your own migration in your app for it. However, you need that table. 
+
+If you want to create your own migration file, here are the fields you must create:
+```sql
+`aggregate_id` CHAR(36) NOT NULL,
+`aggregate_type` VARCHAR(255) NOT NULL,
+`aggregate_root` MEDIUMTEXT NOT NULL,
+`aggregate_version` INT(11) NOT NULL,
+`created_at` DATETIME NOT NULL,
+```
+
 ### In Memory Store
 
 Mostly for the use in tests. This store will just store the objects in an array structure in memory.
@@ -32,6 +43,8 @@ $store = new InMemoryStore();
 Serializers are the objects that take care of the serialization of the aggregates. The stores included in this library use by default the `SerializeSerializer`. It's just an OOP wrapper around phps serilaize() and unserialize().
 
 You are free to implement your own serializers by implementing the interface `Psa\EventSourcing\SnapshotStore\Serializer\SerializerInterface`.
+
+Keep in mind that to be able to serialize and restore your object properly, you need to make sure that your object shouldn't have any open resource handlers or connections. You might be able tore restore them, but your aggregate shouldn't have anything like that and if it has you can't be sure to be able to restore them again correctly!
 
 ## Using Stores
 

@@ -8,10 +8,10 @@ use ArrayIterator;
 use PHPUnit\Framework\TestCase;
 use Psa\EventSourcing\Aggregate\AggregateType;
 use Psa\EventSourcing\EventStoreIntegration\AggregateReflectionTranslator;
-use Psa\EventSourcing\Test\TestApp\Domain\Account;
+use Psa\EventSourcing\Test\TestApp\Domain\InterfaceBased\Account;
 use Iterator;
 
-//@codingStandardsIgnoreStart
+// phpcs:enable
 class TestAggregate
 {
 	protected $aggregateType = [
@@ -19,16 +19,44 @@ class TestAggregate
 	];
 	protected $aggregateId = 'e37ad7f3-91df-440c-9568-6a2b90fd7fdb';
 	protected $aggregateVersion = 1;
-	protected $events = ['first' => 'event'];
+	protected $recordedEvents = ['first' => 'event'];
 	public static function reconstituteFromHistory(Iterator $historyEvents): self
 	{
 		return new self();
 	}
-	protected function replay(Iterator $historyEvents): void
+	protected function replayEvents(Iterator $historyEvents): void
 	{
 	}
 }
-//@codingStandardsIgnoreEnd
+// phpcs:disable
+
+// phpcs:enable
+class TestTwoAggregate
+{
+	protected $aggregateType = [
+		'TestAggregate' => TestAggregate::class
+	];
+	public function aggregateId()
+	{
+		return 'e37ad7f3-91df-440c-9568-6a2b90fd7fdb';
+	}
+	protected function aggregateVersion(): int
+	{
+		return 1;
+	}
+	protected function recordedEvents(): array
+	{
+		return ['first' => 'event'];
+	}
+	public static function reconstituteFromHistory(Iterator $historyEvents): self
+	{
+		return new self();
+	}
+	protected function replayEvents(Iterator $historyEvents): void
+	{
+	}
+}
+// phpcs:disable
 
 /**
  * AggregateReflectionTranslatorTest
@@ -64,5 +92,20 @@ class AggregateReflectionTranslatorTest extends TestCase
 			AggregateType::fromMapping(['TestAggregate' => TestAggregate::class]),
 			new ArrayIterator(['first' => 'event'])
 		);
+	}
+
+	/**
+	 * @return void
+	 */
+	public function testExtractPendingStreamEvents(): void
+	{
+		$aggregate = new TestTwoAggregate();
+		$translator = new AggregateReflectionTranslator();
+
+		$result = $translator->extractAggregateId($aggregate);
+		$this->assertEquals('e37ad7f3-91df-440c-9568-6a2b90fd7fdb', $result);
+
+		$result = $translator->extractPendingStreamEvents($aggregate);
+		$this->assertEquals(['first' => 'event'], $result);
 	}
 }

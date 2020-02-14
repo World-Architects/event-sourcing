@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * PSA Event Sourcing Library
+ * Copyright PSA Ltd. All rights reserved.
+ */
+
 declare(strict_types=1);
 
 namespace Psa\EventSourcing\Aggregate;
@@ -7,6 +12,7 @@ namespace Psa\EventSourcing\Aggregate;
 use Assert\Assert;
 use Psa\EventSourcing\Aggregate\Exception\AggregateTypeException;
 use InvalidArgumentException;
+use Psa\EventSourcing\Aggregate\Exception\AggregateTypeMismatchException;
 
 /**
  * Aggregate Type
@@ -40,24 +46,31 @@ class AggregateType implements AggregateTypeInterface
 	/**
 	 * Use this factory when aggregate type should be detected based on given aggregate root
 	 *
-	 * @param object $eventSourcedAggregateRoot
+	 * @param object $aggregateRoot Aggregate
 	 * @throws Exception\AggregateTypeException
 	 */
-	public static function fromAggregateRoot(object $eventSourcedAggregateRoot): AggregateType
+	public static function fromAggregate(object $aggregateRoot): AggregateTypeInterface
 	{
 		// Check if the aggregate implements the type provider
-		if ($eventSourcedAggregateRoot instanceof AggregateTypeProviderInterface) {
-			return $eventSourcedAggregateRoot->aggregateType();
+		if ($aggregateRoot instanceof AggregateTypeProviderInterface) {
+			return $aggregateRoot->aggregateType();
 		}
 
 		$self = new static();
-		$aggregateClass = get_class($eventSourcedAggregateRoot);
+		$aggregateClass = get_class($aggregateRoot);
 		$typeConstant = $aggregateClass . '::' . $self->aggregateTypeConstant;
 
 		// Check if the aggregate has the type defined as constant
 		if (defined($typeConstant)) {
 			$self->aggregateType = constant($typeConstant);
-			$self->mapping = [$self->aggregateType => $aggregateClass];
+			if (is_string($self->aggregateType)) {
+				$self->mapping = [$self->aggregateType => $aggregateClass];
+			}
+
+			if (is_array($self->aggregateType)) {
+				$self->mapping = $self->aggregateType;
+				$self->aggregateType = array_keys($self->aggregateType)[0];
+			}
 
 			return $self;
 		}
@@ -75,10 +88,13 @@ class AggregateType implements AggregateTypeInterface
 	 *
 	 * @throws \InvalidArgumentException
 	 */
-	public static function fromAggregateRootClass(string $aggregateRootClass): AggregateType
+	public static function fromAggregateClass(string $aggregateRootClass): AggregateTypeInterface
 	{
 		if (!class_exists($aggregateRootClass)) {
-			throw new InvalidArgumentException(sprintf('Aggregate root class %s can not be found', $aggregateRootClass));
+			throw new InvalidArgumentException(sprintf(
+				'Aggregate root class %s can not be found',
+				$aggregateRootClass
+			));
 		}
 
 		$self = new static();
@@ -93,12 +109,13 @@ class AggregateType implements AggregateTypeInterface
 	 * @param string $aggregateTypeString Aggregate Type String
 	 * @throws \InvalidArgumentException
 	 */
-	public static function fromString(string $aggregateTypeString): AggregateType
+	public static function fromString(string $aggregateTypeString): AggregateTypeInterface
 	{
 		Assert::that($aggregateTypeString)->string()->notBlank();
 
 		$self = new static();
 		$self->aggregateType = $aggregateTypeString;
+		$self->mapping = [$aggregateTypeString => $aggregateTypeString];
 
 		return $self;
 	}
@@ -107,10 +124,11 @@ class AggregateType implements AggregateTypeInterface
 	 * @param array $mapping Mapping
 	 * @return static
 	 */
-	public static function fromMapping(array $mapping): AggregateType
+	public static function fromMapping(array $mapping): AggregateTypeInterface
 	{
 		$self = new static();
 		$self->mapping = $mapping;
+		$self->aggregateType = array_keys($mapping)[0];
 
 		return $self;
 	}
@@ -143,14 +161,12 @@ class AggregateType implements AggregateTypeInterface
 	 * @param object $aggregateRoot An aggregate
 	 * @throws Exception\AggregateTypeException
 	 */
-	public function assert(object $aggregateRoot): void
+	public function assert(AggregateTypeInterface $otherType): void
 	{
-		$otherAggregateType = self::fromAggregateRoot($aggregateRoot);
-
-		if (!$this->equals($otherAggregateType)) {
-			throw AggregateTypeException::typeMismatch(
-				$this->toString(),
-				$otherAggregateType->toString()
+		if (!$this->equals($otherType)) {
+			throw AggregateTypeMismatchException::mismatch(
+				(string)$this,
+				(string)$otherType
 			);
 		}
 	}
@@ -160,13 +176,13 @@ class AggregateType implements AggregateTypeInterface
 	 *
 	 * @return bool
 	 */
-	public function equals(AggregateType $other): bool
+	public function equals(AggregateTypeInterface $other): bool
 	{
-		if (!$aggregateTypeString = $this->mappedClass()) {
-			$aggregateTypeString = $this->toString();
+		if (!$typeString = $this->mappedClass()) {
+			$typeString = $this->toString();
 		}
 
-		return $aggregateTypeString === $other->toString()
-			|| $aggregateTypeString === $other->mappedClass();
+		return $typeString === $other->toString()
+			|| $typeString === $other->mappedClass();
 	}
 }
