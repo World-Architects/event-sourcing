@@ -134,6 +134,14 @@ class EventType
 	}
 
 	/**
+	 * @return array
+	 */
+	public function getMapping(): array
+	{
+		return $this->mapping;
+	}
+
+	/**
 	 * @return null|string
 	 */
 	public function mappedClass(): ?string
