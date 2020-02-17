@@ -78,7 +78,7 @@ class EventReflectionTranslator implements EventTranslatorInterface
 	 */
 	protected function buildEventStoreData($aggregateId, $aggregateType, $event): EventData
 	{
-		$eventType = EventType::fromEvent($event)->toString();
+		$eventType = array_values(EventType::fromEvent($event)->getMapping())[0];
 
 		return new EventData(
 			EventId::generate(),
@@ -136,7 +136,8 @@ class EventReflectionTranslator implements EventTranslatorInterface
 	{
 		return [
 			'aggregate_id' => $aggregateId,
-			'event_class' => get_class($event)
+			'event_class' => get_class($event),
+			'event_type' => $eventType
 		];
 	}
 
