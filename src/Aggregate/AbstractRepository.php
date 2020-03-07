@@ -9,26 +9,6 @@ declare(strict_types=1);
 
 namespace Psa\EventSourcing\Aggregate;
 
-use ArrayIterator;
-use Assert\Assert;
-use DateTimeImmutable;
-use Psa\EventSourcing\Aggregate\Event\EventType;
-use Psa\EventSourcing\Aggregate\Exception\AggregateTypeMismatchException;
-use Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface;
-use Psa\EventSourcing\Aggregate\Event\Exception\EventTypeException;
-use Psa\EventSourcing\EventStoreIntegration\AggregateTranslator;
-use Psa\EventSourcing\EventStoreIntegration\AggregateTranslatorInterface;
-use Psa\EventSourcing\EventStoreIntegration\AggregateChangedEventTranslator;
-use Psa\EventSourcing\EventStoreIntegration\EventTranslatorInterface;
-use Psa\EventSourcing\SnapshotStore\Snapshot;
-use Psa\EventSourcing\SnapshotStore\SnapshotInterface;
-use Psa\EventSourcing\SnapshotStore\SnapshotStoreInterface;
-use Prooph\EventStore\EventData;
-use Prooph\EventStore\EventId;
-use Prooph\EventStore\EventStoreConnection;
-use Prooph\EventStore\ExpectedVersion;
-use Prooph\EventStore\SliceReadStatus;
-use Prooph\EventStore\StreamEventsSlice;
 use RuntimeException;
 
 /**
@@ -89,9 +69,11 @@ abstract class AbstractRepository implements AggregateRepositoryInterface
 	}
 
 	/**
-	 * @param object $eventSourcedAggregateRoot
+	 * @throws \Psa\EventSourcing\Aggregate\Exception\AggregateTypeException
+	 * @param object $eventSourcedAggregateRoot Event Sourced Aggregate Root
+	 * @return void
 	 */
-	protected function assertAggregateType(object $eventSourcedAggregateRoot)
+	protected function assertAggregateType(object $eventSourcedAggregateRoot): void
 	{
 		$aggregateType = AggregateType::fromAggregate($eventSourcedAggregateRoot);
 		$this->aggregateType->assert($aggregateType);
@@ -101,6 +83,9 @@ abstract class AbstractRepository implements AggregateRepositoryInterface
 	 * Default stream name generation.
 	 *
 	 * Override this method in an extending repository to provide a custom name
+	 *
+	 * @param string $aggregateId Aggregate UUID as string
+	 * @return string
 	 */
 	protected function determineStreamName(string $aggregateId): string
 	{

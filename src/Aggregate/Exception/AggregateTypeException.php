@@ -9,8 +9,6 @@ declare(strict_types=1);
 
 namespace Psa\EventSourcing\Aggregate\Exception;
 
-use Exception;
-
 /**
  * AggregateTypeException
  */
@@ -18,7 +16,7 @@ class AggregateTypeException extends AggregateException
 {
 	/**
 	 * @param mixed $type Type
-	 * @return static
+	 * @return self
 	 */
 	public static function notAnObject($type)
 	{
@@ -31,7 +29,7 @@ class AggregateTypeException extends AggregateException
 	/**
 	 * @param string $aggregateType Aggregate Type
 	 * @param string $otherAggregateType Other Aggregate Type
-	 * @return static
+	 * @return self
 	 */
 	public static function typeMismatch(string $aggregateType, string $otherAggregateType)
 	{

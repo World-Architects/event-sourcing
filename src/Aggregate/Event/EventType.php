@@ -48,7 +48,7 @@ class EventType
 	 * Use this factory when aggregate type should be detected based on given aggregate root
 	 *
 	 * @param object $event Event object
-	 * @throws \Psa\EventSourcing\Aggregate\Event\Exception\EventTypeException
+	 * @return self
 	 */
 	public static function fromEvent(object $event): EventType
 	{
@@ -106,8 +106,9 @@ class EventType
 	/**
 	 * Use this factory when the aggregate type is not equal to the aggregate root class
 	 *
-	 * @param string $eventTypeString Aggregate Type String
 	 * @throws \InvalidArgumentException
+	 * @param string $eventTypeString Aggregate Type String
+	 * @return self
 	 */
 	public static function fromString(string $eventTypeString): EventType
 	{
@@ -166,8 +167,9 @@ class EventType
 	}
 
 	/**
-	 * @param object $event Event object
-	 * @throws \Psa\EventSourcing\Aggregate\Event\Exception\EventTypeException
+	 * @throws \Psa\EventSourcing\Aggregate\Event\Exception\EventTypeMismatchException
+	 * @param \Psa\EventSourcing\Aggregate\Event\EventType $otherType Other Type
+	 * @return void
 	 */
 	public function assert(EventType $otherType): void
 	{

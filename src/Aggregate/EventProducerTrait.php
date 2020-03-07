@@ -52,7 +52,7 @@ trait EventProducerTrait
 	 */
 	protected function recordThat(AggregateChangedEventInterface $event): void
 	{
-		$this->aggregateVersion += 1;
+		$this->aggregateVersion++;
 
 		$this->recordedEvents[] = $event->withAggregateVersion($this->aggregateVersion);
 
