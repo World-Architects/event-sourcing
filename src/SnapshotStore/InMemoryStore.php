@@ -9,13 +9,9 @@ declare(strict_types=1);
 
 namespace Psa\EventSourcing\SnapshotStore;
 
-use Psa\EventSourcing\Aggregate\AggregateRoot;
-use Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface;
 use Psa\EventSourcing\SnapshotStore\Serializer\SerializerInterface;
 use Psa\EventSourcing\SnapshotStore\Serializer\SerializeSerializer;
-use Assert\Assert;
 use DateTimeImmutable;
-use Ramsey\Uuid\Uuid;
 
 /**
  * In Memory Store
@@ -46,7 +42,7 @@ class InMemoryStore implements SnapshotStoreInterface
 	public function __construct(
 		?SerializerInterface $serializer = null
 	) {
-		$this->serializer = $serializer ? $serializer : new SerializeSerializer();
+		$this->serializer = $serializer ?: new SerializeSerializer();
 	}
 
 	/**

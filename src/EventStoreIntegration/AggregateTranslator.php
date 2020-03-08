@@ -11,9 +11,7 @@ namespace Psa\EventSourcing\EventStoreIntegration;
 
 use Assert\Assert;
 use Iterator;
-use Psa\EventSourcing\Aggregate\AggregateType;
 use Psa\EventSourcing\Aggregate\AggregateTypeInterface;
-use Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface;
 
 /**
  * Aggregate Translator
@@ -53,7 +51,7 @@ final class AggregateTranslator implements AggregateTranslatorInterface
 	}
 
 	/**
-	 * @param \Psa\EventSourcing\Aggregate\AggregateType $aggregateType Aggregate Type
+	 * @param \Psa\EventSourcing\Aggregate\AggregateTypeInterface $aggregateType Aggregate Type
 	 * @param \Iterator $historyEvents
 	 * @return object reconstructed AggregateRoot
 	 */

@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace Psa\EventSourcing\SnapshotStore;
 
 use Assert\Assert;
-use Assert\Assertion;
 use DateTimeImmutable;
 
 /**
@@ -48,7 +47,8 @@ class Snapshot implements SnapshotInterface
 	 *
 	 * @param string $aggregateType Aggregate Type
 	 * @param string $aggregateId Aggregate Id
-	 * @param object $aggregateRoot
+	 * @param object $aggregateRoot Aggregate Root
+	 * @param int $lastVersion Last Version
 	 * @param \DateTimeImmutable $createdAt Created at
 	 */
 	public function __construct(

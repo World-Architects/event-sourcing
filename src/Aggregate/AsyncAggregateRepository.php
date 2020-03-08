@@ -9,32 +9,20 @@ declare(strict_types=1);
 
 namespace Psa\EventSourcing\Aggregate;
 
-use Amp\Failure;
-use Amp\Loop;
-use Amp\Success;
 use ArrayIterator;
 use Assert\Assert;
 use DateTimeImmutable;
-use Psa\EventSourcing\Aggregate\Event\EventType;
 use Psa\EventSourcing\Aggregate\Exception\AggregateTypeMismatchException;
-use Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface;
-use Psa\EventSourcing\Aggregate\Event\Exception\EventTypeException;
 use Psa\EventSourcing\EventStoreIntegration\AggregateRootDecorator;
-use Psa\EventSourcing\EventStoreIntegration\AggregateTranslator;
 use Psa\EventSourcing\EventStoreIntegration\AggregateTranslatorInterface;
-use Psa\EventSourcing\EventStoreIntegration\AggregateChangedEventTranslator;
 use Psa\EventSourcing\EventStoreIntegration\EventTranslatorInterface;
 use Psa\EventSourcing\SnapshotStore\Snapshot;
 use Psa\EventSourcing\SnapshotStore\SnapshotInterface;
 use Psa\EventSourcing\SnapshotStore\SnapshotStoreInterface;
 use Prooph\EventStore\Async\EventStoreConnection;
-use Prooph\EventStore\EventData;
-use Prooph\EventStore\EventId;
 use Prooph\EventStore\ExpectedVersion;
 use Prooph\EventStore\SliceReadStatus;
-use Prooph\EventStore\StreamEventsSlice;
 use RuntimeException;
-use Throwable;
 
 use function Amp\Promise\wait;
 
@@ -155,12 +143,13 @@ abstract class AsyncAggregateRepository extends AbstractRepository
 
 	/**
 	 * Load an aggregate from the snapshot store
-	 *
 	 * - Checks if a snapshot store is present for this instance of the aggregate repo
 	 * - Checks if a snapshot was found for the given aggregate id
 	 * - Checks if the snapshots aggregate type matches the repositories type
 	 * - Fetches and replays the events after the aggregate version of restored from the snapshot
 	 *
+	 * @throws \Psa\EventSourcing\Aggregate\Exception\AggregateTypeMismatchException
+	 * @throws \Throwable
 	 * @param string $aggregateId Aggregate UUID
 	 * @return null|object
 	 */
@@ -195,6 +184,7 @@ abstract class AsyncAggregateRepository extends AbstractRepository
 	/**
 	 * Checks if the snapshot matches the repositories aggregate type
 	 *
+	 * @throws \Psa\EventSourcing\Aggregate\Exception\AggregateTypeMismatchException
 	 * @param \Psa\EventSourcing\SnapshotStore\SnapshotInterface $snapshot Snapshot
 	 * @return void
 	 */
@@ -237,6 +227,8 @@ abstract class AsyncAggregateRepository extends AbstractRepository
 	/**
 	 * Gets an aggregate
 	 *
+	 * @throws \Psa\EventSourcing\Aggregate\Exception\AggregateTypeMismatchException
+	 * @throws \Throwable*@throws \Throwable
 	 * @param string $aggregateId Aggregate UUID
 	 * @return object
 	 */
@@ -262,6 +254,7 @@ abstract class AsyncAggregateRepository extends AbstractRepository
 	/**
 	 * Get events from position
 	 *
+	 * @throws \Throwable
 	 * @param string $aggregateId Aggregate Id
 	 * @param int $position Position
 	 * @return \Iterator
@@ -322,6 +315,8 @@ abstract class AsyncAggregateRepository extends AbstractRepository
 	}
 
 	/**
+	 * @throws \Psa\EventSourcing\Aggregate\Exception\AggregateTypeException
+	 * @throws \Throwable
 	 * @param object $aggregate Aggregate
 	 * @return mixed
 	 */
