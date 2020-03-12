@@ -38,7 +38,7 @@ class EventReflectionTranslator implements EventTranslatorInterface
 	 *
 	 * @param array $excludedProperties Exclude this properties from conversion
 	 */
-	public function __construct(array $excludedProperties = [], array $propertyHandlers = [])
+	public function __construct(array $excludedProperties = [])
 	{
 		$this->excludedProperties = $excludedProperties;
 	}
@@ -100,6 +100,7 @@ class EventReflectionTranslator implements EventTranslatorInterface
 	 * @param AggregateTypeInterface $aggregateType Aggregate Type
 	 * @param object $event Event Object
 	 * @param string $eventType Event Type
+	 * @return array
 	 */
 	protected function buildPayload($aggregateId, $aggregateType, $event, $eventType): array
 	{
@@ -138,6 +139,7 @@ class EventReflectionTranslator implements EventTranslatorInterface
 	}
 
 	/**
+	 * @throws \ReflectionException
 	 * @param \Prooph\EventStore\RecordedEvent $recordedEvent Recorded Event
 	 * @return object
 	 */
