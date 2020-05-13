@@ -52,6 +52,7 @@ class AggregateChangedEvent implements AggregateChangedEventInterface
 	/**
 	 * Constructor
 	 *
+	 * @throws \Exception
 	 * @param string $aggregateId Aggregate UUID
 	 * @param array $payload Payload
 	 * @param array $metadata Metadata
@@ -71,6 +72,7 @@ class AggregateChangedEvent implements AggregateChangedEventInterface
 	/**
 	 * Initializes the event
 	 *
+	 * @throws \Exception
 	 * @return void
 	 */
 	protected function init(): void
@@ -120,17 +122,7 @@ class AggregateChangedEvent implements AggregateChangedEventInterface
 	}
 
 	/**
-	 * With    public function version(): int
-		 {
-			 return $this->metadata['_aggregate_version'];
-		 }
-		 public function withVersion(int $version): AggregateChanged
-		 {
-			 $self = clone $this;
-			 $self->setVersion($version);
-			 return $self;
-		 } meta data
-	 *
+	 * @param array $metadata Meta data array
 	 * @return self
 	 */
 	public function withMetadata(array $metadata): AggregateChangedEventInterface
@@ -225,7 +217,11 @@ class AggregateChangedEvent implements AggregateChangedEventInterface
 	 */
 	protected function getFromPayload(string $property)
 	{
-		if (!isset($this->{$property}) || $this->{$property} === null && isset($this->payload[$property])) {
+		if (!isset($this->payload[$property])) {
+			return null;
+		}
+
+		if (!isset($this->{$property}) || $this->{$property} === null) {
 			$this->{$property} = $this->payload[$property];
 
 			return $this->payload[$property];
@@ -239,6 +235,7 @@ class AggregateChangedEvent implements AggregateChangedEventInterface
 	 *
 	 * @param string $name Name
 	 * @param array $arguments Arguments
+	 * @return mixed
 	 */
 	public function __call($name, $arguments)
 	{

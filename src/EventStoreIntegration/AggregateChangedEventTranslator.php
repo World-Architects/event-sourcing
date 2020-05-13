@@ -12,7 +12,6 @@ namespace Psa\EventSourcing\EventStoreIntegration;
 use Prooph\EventStore\EventData;
 use Prooph\EventStore\EventId;
 use Prooph\EventStore\RecordedEvent;
-use Psa\EventSourcing\Aggregate\AggregateType;
 use Psa\EventSourcing\Aggregate\AggregateTypeInterface;
 use Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface;
 use Psa\EventSourcing\Aggregate\Event\EventType;
@@ -96,7 +95,7 @@ class AggregateChangedEventTranslator implements EventTranslatorInterface
 		$storeEvents = [];
 		foreach ($events as $event) {
 			/**
-			 * @var \Psa\EventSourcing\EventSourcing\Aggregate\Event\AggregateChangedEventInterface $event
+			 * @var $event \Psa\EventSourcing\EventSourcing\Aggregate\Event\AggregateChangedEventInterface
 			 */
 			if (!$event instanceof AggregateChangedEventInterface) {
 				throw new RuntimeException(sprintf(

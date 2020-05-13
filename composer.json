@@ -12,8 +12,8 @@
 		"php": "^7.2",
 		"ext-json": "*",
 		"beberlei/assert": "^3.2",
-		"prooph/event-store": "dev-master as v8.0.0-RC-1",
-		"prooph/event-store-client": "dev-master as 1.0",
+		"prooph/event-store": "dev-master#70ed3816a49769557dc7ec6c6828823fced31348 as v8.0.0-RC-1",
+		"prooph/event-store-client": "dev-master#30b35b2e4d0c9bea7420f3088c2ec3732efcb25b as 1.0",
 		"psr/log": "^1.1",
 		"ramsey/uuid": "^3.8"
 	},
@@ -23,7 +23,7 @@
 		"phpro/grumphp": "^0.15.2",
 		"phpstan/phpstan": "^0.11.16",
 		"phpunit/phpunit": "^8.2",
-		"prooph/event-store-http-client": "dev-master",
+		"prooph/event-store-http-client": "dev-master#f47ac7bfe5905c6fc181411feb65c941f9396334",
 		"psr/cache": "^1.0",
 		"squizlabs/php_codesniffer": "^3.5"
 	},
@@ -39,7 +39,7 @@
 	},
 	"scripts": {
 		"test": [
-			".\\bin\\phpunit"
+			"./bin/phpunit"
 		],
 		"coverage": [
 			".\\bin\\phpunit --coverage-html ./tmp/coverage"

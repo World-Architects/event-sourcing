@@ -21,6 +21,7 @@ class SnapshotFactory
 	/**
 	 * Creates a snapshop from an aggregat implementing EventSourcedAggregateInterface
 	 *
+	 * @throws \Exception
 	 * @param \Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface $aggregate Aggregate
 	 * @return \Psa\EventSourcing\SnapshotStore\SnapshotInterface
 	 */

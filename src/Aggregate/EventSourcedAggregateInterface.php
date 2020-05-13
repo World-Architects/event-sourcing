@@ -9,9 +9,6 @@ declare(strict_types=1);
 
 namespace Psa\EventSourcing\Aggregate;
 
-use Psa\EventSourcing\Aggregate\EventProducerTrait;
-use Psa\EventSourcing\Aggregate\EventSourcedTrait;
-
 /**
  * Event Sourced Aggregate Interface
  */

@@ -9,8 +9,6 @@ declare(strict_types=1);
 
 namespace Psa\EventSourcing\SnapshotStore;
 
-use Psa\EventSourcing\Aggregate\AggregateRoot;
-use Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface;
 use Psa\EventSourcing\SnapshotStore\Serializer\SerializerInterface;
 use Psa\EventSourcing\SnapshotStore\Serializer\SerializeSerializer;
 use Assert\Assert;

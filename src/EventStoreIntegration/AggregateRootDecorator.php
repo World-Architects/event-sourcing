@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Psa\EventSourcing\EventStoreIntegration;
 
-use Psa\EventSourcing\Aggregate\AggregateChangedEvent;
 use Psa\EventSourcing\Aggregate\AggregateRoot;
 use BadMethodCallException;
 use Iterator;

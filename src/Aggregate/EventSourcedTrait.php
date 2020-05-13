@@ -28,6 +28,8 @@ trait EventSourcedTrait
 
 	/**
 	 * @throws RuntimeException
+	 * @param \Iterator $historyEvents History Events
+	 * @return static
 	 */
 	public static function reconstituteFromHistory(Iterator $historyEvents): self
 	{
@@ -41,6 +43,8 @@ trait EventSourcedTrait
 	 * Replay past events
 	 *
 	 * @throws RuntimeException
+	 * @param \Iterator $historyEvents History Events
+	 * @return void
 	 */
 	protected function replay(Iterator $historyEvents): void
 	{

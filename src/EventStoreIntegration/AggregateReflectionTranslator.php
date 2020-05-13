@@ -12,9 +12,7 @@ namespace Psa\EventSourcing\EventStoreIntegration;
 use Assert\Assert;
 use Iterator;
 use InvalidArgumentException;
-use Psa\EventSourcing\Aggregate\AggregateType;
 use Psa\EventSourcing\Aggregate\AggregateTypeInterface;
-use Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface;
 use RuntimeException;
 use ReflectionClass;
 
@@ -70,6 +68,7 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 	/**
 	 * Returns the reflection for the given object
 	 *
+	 * @throws \ReflectionException
 	 * @param object|string $aggregate Aggregate object
 	 * @return \ReflectionClass
 	 */
@@ -104,6 +103,7 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 	/**
 	 * Extracts data from an object via reflecting properties and methods
 	 *
+	 * @throws \ReflectionException
 	 * @param object $aggregate Aggregate
 	 * @param string $propertyOrMethod Property
 	 * @param array $args Arguments
@@ -115,7 +115,7 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 
 		if (
 			!isset($this->propertyMap[$propertyOrMethod])
-			&& !isset($this->propertyMap[$propertyOrMethod])
+			&& !isset($this->methodeMap[$propertyOrMethod])
 		) {
 			throw new RuntimeException(sprintf(
 				'Property or method `%s` is not mapped',
@@ -163,8 +163,8 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 	}
 
 	/**
+	 * @throws \ReflectionException
 	 * @param object $aggregate Aggregate
-	 *
 	 * @return int
 	 */
 	public function extractAggregateVersion(object $aggregate): int
@@ -181,6 +181,7 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 	/**
 	 * @param object $aggregate Aggregate
 	 *
+	 * @throws \ReflectionException
 	 * @return string
 	 */
 	public function extractAggregateId(object $aggregate): string
@@ -195,7 +196,8 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 	 * We need to call some public static method to reconstitute the aggregate
 	 * from history.
 	 *
-	 * @param \Psa\EventSourcing\Aggregate\AggregateType $aggregateType Aggregate Type
+	 * @throws \ReflectionException
+	 * @param \Psa\EventSourcing\Aggregate\AggregateTypeInterface $aggregateType Aggregate Type
 	 * @param \Iterator $historyEvents History events
 	 * @return object reconstructed AggregateRoot
 	 */
@@ -224,6 +226,7 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 	/**
 	 * Extracts pending events from aggregate
 	 *
+	 * @throws \ReflectionException
 	 * @param object $aggregate Aggregate
 	 * @return array
 	 */
@@ -262,6 +265,7 @@ class AggregateReflectionTranslator implements AggregateTranslatorInterface
 	/**
 	 * Replay stream events on the aggregate
 	 *
+	 * @throws \ReflectionException
 	 * @param object $aggregate Aggregate
 	 * @param Iterator $events
 	 * @return void

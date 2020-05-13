@@ -9,15 +9,11 @@ declare(strict_types=1);
 
 namespace Psa\EventSourcing\EventStoreIntegration;
 
-use Iterator;
 use Prooph\EventStore\EventData;
 use Prooph\EventStore\EventId;
 use Prooph\EventStore\RecordedEvent;
-use Psa\EventSourcing\Aggregate\AggregateType;
 use Psa\EventSourcing\Aggregate\AggregateTypeInterface;
-use Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface;
 use Psa\EventSourcing\Aggregate\Event\EventType;
-use Psa\EventSourcing\Aggregate\EventSourcedAggregateInterface;
 use ReflectionClass;
 use RuntimeException;
 
@@ -25,10 +21,10 @@ use RuntimeException;
  * Reflection based Event Translator
  *
  * The reflection based translator will read *all* properties of an event object
- * and use them as a payload for the event that gets persistet.
+ * and use them as a payload for the event that gets persisted.
  *
  * It will also take the class name of the event object and add it to the meta
- * data of the persistet event.
+ * data of the persisted event.
  */
 class EventReflectionTranslator implements EventTranslatorInterface
 {
@@ -42,7 +38,7 @@ class EventReflectionTranslator implements EventTranslatorInterface
 	 *
 	 * @param array $excludedProperties Exclude this properties from conversion
 	 */
-	public function __construct(array $excludedProperties = [], array $propertyHandlers = [])
+	public function __construct(array $excludedProperties = [])
 	{
 		$this->excludedProperties = $excludedProperties;
 	}
@@ -104,6 +100,7 @@ class EventReflectionTranslator implements EventTranslatorInterface
 	 * @param AggregateTypeInterface $aggregateType Aggregate Type
 	 * @param object $event Event Object
 	 * @param string $eventType Event Type
+	 * @return array
 	 */
 	protected function buildPayload($aggregateId, $aggregateType, $event, $eventType): array
 	{
@@ -142,6 +139,7 @@ class EventReflectionTranslator implements EventTranslatorInterface
 	}
 
 	/**
+	 * @throws \ReflectionException
 	 * @param \Prooph\EventStore\RecordedEvent $recordedEvent Recorded Event
 	 * @return object
 	 */

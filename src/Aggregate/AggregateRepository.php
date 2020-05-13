@@ -12,24 +12,15 @@ namespace Psa\EventSourcing\Aggregate;
 use ArrayIterator;
 use Assert\Assert;
 use DateTimeImmutable;
-use Psa\EventSourcing\Aggregate\Event\EventType;
+use Iterator;
 use Psa\EventSourcing\Aggregate\Exception\AggregateTypeMismatchException;
-use Psa\EventSourcing\Aggregate\Event\AggregateChangedEventInterface;
-use Psa\EventSourcing\Aggregate\Event\Exception\EventTypeException;
-use Psa\EventSourcing\EventStoreIntegration\AggregateTranslator;
 use Psa\EventSourcing\EventStoreIntegration\AggregateTranslatorInterface;
-use Psa\EventSourcing\EventStoreIntegration\AggregateChangedEventTranslator;
 use Psa\EventSourcing\EventStoreIntegration\EventTranslatorInterface;
 use Psa\EventSourcing\SnapshotStore\Snapshot;
 use Psa\EventSourcing\SnapshotStore\SnapshotInterface;
 use Psa\EventSourcing\SnapshotStore\SnapshotStoreInterface;
-use Prooph\EventStore\EventData;
-use Prooph\EventStore\EventId;
 use Prooph\EventStore\EventStoreConnection;
 use Prooph\EventStore\ExpectedVersion;
-use Prooph\EventStore\SliceReadStatus;
-use Prooph\EventStore\StreamEventsSlice;
-use RuntimeException;
 
 /**
  * Abstract Aggregate Repository
@@ -104,6 +95,9 @@ abstract class AggregateRepository extends AbstractRepository
 	 * Constructor
 	 *
 	 * @param \Prooph\EventStore\EventStoreConnection $eventStore Event Store Connection
+	 * @param \Psa\EventSourcing\EventStoreIntegration\AggregateTranslatorInterface $aggregateTranslator Aggregate Translator
+	 * @param \Psa\EventSourcing\EventStoreIntegration\EventTranslatorInterface $eventTranslator Event Translator
+	 * @param null|\Psa\EventSourcing\SnapshotStore\SnapshotStoreInterface $snapshotStore Snapshot Store
 	 */
 	public function __construct(
 		EventStoreConnection $eventStore,
@@ -136,12 +130,12 @@ abstract class AggregateRepository extends AbstractRepository
 
 	/**
 	 * Load an aggregate from the snapshot store
-	 *
 	 * - Checks if a snapshot store is present for this instance of the aggregate repo
 	 * - Checks if a snapshot was found for the given aggregate id
 	 * - Checks if the snapshots aggregate type matches the repositories type
 	 * - Fetches and replays the events after the aggregate version of restored from the snapshot
 	 *
+	 * @throws \Psa\EventSourcing\Aggregate\Exception\AggregateTypeMismatchException
 	 * @param string $aggregateId Aggregate Id
 	 * @return null|object
 	 */
@@ -176,6 +170,7 @@ abstract class AggregateRepository extends AbstractRepository
 	/**
 	 * Checks if the snapshot matches the repositories aggregate type
 	 *
+	 * @throws \Psa\EventSourcing\Aggregate\Exception\AggregateTypeMismatchException
 	 * @param \Psa\EventSourcing\SnapshotStore\SnapshotInterface $snapshot Snapshot
 	 * @return void
 	 */
@@ -192,6 +187,7 @@ abstract class AggregateRepository extends AbstractRepository
 	/**
 	 * Creates a snapshot of the aggregate
 	 *
+	 * @throws \Exception
 	 * @param object $aggregate Aggregate
 	 * @return void
 	 */
@@ -218,6 +214,7 @@ abstract class AggregateRepository extends AbstractRepository
 	/**
 	 * Gets an aggregate
 	 *
+	 * @throws \Psa\EventSourcing\Aggregate\Exception\AggregateTypeMismatchException
 	 * @param string $aggregateId Aggregate UUID
 	 * @return object
 	 */
@@ -245,7 +242,7 @@ abstract class AggregateRepository extends AbstractRepository
 	 * @param int $position Position
 	 * @return \Iterator
 	 */
-	protected function getEventsFromPosition(string $aggregateId, int $position): \Iterator
+	protected function getEventsFromPosition(string $aggregateId, int $position): Iterator
 	{
 		Assert::that($aggregateId)->uuid($aggregateId);
 
@@ -283,6 +280,7 @@ abstract class AggregateRepository extends AbstractRepository
 	}
 
 	/**
+	 * @throws \Psa\EventSourcing\Aggregate\Exception\AggregateTypeException
 	 * @param object $aggregate Aggregate
 	 * @return void
 	 */
