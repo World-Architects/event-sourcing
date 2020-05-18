@@ -18,10 +18,10 @@ build:
       PDO_TEST_HOST: '127.0.0.1'
       PDO_TEST_DB: 'test'
     php:
-      version: '7.3'
+      version: '7.4'
   project_setup:
     before:
-      - mysql -e "CREATE DATABASE test CHARSET=utf8 DEFAULT COLLATE utf8_general_ci"    
+      - mysql -e "CREATE DATABASE test CHARSET=utf8 DEFAULT COLLATE utf8_general_ci"
       # We need to run eventstore on docker as ubuntu 14.4 is end of live at eventstore
       # Scrutinizer does not support newer ubuntu version and tell people to use docker to run newer versions
       - docker pull eventstore/eventstore
@@ -47,7 +47,7 @@ build:
               format: php-clover
       environment:
         php:
-          version: 7.3
+          version: 7.4
 filter:
   excluded_paths:
     - 'tests/*'
